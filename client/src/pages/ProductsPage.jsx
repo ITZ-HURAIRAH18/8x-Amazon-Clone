@@ -16,6 +16,7 @@ export default function ProductsPage() {
   const category = routeCategory || params.get("category") || "All"
   const sort = params.get("sort") || "featured"
   const deals = params.get("deals") === "true"
+  const featured = params.get("featured") === "true"
   const [filters, setFilters] = useState({ minPrice: "", maxPrice: "", rating: "", brand: "", availability: "" })
   const [products, setProducts] = useState([])
   const [meta, setMeta] = useState({ page: 1, pages: 1, total: 0 })
@@ -27,7 +28,7 @@ export default function ProductsPage() {
     let active = true
     setLoading(true)
     setError("")
-    const query = { search, category: category === "All" ? "" : category, sort, deal: deals ? "true" : "", ...filters, page: params.get("page") || 1, limit: 24 }
+    const query = { search, category: category === "All" ? "" : category, sort, deal: deals ? "true" : "", featured: featured ? "true" : "", ...filters, page: params.get("page") || 1, limit: 24 }
     Object.keys(query).forEach((key) => { if (query[key] === "") delete query[key] })
     productApi.list(query)
       .then((result) => { if (active) { setProducts((result.data || []).map(normalizeProduct)); setMeta(result.meta || { page: 1, pages: 1, total: 0 }) } })
@@ -42,12 +43,13 @@ export default function ProductsPage() {
         if (filters.rating) fallback = fallback.filter((item) => item.rating >= Number(filters.rating))
         if (filters.availability === "in-stock") fallback = fallback.filter((item) => item.stock > 0)
         if (deals) fallback = fallback.filter((item) => item.deal)
+        if (featured) fallback = fallback.filter((item) => item.featured)
         setProducts(fallback)
         setMeta({ page: 1, pages: 1, total: fallback.length })
       })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [search, category, sort, deals, filters, params])
+  }, [search, category, sort, deals, featured, filters, params])
 
   const heading = useMemo(() => search ? `Results for "${search}"` : category === "All" ? "All products" : category, [search, category])
   const updateParam = (key, value) => { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); if (key !== "page") next.delete("page"); setParams(next) }
