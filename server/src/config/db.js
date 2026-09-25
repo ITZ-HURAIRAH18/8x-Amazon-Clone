@@ -251,7 +251,10 @@ const connectDatabase = async () => {
     await connectDB();
     return true;
   } catch (err) {
-    if (env.nodeEnv === "production") throw err;
+    if (env.nodeEnv === "production") {
+      console.error(`MongoDB unavailable (${safeMongoMessage(err)})`);
+      throw new Error("MongoDB unavailable");
+    }
     console.warn(`MongoDB unavailable; API will use demo fallback data (${safeMongoMessage(err)})`);
     return false;
   }

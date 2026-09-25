@@ -267,7 +267,7 @@ Deploy the `client/` directory as a Vite application. Set:
 VITE_API_URL=https://<backend-domain>/api
 ```
 
-`client/vercel.json` rewrites client-side routes to `index.html` while leaving API calls on the separately configured backend origin.
+`client/vercel.json` rewrites client-side routes to `index.html` while leaving API calls on the separately configured backend origin. A root `vercel.json` is also included for deploying the Express API as a Vercel Node function through `server/api/index.js`.
 
 ### Backend
 

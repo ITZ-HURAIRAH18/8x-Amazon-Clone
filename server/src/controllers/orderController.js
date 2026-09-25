@@ -100,8 +100,8 @@ export const createOrder = asyncHandler(async (req, res) => {
       decremented.push(item)
     }
     await Cart.deleteOne({ user: req.user._id })
-    if (couponResult.coupon) await recordCouponUsage(couponResult.coupon.code)
-    await createNotification(req.user._id, { type: "order", title: "Order placed", message: `We received order ${order.orderNumber || order._id}.`, link: `/account/orders/${order._id}`, metadata: { orderId: String(order._id) } })
+    if (couponResult.coupon) { try { await recordCouponUsage(couponResult.coupon.code) } catch { /* order remains authoritative if analytics side effect fails */ } }
+    try { await createNotification(req.user._id, { type: "order", title: "Order placed", message: `We received order ${order.orderNumber || order._id}.`, link: `/account/orders/${order._id}`, metadata: { orderId: String(order._id) } }) } catch { /* do not turn a placed order into a failed request */ }
     return res.status(201).json({ data: orderJson(order) })
   }
 
@@ -147,8 +147,8 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
   memory.orders.push(order)
   memory.carts.delete(String(req.user._id))
-  if (couponResult.coupon) await recordCouponUsage(couponResult.coupon.code)
-  await createNotification(req.user._id, { type: "order", title: "Order placed", message: `We received order ${order.orderNumber}.`, link: `/account/orders/${order._id}`, metadata: { orderId: order._id } })
+  if (couponResult.coupon) { try { await recordCouponUsage(couponResult.coupon.code) } catch { /* best effort */ } }
+  try { await createNotification(req.user._id, { type: "order", title: "Order placed", message: `We received order ${order.orderNumber}.`, link: `/account/orders/${order._id}`, metadata: { orderId: order._id } }) } catch { /* best effort */ }
   return res.status(201).json({ data: orderJson(order) })
 })
 
@@ -184,7 +184,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     order.status = status
     order.statusHistory.push({ status, label: status, at: new Date() })
     await order.save()
-    if (["Shipped", "Delivered"].includes(status)) await createNotification(req.user._id, { type: "order", title: `Order ${status.toLowerCase()}`, message: `Your order ${order.orderNumber || order._id} is ${status.toLowerCase()}.`, link: `/account/orders/${order._id}` })
+    if (["Shipped", "Delivered"].includes(status)) { try { await createNotification(req.user._id, { type: "order", title: `Order ${status.toLowerCase()}`, message: `Your order ${order.orderNumber || order._id} is ${status.toLowerCase()}.`, link: `/account/orders/${order._id}` }) } catch { /* status remains authoritative */ } }
     return res.json({ data: orderJson(order) })
   }
   const order = memory.orders.find((entry) => String(entry._id) === String(req.params.id) && String(entry.user) === String(req.user._id))
@@ -192,6 +192,6 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   order.status = status
   order.statusHistory ||= []
   order.statusHistory.push({ status, label: status, at: new Date() })
-  await createNotification(req.user._id, { type: "order", title: `Order ${status.toLowerCase()}`, message: `Your order ${order.orderNumber} is ${status.toLowerCase()}.`, link: `/account/orders/${order._id}` })
+  try { await createNotification(req.user._id, { type: "order", title: `Order ${status.toLowerCase()}`, message: `Your order ${order.orderNumber} is ${status.toLowerCase()}.`, link: `/account/orders/${order._id}` }) } catch { /* status remains authoritative */ }
   return res.json({ data: orderJson(order) })
 })
