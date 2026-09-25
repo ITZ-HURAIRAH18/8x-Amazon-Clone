@@ -55,6 +55,7 @@ export const cartApi = {
   clear: async () => unwrap(await api.delete("/cart")),
   merge: async (items) => unwrap(await api.post("/cart/merge", { items })),
   saveForLater: async (itemId) => unwrap(await api.post(`/cart/${itemId}/save-for-later`)),
+  moveToWishlist: async (itemId) => unwrap(await api.post(`/cart/${itemId}/move-to-wishlist`)),
   moveSavedToCart: async (itemId) => unwrap(await api.post(`/cart/saved/${itemId}/move-to-cart`)),
   removeSaved: async (itemId) => unwrap(await api.delete(`/cart/saved/${itemId}`)),
 }
@@ -63,6 +64,7 @@ export const wishlistApi = {
   get: async () => unwrap(await api.get("/wishlist")),
   add: async (productId) => unwrap(await api.post("/wishlist", { productId })),
   remove: async (productId) => unwrap(await api.delete(`/wishlist/${encodeURIComponent(productId)}`)),
+  moveToCart: async (productId) => unwrap(await api.post(`/wishlist/${encodeURIComponent(productId)}/move-to-cart`)),
   clear: async () => unwrap(await api.delete("/wishlist")),
 }
 

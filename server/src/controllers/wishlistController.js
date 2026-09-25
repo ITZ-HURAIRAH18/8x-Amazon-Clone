@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { Wishlist } from "../models/Wishlist.js"
+import { Cart } from "../models/Cart.js"
 import { Product } from "../models/Product.js"
 import { databaseReady } from "../config/db.js"
 import { memory, id } from "../data/memory.js"
@@ -70,6 +71,36 @@ export const removeWishlistItem = asyncHandler(async (req, res) => {
   const items = demoList(req.user._id).filter((item) => String(item.productId) !== productId)
   memory.wishlists.set(String(req.user._id), items)
   return res.json({ data: serializeDemo(items) })
+})
+
+export const moveWishlistToCart = asyncHandler(async (req, res) => {
+  const productId = String(req.params.productId)
+  const product = await findProduct(productId)
+  if (!product) return res.status(404).json({ message: "Product not found", code: "PRODUCT_NOT_FOUND" })
+  if (product.stock < 1) return res.status(409).json({ message: "This item is currently unavailable", code: "OUT_OF_STOCK" })
+  if (databaseReady()) {
+    const wishlist = await Wishlist.findOne({ user: req.user._id })
+    if (!wishlist || !wishlist.items.some((item) => String(item.product) === String(product._id))) return res.status(404).json({ message: "Wishlist item not found", code: "WISHLIST_ITEM_NOT_FOUND" })
+    const cart = (await Cart.findOne({ user: req.user._id })) || new Cart({ user: req.user._id, items: [], savedItems: [] })
+    const existing = cart.items.find((item) => String(item.product) === String(product._id))
+    if (existing) existing.quantity = Math.min(product.stock, existing.quantity + 1)
+    else cart.items.push({ product: product._id, quantity: 1 })
+    await cart.save()
+    wishlist.items = wishlist.items.filter((item) => String(item.product) !== String(product._id))
+    await wishlist.save()
+    return res.json({ data: { moved: true, productId } })
+  }
+  const items = demoList(req.user._id)
+  const item = items.find((entry) => String(entry.productId) === String(product._id))
+  if (!item) return res.status(404).json({ message: "Wishlist item not found", code: "WISHLIST_ITEM_NOT_FOUND" })
+  memory.wishlists.set(String(req.user._id), items.filter((entry) => String(entry.productId) !== String(product._id)))
+  const cart = memory.carts.get(String(req.user._id)) || { id: id("cart"), user: String(req.user._id), items: [], savedItems: [] }
+  const existing = cart.items.find((entry) => String(entry.productId) === String(product._id))
+  if (existing) existing.quantity = Math.min(product.stock, existing.quantity + 1)
+  else cart.items.push({ id: id("item"), productId: String(product._id), quantity: 1 })
+  cart.updatedAt = new Date()
+  memory.carts.set(String(req.user._id), cart)
+  return res.json({ data: { moved: true, productId } })
 })
 
 export const clearWishlist = asyncHandler(async (req, res) => {

@@ -154,6 +154,7 @@ All routes are prefixed with `/api`.
 - `DELETE /cart/:itemId`
 - `DELETE /cart`
 - `POST /cart/:itemId/save-for-later`
+- `POST /cart/:itemId/move-to-wishlist`
 - `POST /cart/saved/:itemId/move-to-cart`
 - `DELETE /cart/saved/:itemId`
 
@@ -163,6 +164,7 @@ All routes are prefixed with `/api`.
 - `POST /wishlist`
 - `DELETE /wishlist`
 - `DELETE /wishlist/:productId`
+- `POST /wishlist/:productId/move-to-cart`
 
 ### Addresses and coupons
 

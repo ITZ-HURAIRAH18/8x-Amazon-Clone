@@ -21,7 +21,7 @@ function splitValues(value) {
 }
 
 function filterDemo(query) {
-  const { search, category, minPrice, maxPrice, rating, brand, availability, featured, bestseller, deal, deals, minDiscount, prime } = query
+  const { search, category, minPrice, maxPrice, rating, brand, availability, featured, bestseller, deal, deals, prime } = query
   let result = [...demoProducts]
   if (search) {
     const term = new RegExp(escapeRegex(search), "i")
@@ -43,7 +43,7 @@ function filterDemo(query) {
   if (featured === "true") result = result.filter((product) => product.featured)
   if (bestseller === "true") result = result.filter((product) => product.bestseller)
   if (deal === "true" || deals === "true") result = result.filter((product) => product.deal)
-  const minimumDiscount = numberOrUndefined(minDiscount)
+  const minimumDiscount = numberOrUndefined(query.minDiscount ?? query.discount)
   if (minimumDiscount !== undefined) result = result.filter((product) => Number(product.discount || 0) >= minimumDiscount)
   if (prime === "true") result = result.filter((product) => product.prime)
   return result
@@ -92,7 +92,7 @@ function buildDbFilter(query) {
   if (query.featured === "true") filter.featured = true
   if (query.bestseller === "true") filter.bestseller = true
   if (query.deal === "true" || query.deals === "true") filter.deal = true
-  const minimumDiscount = numberOrUndefined(query.minDiscount)
+  const minimumDiscount = numberOrUndefined(query.minDiscount ?? query.discount)
   if (minimumDiscount !== undefined) filter.discount = { $gte: minimumDiscount }
   if (query.prime === "true") filter.prime = true
   return filter
@@ -116,18 +116,19 @@ function dbSort(sort) {
 export const listProducts = asyncHandler(async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1)
   const limit = Math.min(48, Math.max(1, Number(req.query.limit) || 24))
+  const query = { ...req.query, search: req.query.search || req.query.q || "" }
   let products
   let total
   if (databaseReady()) {
-    const filter = buildDbFilter(req.query)
+    const filter = buildDbFilter(query)
     const [rows, count] = await Promise.all([
-      Product.find(filter).sort(dbSort(req.query.sort)).skip((page - 1) * limit).limit(limit).lean(),
+      Product.find(filter).sort(dbSort(query.sort)).skip((page - 1) * limit).limit(limit).lean(),
       Product.countDocuments(filter),
     ])
     products = rows.map((row) => ({ ...row, id: String(row._id) }))
     total = count
   } else {
-    const filtered = sortDemo(filterDemo(req.query), req.query.sort)
+    const filtered = sortDemo(filterDemo(query), query.sort)
     total = filtered.length
     products = filtered.slice((page - 1) * limit, page * limit).map(fallbackProduct)
   }

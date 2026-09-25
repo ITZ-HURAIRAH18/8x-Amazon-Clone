@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { Cart } from "../models/Cart.js"
+import { Wishlist } from "../models/Wishlist.js"
 import { Product } from "../models/Product.js"
 import { databaseReady } from "../config/db.js"
 import { memory, id } from "../data/memory.js"
@@ -135,6 +136,28 @@ export const removeCartItem = asyncHandler(async (req, res) => {
   if (cart.items.length === before) return res.status(404).json({ message: "Cart item not found", code: "CART_ITEM_NOT_FOUND" })
   await writeCart(req.user._id, cart)
   return res.json({ data: serializeDemoCart(cart) })
+})
+
+export const moveCartItemToWishlist = asyncHandler(async (req, res) => {
+  if (databaseReady()) {
+    const cart = await Cart.findOne({ user: req.user._id, "items._id": req.params.itemId })
+    if (!cart) return res.status(404).json({ message: "Cart item not found", code: "CART_ITEM_NOT_FOUND" })
+    const item = cart.items.id(req.params.itemId)
+    const wishlist = (await Wishlist.findOne({ user: req.user._id })) || new Wishlist({ user: req.user._id, items: [] })
+    if (!wishlist.items.some((entry) => String(entry.product) === String(item.product))) wishlist.items.push({ product: item.product, addedAt: new Date() })
+    item.deleteOne()
+    await Promise.all([cart.save(), wishlist.save()])
+    return res.json({ data: { moved: true, productId: String(item.product) } })
+  }
+  const cart = await readCart(req.user._id)
+  const item = cart.items.find((entry) => entry.id === req.params.itemId)
+  if (!item) return res.status(404).json({ message: "Cart item not found", code: "CART_ITEM_NOT_FOUND" })
+  const items = memory.wishlists.get(String(req.user._id)) || []
+  if (!items.some((entry) => String(entry.productId) === String(item.productId))) items.push({ id: id("wish"), productId: item.productId, addedAt: new Date() })
+  memory.wishlists.set(String(req.user._id), items)
+  cart.items = cart.items.filter((entry) => entry.id !== req.params.itemId)
+  await writeCart(req.user._id, cart)
+  return res.json({ data: { moved: true, productId: item.productId } })
 })
 
 export const saveCartItemForLater = asyncHandler(async (req, res) => {
