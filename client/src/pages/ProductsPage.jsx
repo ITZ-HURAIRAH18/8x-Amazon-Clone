@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight, Filter, SlidersHorizontal, X } from "lucide-react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import ProductCard from "../components/ProductCard"
 import { productApi, errorMessage } from "../services/api"
 import demoProducts from "../data/demoProducts"
@@ -150,7 +150,7 @@ export default function ProductsPage() {
       </aside>
       <section className="results-main">
         <div className="results-toolbar"><span>{meta.total ? `${(page - 1) * 24 + 1}–${Math.min(page * 24, meta.total)} of ${meta.total} results` : "No results"}</span><label>Sort by <select value={sort} onChange={(event) => updateParam("sort", event.target.value)} aria-label="Sort products">{sortOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><ChevronDown size={14} /></label></div>
-        {loading ? <ProductGridSkeleton /> : error && products.length === 0 ? <div className="empty-state"><div className="empty-state__icon">!</div><h2>Unable to load products</h2><p>{error}</p><button className="primary-button" type="button" onClick={() => window.location.reload()}>Retry</button></div> : products.length === 0 ? <EmptyResults onClear={clearFilters} /> : <><div className="product-grid">{products.map((product) => <ProductCard product={product} key={product.id} />)}</div><Pagination page={page} pages={pageCount} onChange={goPage} /></>}
+        {loading ? <ProductGridSkeleton /> : error && products.length === 0 ? <div className="empty-state"><div className="empty-state__icon">!</div><h2>Unable to load products</h2><p>{error}</p><button className="primary-button" type="button" onClick={() => window.location.reload()}>Retry</button></div> : products.length === 0 ? <EmptyResults onClear={clearFilters} search={search} category={category} hasFilters={activeFilterCount > 0 || search || category !== "All"} /> : <><div className="product-grid">{products.map((product) => <ProductCard product={product} key={product.id} />)}</div><Pagination page={page} pages={pageCount} onChange={goPage} /></>}
       </section>
     </div>
   </div></div>
@@ -158,5 +158,26 @@ export default function ProductsPage() {
 
 function FilterGroup({ title, children }) { return <section className="filter-group"><h2>{title}</h2>{children}</section> }
 function ProductGridSkeleton() { return <div className="product-grid">{[1, 2, 3, 4, 5, 6, 7, 8].map((item) => <div className="product-skeleton" key={item}><div /><span /><span /><span /></div>)}</div> }
-function EmptyResults({ onClear }) { return <div className="empty-state"><div className="empty-state__icon">⌕</div><h2>No results found</h2><p>Try changing your search terms or clearing some filters.</p><button className="primary-button" type="button" onClick={onClear}>Clear filters</button></div> }
+function EmptyResults({ onClear, search, category, hasFilters }) {
+  const suggestions = defaultCategories.slice(1, 7)
+  const reason = search
+    ? `We could not find anything for “${search}”.`
+    : category !== "All"
+      ? `There are no ${category.toLowerCase()} products matching these filters right now.`
+      : "No products match these filters right now."
+  return <div className="empty-state empty-state--soon">
+    <div className="empty-state__icon" aria-hidden="true">⌕</div>
+    <h2>No matching products yet</h2>
+    <p>{reason}</p>
+    <p className="empty-state__soon">Our catalog is growing every week &mdash; more products in this category are coming soon.</p>
+    <div className="empty-state__actions">
+      {hasFilters && <button className="primary-button" type="button" onClick={onClear}>Clear all filters</button>}
+      <Link className="secondary-button" to="/products">Browse all products</Link>
+    </div>
+    <div className="empty-state__suggestions">
+      <span>Try a popular category</span>
+      <div>{suggestions.map((name) => <Link key={name} to={`/search?category=${encodeURIComponent(name)}`}>{name}</Link>)}</div>
+    </div>
+  </div>
+}
 function Pagination({ page, pages, onChange }) { if (pages <= 1) return null; const numbers = Array.from({ length: Math.min(5, pages) }, (_, index) => Math.max(1, Math.min(pages - 4, page - 2)) + index); return <nav className="pagination" aria-label="Product pages"><button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1}><ChevronLeft size={16} /> Previous</button>{numbers.map((number) => <button type="button" className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined} onClick={() => onChange(number)} key={number}>{number}</button>)}<button type="button" onClick={() => onChange(page + 1)} disabled={page >= pages}>Next <ChevronRight size={16} /></button></nav> }

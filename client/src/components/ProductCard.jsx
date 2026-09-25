@@ -50,7 +50,9 @@ export default function ProductCard({ product }) {
       <span className="delivery-line">{product.delivery || "FREE delivery"}</span>
       <div className="product-card__actions">
         <button className="card-add-button" type="button" onClick={addCart} disabled={product.stock < 1}>{added ? <><Check size={15} /> Added</> : <><ShoppingCart size={16} /> Add to cart</>}</button>
-        <button className={`card-compare-button ${compared ? "is-active" : ""}`} type="button" onClick={toggleCompare} aria-pressed={compared} aria-label={`${compared ? "Remove" : "Add"} ${product.title} ${compared ? "from" : "to"} comparison`}><Scale size={15} /> {compared ? "Added" : "Compare"}</button>
+        {compared
+          ? <Link className="card-compare-button is-active" to="/compare" aria-label={`Open the comparison table containing ${product.title}`}><Scale size={15} /> Added &mdash; view</Link>
+          : <button className="card-compare-button" type="button" onClick={toggleCompare} aria-label={`Add ${product.title} to comparison`}><Scale size={15} /> Compare</button>}
       </div>
     </div>
   </article>

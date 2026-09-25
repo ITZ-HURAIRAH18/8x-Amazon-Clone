@@ -141,11 +141,24 @@ export function CartProvider({ children }) {
     if (product.stock != null && Number(product.stock) < 1) { setError("This item is currently unavailable."); return false }
     setError("")
     if (user) {
+      // Show the item immediately, then reconcile with the server. The API can
+      // take a few hundred milliseconds on a remote database, and the shopper
+      // should not wait staring at an unchanged header badge.
+      const snapshot = { items, savedItems, unavailableItems }
+      const existing = items.find((entry) => productKey(entry.product) === productKey(product))
+      const optimisticItems = existing
+        ? items.map((entry) => (productKey(entry.product) === productKey(product) ? { ...entry, quantity: entry.quantity + safeQuantity } : entry))
+        : [...items, { id: `pending-${product.id}`, quantity: safeQuantity, product }]
+      setItems(optimisticItems)
+      setUnavailableItems((current) => current.filter((entry) => String(entry.productId) !== String(product.id)))
       try {
         applyCart(await cartApi.add(product.id, safeQuantity))
         return true
       } catch (requestError) {
-        setError(errorMessage(requestError, "The item could not be synced to your account."))
+        setItems(snapshot.items)
+        setSavedItems(snapshot.savedItems)
+        setUnavailableItems(snapshot.unavailableItems)
+        setError(errorMessage(requestError, "The item could not be added to your cart."))
         return false
       }
     }

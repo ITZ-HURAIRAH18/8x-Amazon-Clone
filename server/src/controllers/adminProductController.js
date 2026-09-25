@@ -24,7 +24,7 @@ import {
   text,
   withPagination,
 } from "../utils/validation.js"
-import { ensureTaxonomyRecords } from "../services/taxonomyService.js"
+import { ensureTaxonomyRecords, invalidateTaxonomyCache } from "../services/taxonomyService.js"
 import { createAdminNotification } from "./notificationController.js"
 import { restoreDealProducts } from "../services/dealService.js"
 
@@ -220,6 +220,8 @@ export const createProduct = asyncHandler(async (req, res) => {
     memory.products.push(product)
   }
   await notifyLowStock(product)
+  // A new product can introduce a category or brand, so the cached sets are stale.
+  invalidateTaxonomyCache()
   return res.status(201).json({ success: true, message: "Product created", data: serializeProduct(product) })
 })
 

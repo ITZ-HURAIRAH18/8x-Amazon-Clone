@@ -63,6 +63,8 @@ if (!connected) {
       active: true,
     },
   ])
+  await Category.createIndexes()
+  await Brand.createIndexes()
   console.log(`Seeded ${products.length} products, ${categoryNames.length} categories, ${brandNames.length} brands, and 3 coupons`)
   console.log("Existing deals were removed because seeded products receive new identifiers.")
   await disconnectDatabase()

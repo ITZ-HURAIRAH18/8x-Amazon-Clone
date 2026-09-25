@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom"
-import { Bell, ChevronDown, Globe, Heart, MapPin, Search, ShoppingCart, UserRound, X } from "lucide-react"
+import { Bell, ChevronDown, Globe, Heart, MapPin, Scale, Search, ShoppingCart, UserRound, X } from "lucide-react"
 import AmazonLogo from "./AmazonLogo"
 import { productApi } from "../services/api"
-import { useAuth, useCart, useNotifications, useWishlist } from "../context/StoreContext"
+import { useAuth, useCart, useNotifications, useShoppingMemory, useWishlist } from "../context/StoreContext"
 
 const RECENT_KEY = "amazon_clone_recent_searches"
 
@@ -14,6 +14,7 @@ export default function GlobalHeader() {
   const { user, logout } = useAuth()
   const { count, subtotal } = useCart()
   const { count: wishlistCount } = useWishlist()
+  const { compare } = useShoppingMemory()
   const { items: notifications, unreadCount, markRead, markAllRead } = useNotifications()
   const [term, setTerm] = useState(params.get("q") || "")
   const [category, setCategory] = useState(params.get("category") || "All")
@@ -93,6 +94,7 @@ export default function GlobalHeader() {
       <div className="header-popover-wrap"><button className="header-account" type="button" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotificationOpen(false) }}><span><small>Hello, {accountName}</small><strong>{user ? "Account & Lists" : "Sign in"}</strong></span><ChevronDown size={13} /></button>{accountOpen && <div className="account-popover">{user ? <><strong>Hello, {user.name}</strong><Link to="/account" onClick={() => setAccountOpen(false)}><UserRound size={16} /> Your account</Link><Link to="/account/orders" onClick={() => setAccountOpen(false)}>Your orders</Link><Link to="/wishlist" onClick={() => setAccountOpen(false)}><Heart size={16} /> Your wishlist <small>{wishlistCount}</small></Link><button type="button" onClick={() => { logout(); setAccountOpen(false); navigate("/") }}>Sign out</button></> : <><strong>Sign in for the best experience</strong><Link className="primary-button" to="/login" onClick={() => setAccountOpen(false)}>Sign in</Link><Link to="/register" onClick={() => setAccountOpen(false)}>Create an account</Link></>}</div>}</div>
       <Link className="header-orders" to={user ? "/account/orders" : "/login"}><span><small>Returns</small><strong>& Orders</strong></span></Link>
       <Link className="header-wishlist" to="/wishlist" aria-label={`Wishlist, ${wishlistCount} items`}><Heart size={21} fill={wishlistCount ? "currentColor" : "none"} /><span>{wishlistCount > 99 ? "99+" : wishlistCount}</span></Link>
+      {compare.length > 0 && <Link className="header-compare" to="/compare" aria-label={`Compare products, ${compare.length} selected`}><Scale size={21} /><span className="header-compare__text">Compare</span><b>{compare.length}</b></Link>}
       <div className="header-popover-wrap"><button className="header-notifications" type="button" aria-label={`Notifications, ${unreadCount} unread`} aria-expanded={notificationOpen} onClick={toggleNotification}><Bell size={21} />{unreadCount > 0 && <b>{unreadCount > 9 ? "9+" : unreadCount}</b>}</button>{notificationOpen && <div className="notification-popover"><div className="notification-popover__heading"><strong>Notifications</strong>{unreadCount > 0 && <button type="button" onClick={markAllRead}>Mark all read</button>}</div>{notifications.length === 0 ? <p>You're all caught up.</p> : notifications.slice(0, 6).map((item) => <Link key={item.id} to={item.link || "/account"} className={`notification-item ${item.read ? "" : "is-unread"}`} onClick={() => { markRead(item.id); setNotificationOpen(false) }}><strong>{item.title}</strong><span>{item.message}</span></Link>)}</div>}</div>
       <Link className="header-cart" to="/cart" aria-label={`Shopping cart, ${count} items`}><span className="cart-icon-wrap"><ShoppingCart size={27} /><b>{count}</b></span><span className="cart-label">Cart</span><small className="cart-subtotal">${subtotal.toFixed(2)}</small></Link>
     </div>

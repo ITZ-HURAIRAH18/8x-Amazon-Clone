@@ -90,11 +90,24 @@ export const addToCart = asyncHandler(async (req, res) => {
   if (product.stock < quantity) return res.status(400).json({ message: "Requested quantity is not available", code: "OUT_OF_STOCK" })
 
   if (databaseReady()) {
-    const cart = (await Cart.findOne({ user: req.user._id })) || new Cart({ user: req.user._id, items: [], savedItems: [] })
-    const existing = cart.items.find((item) => String(item.product) === String(product._id))
-    if (existing) existing.quantity = Math.min(product.stock, existing.quantity + quantity)
-    else cart.items.push({ product: product._id, quantity })
-    const saved = await cart.save()
+    // One atomic write instead of read-modify-save. This removes a round trip
+    // and avoids losing an update when two clicks arrive together.
+    const cart = await Cart.findOneAndUpdate(
+      { user: req.user._id, "items.product": product._id },
+      { $inc: { "items.$.quantity": quantity } },
+      { new: true }
+    )
+    const saved = cart || await Cart.findOneAndUpdate(
+      { user: req.user._id },
+      { $push: { items: { product: product._id, quantity } } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+    // Never let the stored quantity exceed available stock.
+    const item = saved.items.find((entry) => String(entry.product) === String(product._id))
+    if (item && item.quantity > product.stock) {
+      item.quantity = product.stock
+      await saved.save()
+    }
     return res.status(201).json({ data: await serializeDbCart(saved) })
   }
 
