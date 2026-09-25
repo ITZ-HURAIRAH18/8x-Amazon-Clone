@@ -1,24 +1,27 @@
+import { lazy, Suspense } from "react"
 import { Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { useAdminAuth } from "./context/AdminAuthContext"
-import AdminLayout from "./components/admin/AdminLayout"
-import AdminLoginPage from "./pages/AdminLoginPage"
-import AdminForbiddenPage from "./pages/AdminForbiddenPage"
-import AdminDashboardPage from "./pages/AdminDashboardPage"
-import AdminProductsPage from "./pages/AdminProductsPage"
-import AdminProductFormPage from "./pages/AdminProductFormPage"
-import AdminCatalogPage from "./pages/AdminCatalogPage"
-import AdminOrdersPage from "./pages/AdminOrdersPage"
-import AdminOrderDetailPage from "./pages/AdminOrderDetailPage"
-import AdminUsersPage from "./pages/AdminUsersPage"
-import AdminUserDetailPage from "./pages/AdminUserDetailPage"
-import AdminReviewsPage from "./pages/AdminReviewsPage"
-import AdminCouponsPage from "./pages/AdminCouponsPage"
-import AdminDealsPage from "./pages/AdminDealsPage"
-import AdminInventoryPage from "./pages/AdminInventoryPage"
-import AdminAnalyticsPage from "./pages/AdminAnalyticsPage"
-import AdminNotificationsPage from "./pages/AdminNotificationsPage"
-import AdminSettingsPage from "./pages/AdminSettingsPage"
-import AdminSearchPage from "./pages/AdminSearchPage"
+
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"))
+const AdminLoginPage = lazy(() => import("./pages/AdminLoginPage"))
+const AdminForbiddenPage = lazy(() => import("./pages/AdminForbiddenPage"))
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"))
+const AdminProductsPage = lazy(() => import("./pages/AdminProductsPage"))
+const AdminProductFormPage = lazy(() => import("./pages/AdminProductFormPage"))
+const AdminCatalogPage = lazy(() => import("./pages/AdminCatalogPage"))
+const AdminOrdersPage = lazy(() => import("./pages/AdminOrdersPage"))
+const AdminOrderDetailPage = lazy(() => import("./pages/AdminOrderDetailPage"))
+const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"))
+const AdminUserDetailPage = lazy(() => import("./pages/AdminUserDetailPage"))
+const AdminReviewsPage = lazy(() => import("./pages/AdminReviewsPage"))
+const AdminCouponsPage = lazy(() => import("./pages/AdminCouponsPage"))
+const AdminDealsPage = lazy(() => import("./pages/AdminDealsPage"))
+const AdminInventoryPage = lazy(() => import("./pages/AdminInventoryPage"))
+const AdminAnalyticsPage = lazy(() => import("./pages/AdminAnalyticsPage"))
+const AdminNotificationsPage = lazy(() => import("./pages/AdminNotificationsPage"))
+const AdminSettingsPage = lazy(() => import("./pages/AdminSettingsPage"))
+const AdminSearchPage = lazy(() => import("./pages/AdminSearchPage"))
+const AdminNotFoundPage = lazy(() => import("./pages/AdminNotFoundPage"))
 import AmazonShell from "./components/AmazonShell"
 import { useAuth } from "./context/StoreContext"
 import HomePage from "./pages/HomePage"
@@ -63,7 +66,7 @@ function AdminProtectedRoute({ children }) {
 }
 
 export default function App() {
-  return <Routes>
+  return <Suspense fallback={<div className="route-loading">Loading admin workspace…</div>}><Routes>
     <Route path="/admin/login" element={<AdminLoginPage />} />
     <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
       <Route index element={<Navigate to="dashboard" replace />} />
@@ -85,6 +88,7 @@ export default function App() {
       <Route path="notifications" element={<AdminNotificationsPage />} />
       <Route path="settings" element={<AdminSettingsPage />} />
       <Route path="search" element={<AdminSearchPage />} />
+      <Route path="*" element={<AdminNotFoundPage />} />
     </Route>
     <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
     <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
@@ -109,5 +113,5 @@ export default function App() {
       <Route path="checkout/confirmation/:orderId" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFoundPage />} />
     </Route>
-  </Routes>
+  </Routes></Suspense>
 }

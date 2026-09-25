@@ -8,7 +8,9 @@
     "start": "node src/server.js",
     "seed": "node src/seed.js",
     "seed:coupons": "node src/seedCoupons.js",
-    "smoke": "node src/smokeTest.js"
+    "seed:admin": "node src/seedAdmin.js",
+    "smoke": "node src/smokeTest.js",
+    "smoke:admin": "node src/adminSmokeTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

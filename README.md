@@ -2,13 +2,13 @@
 
 ## Overview
 
-Amazon Clone is a high-fidelity MERN e-commerce application inspired by Amazon's browsing experience. It combines a dense, responsive storefront with real REST APIs, MongoDB persistence, JWT authentication, guest and account carts, saved addresses, coupons, wishlist, reviews, checkout, order tracking, and reorder functionality.
+Amazon Clone is a high-fidelity MERN e-commerce application inspired by Amazon's browsing experience. It combines a dense, responsive storefront with real REST APIs, MongoDB persistence, JWT authentication, guest and account carts, saved addresses, coupons, wishlist, reviews, checkout, order tracking, and reorder functionality, plus a complete role-protected administration workspace for catalog, order, customer, promotion, and inventory management.
 
 The project is intentionally a functional commerce demo rather than a claim of Amazon's real backend. Product data is seeded, payment is simulated, and recommendations are deterministic rather than machine-learned.
 
 ## Stack
 
-- **Frontend:** React 18, Vite, React Router, Axios, Lucide React, structured CSS
+- **Frontend:** React 18, Vite, React Router, Axios, Recharts, Lucide React, structured CSS
 - **Backend:** Node.js, Express, Mongoose, MongoDB, JWT, bcryptjs
 - **Repository:** npm workspaces with `client/` and `server/`
 
@@ -86,52 +86,76 @@ The project is intentionally a functional commerce demo rather than a claim of A
 - Empty, error, retry, and no-results states
 - Visible keyboard focus, semantic landmarks, labels, alt text, and accessible controls
 - Dynamic page titles, descriptions, canonical links, and Open Graph defaults
+- Admin workspace: collapsible sidebar, mobile drawer with focus trapping, dense responsive tables, accessible dialogs, Recharts dashboards, and lazy-loaded admin routes
 
 ## Administration
 
-The application includes a separate Amazon-inspired operations workspace for authorized staff.
+The application includes a separate Amazon-inspired operations workspace for authorized staff. It shares the same database as the storefront, so every admin change is immediately visible to customers.
 
 ### Admin access
 
 - Admin URL: `/admin/login`
 - Admin dashboard: `/admin/dashboard`
-- Admin sessions use a separate scoped JWT and require the `admin` role.
-- Customer accounts are redirected to a proper 403 page when they attempt to open admin routes.
-- Admin API routes are protected by authentication and role middleware.
+- Admin sessions use a separate scoped JWT (`type: "admin"`), stored separately from the customer session.
+- `/api/admin/*` is protected by `protect` + `requireAdmin`; customers receive `403`, missing sessions receive `401`.
+- The customer UI is unchanged and remains reachable at `/`, `/deals`, `/cart`, `/account`, and the rest of the storefront.
+- Signing out, suspending, demoting, or deleting an account bumps `tokenVersion`, which immediately invalidates issued tokens.
+- The last active administrator cannot be demoted or deactivated, and admins cannot suspend or demote themselves.
 
 ### Admin workspace
 
-- Live revenue, order, customer, product, review, and inventory metrics
-- Date presets and custom analytics ranges
-- Revenue, order, category, brand, and customer charts backed by MongoDB aggregations
-- Product CRUD, archival, status changes, bulk actions, and inventory thresholds
-- Category and brand CRUD with product-count deletion protection
-- Order search, filtering, sorting, detail view, and status timeline updates
-- Customer search, account status, order history, reviews, wishlist summary, and spending
-- Review moderation with customer-visible status integration
-- Coupon CRUD with percentage, fixed, and shipping discounts
-- Deal CRUD with product selection and active dates
-- Inventory and low-stock management
-- Admin notifications, global search, settings, responsive tables, accessible modals, and mobile navigation
+| Area | Routes | Capabilities |
+| --- | --- | --- |
+| Dashboard | `/admin/dashboard` | Revenue (total/today/week/month), order status counts, customers, products, reviews, low stock, active deals, recent orders, date presets and custom ranges |
+| Analytics | `/admin/analytics` | Revenue and order timelines, top products, sales by category and brand, status distribution, new customers, units sold, average order value |
+| Products | `/admin/products` | Create, edit, activate/deactivate, delete, bulk activate/deactivate/delete/stock, filters, sorting, pagination |
+| Categories | `/admin/categories` | Create, edit, activate/deactivate, delete with product-count protection, rename cascades to products |
+| Brands | `/admin/brands` | Create, edit, activate/deactivate, delete with product-count protection |
+| Orders | `/admin/orders` | Search, filter, sort, paginate, order detail, status timeline, cancel with inventory restore |
+| Customers | `/admin/users` | Search, role/status filters, order count, total spend, addresses, orders, reviews, wishlist, suspend/reactivate, role changes |
+| Reviews | `/admin/reviews` | Search, rating/status/product filters, approve, hide, delete, live product rating recalculation |
+| Coupons | `/admin/coupons` | Percentage, fixed, and free-shipping offers with start/expiry dates, usage limits, per-user limits, minimum order, maximum discount |
+| Deals | `/admin/deals` | Time-bound deals with product selection, overlap protection, and automatic customer deal pricing |
+| Inventory | `/admin/inventory` | Stock and low-stock thresholds, low-stock alerts |
+| Notifications | `/admin/notifications` | Low stock, expiring coupon/deal, moderation, and registration alerts with read state |
+| Search | `/admin/search` | Typed results across products, orders, customers, coupons, categories, and brands |
+| Settings | `/admin/settings` | Store identity, shipping/tax defaults, low-stock default, alert preferences |
+
+Customer/admin consistency is enforced on the server:
+
+- An admin-created product is immediately visible to customers, and deactivating it hides it from the storefront.
+- Product stock is decremented at checkout and restored once when an admin cancels an order.
+- Order status changes made by an admin appear on the customer order and tracking pages.
+- Coupons created by an admin are redeemable at customer checkout, subject to start date, expiry, minimum order, usage limit, and per-user limit.
+- Deals created by an admin appear on the customer deals page and revert pricing when the deal ends or is removed.
+- Review moderation changes customer-visible reviews and recalculates the product rating.
+
+### Revenue and analytics rules
+
+- Revenue includes non-cancelled orders created in the selected range, excluding `Failed` and `Refunded` payment states.
+- Revenue uses the persisted order total, so coupons, shipping, and tax are reflected exactly as charged.
+- Date ranges (`today`, `yesterday`, `last7days`, `30d`, `thismonth`, `lastmonth`, `thisyear`, `90d`, and a validated custom range) are parsed and aggregated on the server.
+- Charts are rendered with Recharts from MongoDB aggregation output; no random or client-side sample data is used.
 
 ### Admin API groups
 
 All routes below require an authenticated admin token:
 
+- `/api/admin/auth/login`, `/api/admin/auth/me`, `/api/admin/auth/logout`
 - `/api/admin/dashboard`
-- `/api/admin/analytics/*`
-- `/api/admin/products/*`
-- `/api/admin/categories/*`
-- `/api/admin/brands/*`
-- `/api/admin/orders/*`
-- `/api/admin/users/*`
-- `/api/admin/reviews/*`
-- `/api/admin/coupons/*`
-- `/api/admin/deals/*`
-- `/api/admin/inventory/*`
-- `/api/admin/notifications/*`
+- `/api/admin/analytics`, `/api/admin/analytics/revenue`, `/orders`, `/products`, `/categories`, `/brands`, `/customers`
+- `/api/admin/products` (+ `/bulk`, `/:id/status`)
+- `/api/admin/categories`, `/api/admin/brands`
+- `/api/admin/orders` (+ `/:id/status`)
+- `/api/admin/users` (+ `/:id/status`, `/:id/role`)
+- `/api/admin/reviews` (+ `/:id` moderation, `/:id` delete)
+- `/api/admin/coupons`, `/api/admin/deals`
+- `/api/admin/inventory` (+ `/:id`)
+- `/api/admin/notifications` (+ `/:id/read`, `/read-all`)
 - `/api/admin/search`
 - `/api/admin/settings`
+
+List endpoints accept `page`, `limit`, `search`, and resource-specific filters and return `{ success, data, meta: { page, limit, total, pages } }`. Mutations validate every field on the server, use allowlisted inputs, and never accept raw `req.body` passthrough.
 
 ### Create an admin safely
 
@@ -147,7 +171,7 @@ ADMIN_PASSWORD=use-a-long-random-password
 npm run seed:admin
 ```
 
-The seed command hashes the password and upserts the admin role. Use a unique development credential and rotate it through the account/security flow after signing in.
+The seed command requires MongoDB, hashes the password with bcrypt, and upserts the account with the `admin` role. Re-running it resets the password and revokes existing sessions.
 
 ---
 
@@ -157,35 +181,40 @@ The seed command hashes the password and upserts the admin role. Use a unique de
 .
 ├── client/
 │   ├── src/
-│   │   ├── components/       # Header, cards, carousels, footer, drawer
-│   │   ├── context/          # Auth, cart, wishlist, memory, notifications
+│   │   ├── components/       # Storefront components
+│   │   │   └── admin/        # Admin layout, tables, modals, charts
+│   │   ├── context/          # Customer auth/cart state and admin session
 │   │   ├── data/             # Demo fallback catalog
-│   │   ├── pages/            # Storefront, account, checkout, orders
-│   │   ├── services/         # Axios API client
+│   │   ├── pages/            # Storefront pages and Admin*.jsx admin pages
+│   │   ├── services/         # Axios customer and admin API clients
 │   │   ├── utils/            # Formatting and SEO helpers
-│   │   ├── App.jsx           # Route table and protected boundaries
-│   │   └── styles.css        # Amazon-style tokens and responsive CSS
+│   │   ├── App.jsx           # Route table, protected boundaries, admin code splitting
+│   │   └── styles.css        # Amazon-style tokens, storefront and admin CSS
 │   └── vercel.json           # SPA history rewrites
 ├── server/
 │   ├── api/                # Optional Vercel Node-function entry
 │   └── src/
 │       ├── config/           # Environment and MongoDB connection
-│       ├── controllers/      # Auth, products, cart, orders, reviews, etc.
+│       ├── controllers/      # Customer + admin* controllers
 │       ├── data/             # Seed catalog and memory fallback
-│       ├── middleware/       # JWT protection, errors, security headers
-│       ├── models/           # Mongoose schemas
-│       ├── routes/           # REST route modules
+│       ├── middleware/       # JWT protect/requireAdmin, errors, security headers
+│       ├── models/           # Mongoose schemas incl. Category, Brand, Deal, Setting
+│       ├── routes/           # REST modules incl. adminRoutes.js
+│       ├── services/         # Taxonomy and deal-state services
+│       ├── utils/            # Pricing, tokens, async, and validation helpers
 │       ├── seed.js           # Product and coupon seeding
-│       └── utils/            # Pricing and async helpers
+│       ├── seedAdmin.js      # Environment-driven admin upsert
+│       ├── smokeTest.js      # Customer commerce smoke test
+│       └── adminSmokeTest.js # Admin + integration smoke test
 ├── .agent-logs/              # Automatically captured assignment exchanges
 └── agent.md                  # Assignment requirements and QA checklist
 ```
 
 ### Request flow
 
-1. The React client calls the Axios service layer.
+1. The React client calls the Axios service layer (`api` for the storefront, `adminClient` for `/api/admin`).
 2. Express middleware applies CORS, security headers, body limits, and rate limits.
-3. Protected routes verify the JWT and load the user.
+3. Protected routes verify the JWT and load the user; admin routes additionally require the `admin` role and an active account.
 4. Controllers use Mongoose when MongoDB is connected and a deterministic in-memory fallback otherwise.
 5. The client context providers keep authentication, cart, wishlist, recently viewed, comparison, and notification state synchronized.
 
@@ -197,6 +226,7 @@ All routes are prefixed with `/api`.
 
 - `POST /auth/register`
 - `POST /auth/login`
+- `POST /auth/logout`
 - `GET /auth/me`
 - `PATCH /auth/profile`
 - `PATCH /auth/password`
@@ -207,7 +237,7 @@ All routes are prefixed with `/api`.
 - `GET /products/facets`
 - `GET /products/:id`
 - `GET /products/:id/recommendations`
-- `POST /products` (authenticated operations endpoint; requires `PRODUCT_ADMIN_TOKEN`)
+- `POST /products` (legacy operations endpoint requiring `PRODUCT_ADMIN_TOKEN`; normal catalog management uses `POST /api/admin/products`)
 
 ### Cart
 
@@ -256,7 +286,11 @@ All routes are prefixed with `/api`.
 - `GET /orders`
 - `POST /orders`
 - `GET /orders/:id`
-- `PATCH /orders/:id/status` (requires `ORDER_STATUS_TOKEN`)
+- `PATCH /orders/:id/status` (customer-scoped transitions)
+
+### Administration
+
+Admin routes are prefixed with `/api/admin`, require a scoped admin JWT, and are documented in the [Administration](#administration) section.
 
 ## Setup
 
@@ -368,6 +402,14 @@ GET https://<backend-domain>/api/health
 
 The public frontend may be deployed independently, but authentication, carts, checkout, and orders are only fully live after the backend origin and its environment variables are configured.
 
+### Admin in production
+
+1. Set `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` on the backend host (Render, Vercel, or a `.env` file) and run `npm run seed:admin` once with the same values.
+2. Confirm the deployment protection on the backend is disabled for API traffic, otherwise `/api/admin/*` returns a Vercel login page instead of JSON.
+3. Add the deployed frontend origin to `CLIENT_URL` so CORS allows the admin client.
+4. Sign in at `https://<frontend-domain>/admin/login`, confirm the dashboard loads, then sign out and confirm the token is revoked.
+5. Rotate the administrator password by re-running the seed command; every issued admin token is invalidated.
+
 ## Local smoke test
 
 With the API running and MongoDB available, run the authenticated API smoke test:
@@ -377,6 +419,18 @@ npm run smoke
 ```
 
 It creates a temporary user, exercises search, wishlist, saved-cart behavior, coupons, checkout order creation, reviews, and notifications, then removes the temporary MongoDB records and restores stock. Override the target with `SMOKE_API_URL` when needed.
+
+### Admin smoke test
+
+The admin suite verifies the real admin and customer/admin integration paths against the running API:
+
+```bash
+$env:ADMIN_EMAIL="admin@example.com"
+$env:ADMIN_PASSWORD="your-seeding-password"
+npm run smoke:admin
+```
+
+It checks admin sign-in and logout, 401/403 enforcement, dashboard and analytics aggregations, product create/update/deactivate/bulk-delete, storefront visibility, category and brand guards, checkout with an admin coupon, inventory decrement and restore on cancellation, order status visibility for customers, deal creation and removal, review moderation visibility, customer suspension and session invalidation, notifications, admin search, and settings. Temporary records are removed and stock is restored afterwards.
 
 ## Recommended Demo Flow
 
@@ -397,6 +451,9 @@ It creates a temporary user, exercises search, wishlist, saved-cart behavior, co
 15. Open the wishlist, notifications, and account sections.
 16. Test the layout at mobile, tablet, and desktop widths.
 17. Log out and log back in to verify persistence.
+18. Sign in at `/admin/login` and review the dashboard, analytics, and the order created above.
+19. Create a product, coupon, and deal in the admin workspace, then confirm each one on the storefront.
+20. Change the order status in admin and confirm the customer order page updates.
 
 ## Known limitations
 
@@ -406,7 +463,8 @@ It creates a temporary user, exercises search, wishlist, saved-cart behavior, co
 - Product photography uses reliable external demo image URLs and may require replacement with a production image CDN.
 - The local development fallback is not a production persistence strategy.
 - JWTs are currently stored in browser localStorage for the SPA; an HttpOnly-cookie/session hardening pass is recommended before a high-security production launch.
-- The optional order-status mutation endpoint requires an operations token and is not exposed in the customer UI.
+- The optional order-status and product-admin operations tokens are legacy emergency paths; normal administration uses role-protected admin accounts.
+- Admin sessions also use browser storage for the SPA token; adopt HttpOnly cookies before a high-security production launch.
 - Seller marketplace tools, fulfillment operations, taxes by jurisdiction, and advanced fraud detection are outside this assignment.
 
 ## Quality and capture records

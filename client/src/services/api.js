@@ -134,7 +134,7 @@ export const adminApi = {
     update: async (id, details) => unwrap(await adminClient.patch(`/admin/products/${id}`, details)),
     remove: async (id) => unwrap(await adminClient.delete(`/admin/products/${id}`)),
     status: async (id, status) => unwrap(await adminClient.patch(`/admin/products/${id}/status`, { status })),
-    bulk: async (action, ids, value) => unwrap(await adminClient.post("/admin/products/bulk", { action, ids, value })),
+    bulk: async (action, ids, value) => unwrap(await adminClient.post("/admin/products/bulk", { action, ids, value, confirm: action === "delete" })),
   },
   categories: {
     list: async (params = {}) => (await adminClient.get("/admin/categories", { params })).data,

@@ -23,3 +23,11 @@ services:
         generateValue: true
       - key: PRODUCT_ADMIN_TOKEN
         generateValue: true
+      # Set these manually, then run `npm run seed:admin` once against the deployed
+      # database to create the first administrator account.
+      - key: ADMIN_NAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
