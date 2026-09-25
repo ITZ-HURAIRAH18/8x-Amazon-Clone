@@ -1,1186 +1,1511 @@
-# Amazon Clone — Phase 2 Power Upgrade
+# AMAZON CLONE — COMPLETE ADMIN DASHBOARD + PRODUCTION ENHANCEMENT
 
-We already have a working MERN Amazon.com clone.
+You are working on my existing MERN Amazon clone.
 
-Do NOT rebuild the project from scratch.
+## CRITICAL INSTRUCTION
 
-Do NOT remove existing functionality.
+DO NOT rebuild the project from scratch.
 
-Do NOT replace the current architecture.
+DO NOT remove, replace, or break existing working customer functionality.
 
-First inspect the entire existing repository and understand what has already been implemented.
+First inspect the entire existing repository and understand:
 
-The project already contains:
-
-* MERN architecture
-* 24 seeded products
-* Product APIs
-* Product browsing
-* Product details
-* Search
-* Cart
-* Authentication
-* Orders
-* Agent capture logs
-* Git workflow
-* Initial Amazon-style UI
-
-There are approximately 21 hours remaining.
-
-Our goal now is to transform the current implementation into a much more complete, polished, professional, high-fidelity Amazon-style shopping experience.
-
-The result should feel like a serious production e-commerce application, not a basic assignment demo.
-
----
-
-# 1. CRITICAL RULES
-
-Before changing anything:
-
-1. Inspect the current project.
-2. Understand the existing architecture.
-3. Identify what is already implemented.
-4. Reuse existing components and APIs.
-5. Do not duplicate existing functionality.
-6. Do not break the existing agent-capture setup.
-7. Do not remove `.agent-logs/`.
-8. Do not add `.agent-logs/` to `.gitignore`.
-9. Continue committing the logs as required by the assignment.
-10. Do not rewrite working code unnecessarily.
-
-Every new feature must integrate with the existing application.
-
-Do not create a second competing implementation.
-
----
-
-# 2. MAIN GOAL
-
-Upgrade the current project into a powerful Amazon-style marketplace with:
-
-* better homepage
-* better navigation
-* advanced search
-* filters
-* sorting
-* product discovery
-* wishlist
-* recently viewed products
-* product comparison
-* reviews and ratings
-* recommendations
-* deals
-* coupons
-* shopping cart improvements
-* saved addresses
-* order tracking
-* reorder
-* notifications
-* account dashboard
-* checkout improvements
-* professional loading states
-* error handling
-* responsive design
-* accessibility
-* performance improvements
-* polished Amazon-style UI
-
-Prioritize features that are visible during a reviewer walkthrough.
-
----
-
-# 3. PRIORITY SYSTEM
-
-Use this priority order.
-
-## P0 — MUST BE PERFECT
-
-These must be stable:
-
-* Homepage
-* Header
-* Search
-* Product listing
-* Product details
-* Authentication
-* Cart
-* Checkout
-* Orders
-* MongoDB persistence
-* Responsive design
-* Deployment readiness
-
-## P1 — HIGH-VALUE FEATURES
-
-Implement these next:
-
-* advanced filtering
-* sorting
-* wishlist
-* reviews
-* recently viewed
-* product comparison
-* coupons
-* order tracking
-* reorder
-* saved addresses
-* account dashboard
-* recommendations
-* deals page
-* notifications
-
-## P2 — POLISH
-
-After P0/P1:
-
-* skeleton loaders
-* animations
-* micro-interactions
-* improved empty states
-* better error states
-* accessibility improvements
-* performance optimization
-* SEO metadata
-* 404 page
-* professional README
-
-Do not sacrifice P0 stability for P2 polish.
-
----
-
-# 4. AMAZON-STYLE HOMEPAGE UPGRADE
-
-Make the homepage significantly richer.
-
-Structure:
-
-HEADER
-
-* Amazon-style top navigation
-* logo
-* delivery location
-* search
-* category selector
-* language
-* account
-* orders
+* frontend architecture
+* backend architecture
+* MongoDB/Mongoose models
+* authentication
+* current API routes
+* customer account system
+* products
+* categories
+* brands
 * cart
-
-SECONDARY NAV
-
-* All
-* Today's Deals
-* Customer Service
-* Registry
-* Gift Cards
-* Sell
-* other appropriate navigation
-
-MAIN CONTENT
-
-1. Hero carousel
-2. Shop by category
-3. Today's Deals
-4. Best Sellers
-5. Featured products
-6. Electronics
-7. Computers
-8. Home & Kitchen
-9. Fashion
-10. Beauty
-11. Books
-12. Recommended for you
-13. Recently viewed
-14. Prime-style promotional section
-15. More products
-16. Footer
-
-The homepage should feel dense and marketplace-oriented.
-
-Do not create huge empty spaces.
-
----
-
-# 5. PROFESSIONAL HEADER
-
-Improve the header substantially.
-
-Add:
-
-* search category dropdown
-* search suggestions
-* recent searches
-* clear search button
-* delivery location selector
-* account dropdown
-* orders shortcut
-* wishlist shortcut
-* cart count
-* cart subtotal preview
-* responsive mobile header
-* side navigation drawer
-
-Search suggestions should appear while typing.
-
-Example:
-
-User types:
-
-"lap"
-
-Show:
-
-Laptop
-Laptop Stand
-Laptop Bag
-Laptop Charger
-
-Clicking a suggestion must perform the appropriate search/navigation.
-
----
-
-# 6. ADVANCED SEARCH
-
-Upgrade the current search system.
-
-Backend:
-
-Support:
-
-* keyword search
-* title
-* description
-* brand
-* category
-* price range
-* rating
-* stock
-* discount
-* bestseller
-* deal
-* sorting
-* pagination
-
-Support URL query parameters.
-
-Example:
-
-/products?search=laptop&category=electronics&minPrice=300&maxPrice=1500&rating=4&sort=price-low
-
-Frontend:
-
-* search input
-* suggestions
-* filters
-* sorting
-* result count
-* pagination
-* clear filters
-* mobile filter drawer
-
-Add a "No results" experience.
-
----
-
-# 7. FILTER SYSTEM
-
-Complete the existing backend brand filtering with a professional UI.
-
-Filters:
-
-* Category
-* Brand
-* Price
-* Customer Rating
-* Availability
-* Discount
-* Deals
-* Prime-style delivery
-
-Desktop:
-
-Sticky filter sidebar.
-
-Mobile:
-
-Filter drawer.
-
-Show active filter chips.
-
-Example:
-
-Brand: Apple
-Rating: 4+
-Price: $500-$1000
-
-Allow:
-
-* remove individual filter
-* clear all filters
-
----
-
-# 8. SORTING
-
-Add:
-
-* Featured
-* Price: Low to High
-* Price: High to Low
-* Avg. Customer Review
-* Newest
-* Best Sellers
-* Biggest Discount
-
-Sorting must update the backend query.
-
----
-
-# 9. PAGINATION
-
-Implement proper pagination.
-
-Show:
-
-Previous
-1
-2
-3
-4
-5
-Next
-
-Do not load hundreds of products unnecessarily.
-
-Display:
-
-"1-24 of 120 results"
-
-Use backend pagination.
-
----
-
-# 10. WISHLIST
-
-Add a real wishlist.
-
-Users can:
-
-* add product to wishlist
-* remove product
-* view wishlist
-* move wishlist item to cart
-* remove all wishlist items
-
-Add heart/favorite control to ProductCard and ProductDetails.
-
-For authenticated users:
-
-Store wishlist in MongoDB.
-
-For guests:
-
-Use localStorage.
-
-Wishlist page:
-
-/wishlist
-
-Use an Amazon-style dense product layout.
-
----
-
-# 11. RECENTLY VIEWED PRODUCTS
-
-Track products opened by the user.
-
-Store the last 10–20 products.
-
-Display:
-
-"Recently viewed"
-
-on homepage and product pages.
-
-Avoid duplicate products.
-
-For logged-in users, persist where practical.
-
-For guests, localStorage is acceptable.
-
----
-
-# 12. PRODUCT COMPARISON
-
-Add product comparison.
-
-Users can select up to 3 or 4 products.
-
-Show:
-
-* image
-* title
-* price
-* rating
+* wishlist
 * reviews
-* brand
-* category
-* availability
-* discount
-* important specifications
+* coupons
+* deals
+* notifications
+* orders
+* addresses
+* checkout
+* recently viewed
+* recommendations
+* existing deployment configuration
+* `.agent-logs/`
+* `CAPTURE-TEST.md`
+* `README.md`
 
-Add:
+Preserve all existing functionality.
 
-"Compare"
+The goal is to **enhance the existing application into a complete, professional Amazon-style e-commerce platform with a real admin dashboard and complete documentation.**
 
-button.
+---
+
+# 1. PRIMARY OBJECTIVE
+
+The current application has a customer account dashboard but does NOT have a proper administration system.
+
+Build a complete:
+
+# ADMIN DASHBOARD
+
+The admin dashboard must follow the same Amazon visual language as the customer application.
+
+It must NOT look like a generic Bootstrap/admin-template dashboard.
+
+Use:
+
+* Amazon-inspired dark navigation
+* `#131921`
+* `#232F3E`
+* `#FF9900`
+* `#FEBD69`
+* `#FFD814`
+* `#FFFFFF`
+* `#E3E6E6`
+* `#0F1111`
+* Amazon-style typography
+* dense professional layouts
+* compact cards
+* subtle borders
+* minimal rounded corners
+* professional tables
+* responsive layouts
+
+Do NOT use emojis.
+
+Do NOT create an AI-looking dashboard.
+
+Do NOT use excessive gradients.
+
+Do NOT use giant rounded cards.
+
+Do NOT use excessive glassmorphism.
+
+Do NOT use random colors.
+
+The result should feel like a serious production e-commerce administration system.
+
+---
+
+# 2. ADMIN AUTHENTICATION
+
+Implement proper admin authentication.
 
 Create:
 
-/compare
+* Admin login
+* Admin logout
+* Admin session/token handling
+* Admin role
+* Protected admin routes
+* Admin middleware
+* Unauthorized handling
+* Forbidden handling
 
-The comparison page should look like a real commerce comparison table.
+Roles should support at minimum:
 
----
+```text
+customer
+admin
+```
 
-# 13. PRODUCT DETAILS UPGRADE
+If the current user model already supports roles, extend it instead of creating a conflicting authentication system.
 
-Make product pages much more professional.
+Admin APIs must NEVER be accessible simply by knowing the API URL.
 
-Include:
+Every sensitive admin endpoint must verify:
 
-LEFT:
-
-* image gallery
-* thumbnail navigation
-* zoom interaction
-* multiple images
-
-CENTER:
-
-* product title
-* rating
-* review count
-* bestseller badge
-* brand
-* product features
-* description
-* specifications
-* shipping information
-
-RIGHT:
-
-* price
-* original price
-* discount
-* delivery date
-* stock
-* quantity
-* Add to Cart
-* Buy Now
-* Add to Wishlist
-
-Below:
-
-* Product details
-* Specifications
-* Customer reviews
-* Related products
-* Frequently bought together
-* Similar products
-* Recently viewed
-
----
-
-# 14. REVIEWS AND RATINGS
-
-Implement a real review system.
-
-Users can:
-
-* submit review
-* choose 1–5 stars
-* write review
-* edit their own review
-* delete their own review
-
-Only authenticated users who purchased the product should be allowed to submit a review if order data makes that practical.
-
-Review model:
-
-* user
-* product
-* order
-* rating
-* title
-* comment
-* createdAt
-* updatedAt
-
-Display:
-
-* average rating
-* total reviews
-* rating distribution
-* review list
-* verified purchase indicator where applicable
+1. authenticated user
+2. valid token/session
+3. admin role
 
 Example:
 
-5 stars ████████
-4 stars ███
-3 stars ██
-2 stars █
-1 star █
+```text
+/customer
+/admin
+```
 
-Add sorting:
+Customer users must not be able to access:
 
-* Most recent
-* Highest rating
-* Lowest rating
-* Most helpful
-
-If time is limited, prioritize creation + display + rating aggregation over an advanced helpful-vote system.
+```text
+/admin
+/api/admin/*
+```
 
 ---
 
-# 15. RECOMMENDATION SYSTEM
+# 3. ADMIN ROUTING
 
-Create a practical recommendation engine.
+Create a professional admin route structure.
 
-Do NOT over-engineer machine learning.
+Example:
 
-Use deterministic recommendation logic.
+```text
+/admin
+/admin/login
+/admin/dashboard
+/admin/products
+/admin/products/new
+/admin/products/:id/edit
+/admin/categories
+/admin/brands
+/admin/orders
+/admin/orders/:id
+/admin/users
+/admin/users/:id
+/admin/reviews
+/admin/coupons
+/admin/deals
+/admin/inventory
+/admin/analytics
+/admin/notifications
+/admin/settings
+```
 
-Recommend products based on:
+Use protected React routes.
 
-* same category
-* same brand
-* similar price
-* related products
-* recently viewed
-* frequently bought together
-* bestseller products
+Unauthenticated users should be redirected to:
 
-Display:
+```text
+/admin/login
+```
 
-"Customers who viewed this item also viewed"
+Authenticated non-admin users should receive a proper:
 
-"Recommended for you"
-
-"Frequently bought together"
-
-"Similar items"
-
-Recommendations should feel relevant.
-
----
-
-# 16. DEALS SYSTEM
-
-Create a dedicated:
-
-/deals
+```text
+403 Forbidden
+```
 
 page.
 
-Include:
+---
 
-* Today's Deals
-* Lightning-style deals
-* Discount percentage
-* original price
-* current price
-* deal progress
-* limited stock
-* countdown timer
+# 4. ADMIN LAYOUT
 
-Use seeded deal data.
+Create a dedicated reusable AdminLayout.
 
-Countdown must be functional.
+Desktop:
 
-Do not fake a countdown that never changes.
+```text
+----------------------------------------------------
+| AMAZON ADMIN HEADER                              |
+----------------------------------------------------
+| SIDEBAR          | MAIN CONTENT                  |
+|                  |                               |
+| Dashboard        |                               |
+| Products         |                               |
+| Categories       |                               |
+| Brands           |                               |
+| Orders           |                               |
+| Customers        |                               |
+| Reviews          |                               |
+| Coupons          |                               |
+| Deals            |                               |
+| Inventory        |                               |
+| Analytics        |                               |
+| Notifications    |                               |
+| Settings         |                               |
+----------------------------------------------------
+```
+
+Header should include:
+
+* Amazon-style branding
+* Admin indicator
+* search/admin search if useful
+* notifications
+* profile menu
+* logout
+* responsive mobile menu
+
+Sidebar should support:
+
+* active route highlighting
+* collapsible behavior
+* mobile drawer
+* icons
+* labels
+* badges for pending orders/reviews if applicable
+
+Do NOT duplicate sidebar code across pages.
+
+Create reusable components.
 
 ---
 
-# 17. COUPONS
+# 5. ADMIN DASHBOARD OVERVIEW
 
-Add coupon functionality.
+Create `/admin/dashboard`.
 
-Create Coupon model:
-
-* code
-* discountType
-* discountValue
-* minimumOrder
-* maximumDiscount
-* expiresAt
-* active
-
-Example:
-
-SAVE10
-
-10% OFF
-
-On checkout:
-
-* coupon input
-* Apply
-* Remove
-* validation
-* discount calculation
+This must be a real business dashboard, not placeholder cards.
 
 Display:
 
+### Revenue
+
+* Total revenue
+* Today's revenue
+* This week's revenue
+* This month's revenue
+
+### Orders
+
+* Total orders
+* Pending orders
+* Processing orders
+* Shipped orders
+* Delivered orders
+* Cancelled orders
+
+### Customers
+
+* Total customers
+* New customers
+* Active customers
+
+### Products
+
+* Total products
+* Active products
+* Out-of-stock products
+* Low-stock products
+
+### Reviews
+
+* Total reviews
+* Pending/moderation reviews
+* Average rating
+
+### Sales
+
+Show charts for:
+
+* revenue over time
+* orders over time
+* sales by category
+* sales by brand
+* order status distribution
+
+Use Recharts or the existing chart library.
+
+Charts must use real MongoDB data.
+
+DO NOT generate fake random analytics.
+
+---
+
+# 6. DASHBOARD DATE FILTER
+
+Allow:
+
+```text
+Today
+Yesterday
+Last 7 days
+Last 30 days
+This month
+Last month
+This year
+Custom range
+```
+
+Changing the range must update the analytics.
+
+Backend should perform the aggregation.
+
+Do not download all orders into React and calculate everything inefficiently on the frontend.
+
+Use MongoDB aggregation pipelines.
+
+---
+
+# 7. REVENUE ANALYTICS
+
+Create backend analytics endpoints.
+
+Example:
+
+```text
+GET /api/admin/analytics/overview
+GET /api/admin/analytics/revenue
+GET /api/admin/analytics/orders
+GET /api/admin/analytics/products
+GET /api/admin/analytics/categories
+GET /api/admin/analytics/customers
+```
+
+Return actual database information.
+
+Revenue calculations must be based on valid orders.
+
+Clearly handle:
+
+* cancelled orders
+* refunded orders if supported
+* pending orders
+* completed orders
+
+Document the exact revenue calculation logic.
+
+---
+
+# 8. PRODUCT MANAGEMENT
+
+Create a complete admin product management system.
+
+Page:
+
+```text
+/admin/products
+```
+
+Features:
+
+* product list
+* search
+* filtering
+* sorting
+* pagination
+* create product
+* edit product
+* delete product
+* activate/deactivate product
+* stock management
+* price management
+* discount management
+* brand
+* category
+* product images
+* ratings
+* bestseller flag
+* featured flag
+* deal flag
+
+Product table should show:
+
+```text
+Image
+Product
+SKU/ID
+Category
+Brand
+Price
+Discount
+Stock
+Rating
+Status
+Actions
+```
+
+Actions:
+
+```text
+View
+Edit
+Delete
+Change status
+```
+
+Use confirmation dialogs for destructive actions.
+
+---
+
+# 9. PRODUCT CREATION FORM
+
+Create a professional product form.
+
+Fields:
+
+```text
+Title
+Description
+Price
+Original Price
+Discount
+Category
+Brand
+Images
+Stock
+SKU
+Rating
+Featured
+Bestseller
+Deal
+Specifications
+Features
+```
+
+Validate both:
+
+### Frontend
+
+and
+
+### Backend
+
+Never trust frontend validation alone.
+
+Handle:
+
+* missing fields
+* invalid prices
+* negative stock
+* invalid image URLs
+* duplicate SKU if SKU exists
+* invalid category
+* invalid brand
+
+Show clear validation messages.
+
+---
+
+# 10. CATEGORY MANAGEMENT
+
+Create:
+
+```text
+/admin/categories
+```
+
+Features:
+
+* list categories
+* create category
+* edit category
+* delete category
+* activate/deactivate category
+* product count per category
+
+Display:
+
+```text
+Category
+Products
+Status
+Created
+Actions
+```
+
+Prevent deletion if the category is still required by products, or provide a safe reassignment flow.
+
+---
+
+# 11. BRAND MANAGEMENT
+
+Create:
+
+```text
+/admin/brands
+```
+
+Features:
+
+* create
+* edit
+* delete
+* activate/deactivate
+* search
+* product count
+
+Make brand filtering work consistently with the customer product search.
+
+---
+
+# 12. ORDER MANAGEMENT
+
+Create:
+
+```text
+/admin/orders
+```
+
+This is one of the most important admin pages.
+
+Display:
+
+```text
+Order ID
+Customer
+Date
+Items
+Total
+Payment
+Status
+Actions
+```
+
+Filters:
+
+```text
+All
+Pending
+Processing
+Shipped
+Delivered
+Cancelled
+```
+
+Search by:
+
+* order ID
+* customer name
+* customer email
+
+Sorting:
+
+* newest
+* oldest
+* highest total
+* lowest total
+
+Pagination required.
+
+---
+
+# 13. ADMIN ORDER DETAILS
+
+Create:
+
+```text
+/admin/orders/:id
+```
+
+Show:
+
+### Customer
+
+* name
+* email
+* phone if available
+
+### Shipping address
+
+### Products
+
+* image
+* title
+* quantity
+* price
+* subtotal
+
+### Payment
+
+* method
+* status
+* transaction information if available
+
+### Order totals
+
+```text
 Subtotal
 Discount
 Shipping
 Tax
-Total
+Grand Total
+```
 
-All calculations must be consistent.
+### Order timeline
 
----
-
-# 18. CART UPGRADE
-
-Improve the cart.
-
-Add:
-
-* Save for later
-* Move to wishlist
-* Remove
-* quantity selector
-* stock validation
-* subtotal
-* estimated tax
-* shipping
-* coupon
-* total
-
-Add:
-
-"Frequently bought together"
-
-below the cart.
-
-If product becomes unavailable:
-
-Show an appropriate message.
-
----
-
-# 19. SAVED ADDRESSES
-
-Upgrade account addresses.
-
-Users can:
-
-* add address
-* edit address
-* delete address
-* set default address
-
-Fields:
-
-* fullName
-* phone
-* street
-* apartment
-* city
-* state
-* postalCode
-* country
-
-Checkout should allow selecting a saved address.
-
----
-
-# 20. CHECKOUT UPGRADE
-
-Make checkout feel like a real Amazon-style checkout.
-
-Steps:
-
-1. Delivery address
-2. Delivery method
-3. Payment method
-4. Order review
-5. Place order
-
-Show an order summary on the right.
-
-Add:
-
-* address selection
-* add address
-* delivery options
-* payment method selection
-* coupon
-* subtotal
-* shipping
-* tax
-* discount
-* total
-
-Payment gateway remains optional.
-
-For this assignment, a realistic simulated payment method is acceptable.
-
-Clearly structure the code so a real payment gateway can be integrated later.
-
----
-
-# 21. ORDER TRACKING
-
-Upgrade orders.
-
-Each order should show:
-
-Order placed
-|
+```text
+Order Placed
 Processing
-|
 Shipped
-|
-Out for delivery
-|
+Out for Delivery
 Delivered
+```
 
-Create a visual order timeline.
+Admin should be able to update the order status.
+
+Prevent invalid status transitions where appropriate.
+
+---
+
+# 14. CUSTOMER MANAGEMENT
+
+Create:
+
+```text
+/admin/users
+```
+
+Display:
+
+```text
+Name
+Email
+Role
+Orders
+Total Spent
+Joined
+Status
+Actions
+```
+
+Features:
+
+* search
+* filtering
+* pagination
+* view customer
+* activate/deactivate customer
+* view customer orders
+* view customer reviews
+* view customer wishlist if available
+
+Do NOT expose passwords or sensitive authentication information.
+
+---
+
+# 15. CUSTOMER DETAILS
+
+Create:
+
+```text
+/admin/users/:id
+```
 
 Show:
 
-* order number
-* order date
-* products
-* total
-* shipping address
-* status
-* estimated delivery
-* tracking-style information
+* profile
+* account creation date
+* order count
+* total spending
+* recent orders
+* reviews
+* wishlist summary
+* addresses only where appropriate
+* account status
 
-Add:
-
-"View order"
-
-"Buy again"
-
-"Track package"
+Keep sensitive information protected.
 
 ---
 
-# 22. BUY AGAIN
+# 16. REVIEW MANAGEMENT
 
-Add a "Buy Again" section to the account.
+Create:
 
-Products from previous orders should be displayed.
+```text
+/admin/reviews
+```
 
-Button:
+Features:
 
-"Buy again"
+* review list
+* search
+* filter by rating
+* filter by product
+* filter by status
+* moderation
+* approve
+* hide
+* delete
 
-Clicking it adds the product to cart.
+Display:
 
----
+```text
+Customer
+Product
+Rating
+Review
+Date
+Status
+Actions
+```
 
-# 23. ACCOUNT DASHBOARD
+If the existing review system has no moderation status, extend it safely.
 
-Transform the current account page into a professional Amazon-style account center.
-
-Sections:
-
-Your Orders
-Your Wishlist
-Your Addresses
-Login & Security
-Buy Again
-Recently Viewed
-Your Reviews
-Coupons
-Notifications
-
-Use a clean grid.
-
-Do not make it look like a SaaS dashboard.
-
-Keep it commerce-focused.
-
----
-
-# 24. NOTIFICATIONS
-
-Create a lightweight notification system.
-
-Examples:
-
-Order placed
-Order shipped
-Order delivered
-Wishlist item price changed
-Product back in stock
-
-Add notification icon/menu.
-
-Unread count should work.
-
-Store notifications in MongoDB for authenticated users.
+Do not break existing customer reviews.
 
 ---
 
-# 25. PRODUCT BADGES
+# 17. COUPON MANAGEMENT
 
-Create reusable badges:
+Create:
 
-* Best Seller
-* Limited Time Deal
-* New
-* 20% off
-* Prime-style delivery
-* In Stock
-* Low Stock
+```text
+/admin/coupons
+```
 
-Do not overload every product with badges.
+Features:
 
-Use badges only when appropriate.
+* create coupon
+* edit coupon
+* activate/deactivate
+* delete
+* expiration
+* usage limits
+* minimum order amount
+* discount percentage
+* fixed discount
+
+Fields:
+
+```text
+Code
+Discount Type
+Discount Value
+Minimum Order
+Maximum Discount
+Start Date
+Expiry Date
+Usage Limit
+Per User Limit
+Active
+```
+
+Customer checkout must continue using the coupon system correctly.
 
 ---
 
-# 26. PRODUCT CARD UPGRADE
+# 18. DEAL MANAGEMENT
 
-Product cards must be highly polished.
+Create:
 
-Include:
+```text
+/admin/deals
+```
 
-* image
-* title
-* rating
-* review count
-* price
-* original price
+Features:
+
+* create deal
+* edit deal
+* activate/deactivate
+* start date
+* end date
 * discount
-* badge
-* delivery information
-* wishlist button
-* Add to Cart
+* product selection
+* stock limit
 
-Hover behavior:
+Dashboard should show active deals.
 
-* subtle border/shadow
-* image remains stable
-* actions become visible where appropriate
-
-Do not create excessive animations.
+Customer side should display active deals.
 
 ---
 
-# 27. LOADING EXPERIENCE
+# 19. INVENTORY MANAGEMENT
 
-Add professional skeleton loaders for:
+Create:
 
-* homepage
-* product grid
-* product detail
-* cart
-* orders
-* wishlist
-* account
+```text
+/admin/inventory
+```
 
-Do not show blank white screens while data loads.
+Show:
+
+```text
+Product
+SKU
+Current Stock
+Low Stock Threshold
+Status
+Actions
+```
+
+Statuses:
+
+```text
+In Stock
+Low Stock
+Out of Stock
+```
+
+Allow admins to update stock.
+
+Highlight low-stock products.
+
+Dashboard should use the same inventory data.
 
 ---
 
-# 28. ERROR STATES
+# 20. LOW-STOCK ALERTS
 
-Create useful error states.
+Create a low-stock section.
 
-Examples:
+Example:
 
-Product not found
+```text
+Low Stock Products
 
-Unable to load products
+Amazon Echo        4 left
+Wireless Mouse     7 left
+Keyboard            2 left
+```
 
-Network error
+Allow configurable low-stock threshold.
 
-Session expired
+Default:
 
-Cart update failed
+```text
+10
+```
 
-Order failed
+---
 
-Payment simulation failed
+# 21. ADMIN NOTIFICATIONS
+
+Create:
+
+```text
+/admin/notifications
+```
+
+Generate useful notifications such as:
+
+* new order
+* low stock
+* new review
+* coupon expiring
+* deal expiring
+* customer registration if useful
+
+Provide:
+
+* unread/read state
+* mark as read
+* mark all as read
+* clear notifications
+
+---
+
+# 22. ADMIN SEARCH
+
+Add an admin search experience.
+
+Allow searching across:
+
+```text
+Products
+Orders
+Customers
+Coupons
+Categories
+Brands
+```
+
+Search should be fast and clearly show result type.
+
+Example:
+
+```text
+Search "keyboard"
+
+Products (12)
+Orders (3)
+Customers (0)
+```
+
+---
+
+# 23. BULK PRODUCT ACTIONS
+
+Where practical, implement:
+
+* bulk activate
+* bulk deactivate
+* bulk delete
+* bulk stock update
+
+Require confirmation before destructive bulk operations.
+
+Do not implement complicated functionality if it risks breaking the existing system.
+
+---
+
+# 24. DASHBOARD QUICK ACTIONS
+
+Add useful quick actions:
+
+```text
+Add Product
+View Orders
+Manage Inventory
+Create Coupon
+Create Deal
+Manage Reviews
+View Customers
+```
+
+Make them actually navigate to working pages.
+
+---
+
+# 25. ADMIN TABLE SYSTEM
+
+Create reusable table components.
+
+Requirements:
+
+* responsive
+* pagination
+* sorting
+* search
+* filters
+* loading state
+* empty state
+* error state
+* row actions
+* confirmation modal
+* mobile-friendly behavior
+
+Do not create a completely different table implementation for every page.
+
+---
+
+# 26. ADMIN MODALS
+
+Create reusable modal components for:
+
+* delete confirmation
+* status change
+* stock update
+* coupon creation
+* deal creation
+* review moderation
+
+Use accessible dialogs.
+
+Support:
+
+* Escape key
+* keyboard navigation
+* focus management
+* clear buttons
+
+---
+
+# 27. ADMIN UI DESIGN
+
+The admin UI must visually belong to the same product.
 
 Use:
 
-Retry
+### Header
 
-Go Home
+Dark Amazon-style header.
 
-Continue Shopping
+### Sidebar
 
-where appropriate.
+Dark navy/charcoal.
+
+### Main background
+
+Light gray.
+
+### Cards
+
+White.
+
+### Primary action
+
+Amazon orange/yellow where appropriate.
+
+### Tables
+
+Dense and professional.
+
+### Buttons
+
+Compact.
+
+### Forms
+
+Clear labels and strong focus states.
+
+Avoid:
+
+* excessive rounded corners
+* excessive shadows
+* neon colors
+* gradients
+* huge typography
+* emojis
+* AI-generated visual patterns
 
 ---
 
-# 29. EMPTY STATES
+# 28. RESPONSIVE ADMIN DASHBOARD
 
-Create polished empty states:
+The admin panel must work on:
 
-Empty cart
-Empty wishlist
-No search results
-No orders
-No notifications
-No recently viewed products
-No reviews
-
-Keep them simple and Amazon-like.
-
-Do not use unnecessary illustrations.
-
----
-
-# 30. MOBILE EXPERIENCE
-
-Improve mobile significantly.
-
-Test:
-
+```text
 390px
 430px
 768px
 1024px
 1280px
 1440px
+```
 
 Mobile:
 
-* compact header
-* search remains prominent
-* horizontal category scrolling
-* product grid
-* filter drawer
-* cart controls
-* checkout
-* account
-* order tracking
+* sidebar becomes drawer
+* tables become horizontally scrollable or responsive cards
+* dashboard cards stack
+* charts resize
+* forms become one column
+* header remains usable
 
-No horizontal page overflow.
+Do not simply hide important information on mobile.
 
 ---
 
-# 31. ACCESSIBILITY
+# 29. CUSTOMER SIDE MUST REMAIN INTACT
+
+After implementing admin functionality, verify that these customer features still work:
+
+```text
+Homepage
+Search
+Categories
+Brands
+Filters
+Sorting
+Product Details
+Authentication
+Cart
+Wishlist
+Recently Viewed
+Checkout
+Addresses
+Coupons
+Orders
+Order Tracking
+Reviews
+Notifications
+Account Dashboard
+Recommendations
+Deals
+Logout
+```
+
+Do not introduce regressions.
+
+---
+
+# 30. CUSTOMER + ADMIN DATA CONSISTENCY
+
+The admin panel and customer panel must use the same database.
+
+For example:
+
+If admin creates:
+
+```text
+Product: Wireless Headphones
+Price: $99
+Stock: 50
+```
+
+the customer immediately sees that product.
+
+If customer purchases:
+
+```text
+Quantity: 2
+```
+
+inventory should update.
+
+Admin inventory must reflect:
+
+```text
+48
+```
+
+If an order status changes in admin:
+
+```text
+Processing → Shipped
+```
+
+the customer order page must reflect the new status.
+
+If admin creates a coupon, the customer checkout must be able to use it.
+
+If admin creates a deal, the customer deals page must display it.
+
+This must be a real integrated system.
+
+---
+
+# 31. API ARCHITECTURE
+
+Keep admin APIs organized.
+
+Example:
+
+```text
+/api/admin/dashboard
+/api/admin/analytics
+/api/admin/products
+/api/admin/categories
+/api/admin/brands
+/api/admin/orders
+/api/admin/users
+/api/admin/reviews
+/api/admin/coupons
+/api/admin/deals
+/api/admin/inventory
+/api/admin/notifications
+```
+
+Use controllers/services instead of putting all logic inside route files.
+
+Use middleware:
+
+```text
+authenticate
+requireAdmin
+validateRequest
+```
+
+Where appropriate.
+
+Return consistent responses:
+
+```json
+{
+  "success": true,
+  "message": "...",
+  "data": {}
+}
+```
+
+For errors:
+
+```json
+{
+  "success": false,
+  "message": "..."
+}
+```
+
+Do not expose stack traces in production responses.
+
+---
+
+# 32. DATABASE DESIGN
+
+Inspect the existing Mongoose schemas first.
+
+Reuse existing models where possible.
+
+Extend only when necessary.
+
+Potential entities:
+
+```text
+User
+Product
+Category
+Brand
+Order
+OrderItem
+Review
+Coupon
+Deal
+Notification
+Address
+Wishlist
+```
+
+Do not create duplicate models for functionality that already exists.
+
+Add indexes where useful for:
+
+* product search
+* order lookup
+* email
+* SKU
+* category
+* brand
+* createdAt
+* order status
+
+---
+
+# 33. SECURITY
+
+Review the entire admin implementation.
+
+Protect against:
+
+* unauthorized admin access
+* privilege escalation
+* insecure direct object access
+* invalid input
+* malicious query parameters
+* mass assignment
+* sensitive data exposure
+
+Never trust:
+
+```text
+role
+userId
+price
+discount
+stock
+order ownership
+```
+
+when supplied directly by the client.
+
+Backend must verify everything.
+
+---
+
+# 34. ADMIN SEED ACCOUNT
+
+Create a safe development/admin seed mechanism.
+
+Example:
+
+```text
+npm run seed:admin
+```
+
+Do NOT hardcode a real production password into the frontend.
+
+Use environment variables.
+
+Document how to create an admin account.
+
+---
+
+# 35. ERROR HANDLING
+
+Every major admin page needs:
+
+### Loading
+
+Professional skeleton/spinner.
+
+### Empty
+
+Example:
+
+```text
+No products found.
+Try changing your filters.
+```
+
+### Error
+
+Example:
+
+```text
+We couldn't load this data.
+Try again.
+```
+
+### Success
+
+Use professional toast/notification messages.
+
+Do not use browser `alert()` for normal application interactions.
+
+---
+
+# 36. ACCESSIBILITY
+
+Target WCAG 2.2 AA.
+
+Implement:
+
+* keyboard navigation
+* visible focus states
+* semantic buttons
+* labels
+* accessible dialogs
+* accessible tables
+* appropriate aria labels
+* sufficient contrast
+* keyboard-accessible sidebar
+* keyboard-accessible dropdowns
+
+Do not rely only on color to communicate status.
+
+---
+
+# 37. PERFORMANCE
+
+Do not sacrifice performance.
+
+Implement where appropriate:
+
+* pagination
+* server-side filtering
+* server-side sorting
+* database indexes
+* lazy loading
+* image optimization
+* debounced search
+* memoization only where useful
+
+Do NOT load thousands of products/orders into the browser unnecessarily.
+
+---
+
+# 38. PRODUCTION DEPLOYMENT
+
+Fix the current deployment gaps.
+
+The current project reportedly has deployment problems involving:
+
+* protected backend deployment
+* frontend production `VITE_API_URL`
+
+Investigate the actual configuration.
+
+Do not guess.
 
 Verify:
 
-* keyboard navigation
-* visible focus
-* semantic HTML
-* aria labels
-* alt text
-* dialog accessibility
-* drawer accessibility
-* Escape handling
-* proper form labels
-* sufficient contrast
-* touch target size
+```text
+Frontend → Production Backend → MongoDB
+```
 
-Do not hide focus outlines.
+works in the deployed environment.
+
+Ensure:
+
+* environment variables are documented
+* CORS is correct
+* API base URL is correct
+* authentication works in production
+* cookies/tokens work correctly
+* no localhost API URLs remain in production
+* build succeeds
+* production frontend loads
+* production backend responds
+* MongoDB production connection works
+
+Do not expose secrets in GitHub.
 
 ---
 
-# 32. VISUAL POLISH
+# 39. MOBILE + VISUAL QA
 
-Perform a full visual QA pass.
+Actually inspect the application visually.
+
+Test:
+
+```text
+390x844
+430x932
+768x1024
+1024x768
+1280x720
+1440x900
+```
 
 Check:
 
-* spacing
-* typography
-* alignment
-* card heights
-* image ratios
-* header proportions
-* search width
-* button sizes
-* colors
-* borders
-* shadows
-* responsive breakpoints
+* header
+* search
+* navigation
+* homepage
+* product cards
+* product detail
+* cart
+* checkout
+* account
+* admin dashboard
+* admin tables
+* admin forms
+* admin mobile drawer
 
-The UI should feel intentionally designed.
+Fix:
 
-Do not introduce:
-
-* excessive rounded corners
-* gradients
-* glass effects
-* huge whitespace
-* purple AI colors
-* random animations
-* unnecessary emoji
-* decorative AI illustrations
-
----
-
-# 33. AMAZON-STYLE DESIGN TOKENS
-
-Keep the current Amazon token system.
-
-Use:
-
---amz-nav-dark
---amz-nav-secondary
---amz-ink
---amz-muted
---amz-canvas
---amz-surface
---amz-border
---amz-border-strong
---amz-link
---amz-link-hover
---amz-accent
---amz-search
---amz-buy
---amz-buy-hover
---amz-success
---amz-warning
-
-Do not introduce random colors.
+* overflow
+* broken alignment
+* clipped text
+* horizontal scrolling
+* broken images
+* overlapping elements
+* incorrect spacing
+* inconsistent typography
 
 ---
 
-# 34. REAL PRODUCT IMAGES
+# 40. REAL PRODUCT IMAGES
 
-Improve the catalog quality.
+Continue using real product photography.
 
-Use real product photography from appropriate sources.
+Do NOT replace product images with:
 
-Product images should:
+* emojis
+* CSS shapes
+* fake illustrations
+* generic AI graphics
+* colored rectangles
 
-* match the product
-* have consistent aspect ratios
-* load reliably
-* have useful alt text
-* support multiple images on product detail pages
+Product cards should look like an actual e-commerce catalog.
 
-Avoid:
-
-* emoji
-* random placeholders
-* decorative generated images
-* broken URLs
+Use consistent image aspect ratios and object-fit behavior.
 
 ---
 
-# 35. PERFORMANCE
+# 41. AMAZON-STYLE HOMEPAGE
 
-Improve:
+Do not weaken the current homepage.
 
-* image lazy loading
-* pagination
-* API efficiency
-* MongoDB indexes
-* React rendering
-* unnecessary requests
-* component rendering
-* bundle size where practical
+Continue improving:
 
-Add MongoDB indexes for commonly queried fields where appropriate.
+```text
+Amazon-style header
+Hero
+Deals
+Categories
+Best Sellers
+Featured Products
+Electronics
+Computers
+Home
+Kitchen
+Fashion
+Beauty
+Books
+Recommendations
+Recently Viewed
+Promotional sections
+Footer
+```
 
----
-
-# 36. SEO
-
-Add appropriate:
-
-* page titles
-* meta descriptions
-* product metadata
-* canonical URLs where appropriate
-* semantic headings
-
-Product pages should have meaningful titles.
-
----
-
-# 37. SECURITY
-
-Review:
-
-* JWT handling
-* password hashing
-* authorization
-* input validation
-* API error responses
-* CORS
-* environment variables
-* sensitive data exposure
-
-Never expose:
-
-* passwords
-* JWT secrets
-* MongoDB credentials
-
-Do not commit `.env`.
+Keep the visual density and shopping-oriented layout.
 
 ---
 
-# 38. MONGODB PRODUCTION READINESS
+# 42. CUSTOMER ACCOUNT
 
-Keep local development working.
+Keep the existing account system.
 
-Prepare the project for MongoDB Atlas.
+Verify:
 
-Document:
+```text
+/account
+/account/orders
+/account/wishlist
+/account/addresses
+/account/reviews
+/account/coupons
+/account/notifications
+```
 
-MONGODB_URI
-
-configuration.
-
-Do not break the local MongoDB workflow.
-
-Add clear environment configuration.
-
----
-
-# 39. DEPLOYMENT READINESS
-
-Prepare both:
-
-Frontend
-Backend
-MongoDB
-
-for deployment.
-
-Verify that:
-
-* frontend production build works
-* backend starts correctly
-* API routes work
-* CORS works
-* environment variables work
-* MongoDB connection works
-* authentication works
-* no localhost API URLs remain in production configuration
-
-If deployment can be completed within the remaining time, deploy it.
-
-Public HTTPS deployment is important for the assignment.
+The admin customer-management system should integrate with these customer records.
 
 ---
 
-# 40. README UPGRADE — VERY IMPORTANT
+# 43. README — VERY IMPORTANT
 
-Update README.md to clearly document what has been built.
+Completely update `README.md`.
 
-Do not merely write generic setup instructions.
+The README must document the actual final system.
 
-Create a professional project README.
+Do NOT claim a feature exists unless it is actually implemented.
 
 Include:
 
@@ -1188,499 +1513,532 @@ Include:
 
 ## Overview
 
-Explain that this is a high-fidelity MERN e-commerce implementation inspired by Amazon's shopping experience.
+Explain that this is a full-stack MERN e-commerce platform inspired by Amazon's shopping experience.
+
+## Technology Stack
+
+```text
+MongoDB
+Express.js
+React
+Node.js
+Vite
+Mongoose
+React Router
+Tailwind/CSS
+Axios
+JWT/session authentication
+Recharts
+```
+
+Only list technologies actually used.
+
+---
 
 ## Features
 
-Create a comprehensive feature list.
+Document all implemented customer features.
 
 Example:
 
-### Shopping
+### Customer
 
+* Homepage
 * Product browsing
-* Product search
-* Advanced filtering
+* Search
+* Category filtering
+* Brand filtering
+* Price filtering
+* Rating filtering
 * Sorting
 * Pagination
 * Product details
 * Product gallery
-* Categories
-* Deals
-* Recommendations
-* Recently viewed
-* Product comparison
-
-### Cart
-
-* Add to cart
-* Quantity management
-* Remove item
-* Save for later
-* Wishlist integration
-* Coupon application
-* Dynamic totals
-
-### Authentication
-
-* Registration
-* Login
-* Logout
-* Protected routes
-* Account dashboard
-
-### Wishlist
-
-* Add/remove wishlist items
-* Move to cart
-* Persistent wishlist
-
-### Reviews
-
-* Ratings
-* Reviews
-* Verified purchase indicator
-* Review sorting
-
-### Checkout
-
-* Address selection
-* Saved addresses
-* Delivery method
-* Payment method UI
-* Coupons
-* Order summary
-* Order creation
-
-### Orders
-
-* Order history
-* Order details
-* Order tracking
-* Buy again
-* Order status
-
-### UI/UX
-
-* Amazon-style header
-* Search suggestions
-* Side drawer
-* Hero carousel
-* Product carousels
-* Responsive design
-* Skeleton loaders
-* Empty states
-* Error states
-* Accessibility
-
-### Backend
-
-* Node.js
-* Express
-* MongoDB
-* Mongoose
-* JWT
-* REST API
-
----
-
-# 41. README — WHAT WAS ADDED IN THIS PHASE
-
-Create a dedicated section:
-
-## Phase 2 Enhancements
-
-Document exactly what you added during this upgrade.
-
-For example:
-
-* Advanced product filtering UI
-* Product sorting
+* Cart
 * Wishlist
-* Recently viewed products
-* Product comparison
-* Review system
-* Recommendation sections
-* Deals page
-* Coupon system
-* Saved addresses
+* Recently viewed
+* Authentication
+* Account dashboard
+* Addresses
+* Coupons
+* Deals
+* Checkout
+* Orders
 * Order tracking
-* Buy Again
-* Notification system
-* Account dashboard improvements
-* Product card improvements
-* Search suggestions
-* Loading skeletons
-* Empty states
-* Error states
-* Accessibility improvements
-* Responsive improvements
-* Performance improvements
-* SEO improvements
-* Deployment configuration
-
-Only list features that actually exist.
-
-Never claim a feature is implemented if it is not.
+* Reviews
+* Notifications
+* Recommendations
 
 ---
 
-# 42. README — ARCHITECTURE
+## Admin Features
+
+Document all implemented admin functionality:
+
+* Admin authentication
+* Role-based authorization
+* Admin dashboard
+* Revenue analytics
+* Order analytics
+* Product management
+* Category management
+* Brand management
+* Customer management
+* Order management
+* Review moderation
+* Coupon management
+* Deal management
+* Inventory management
+* Low-stock alerts
+* Admin notifications
+* Responsive admin interface
+
+Only include features that actually work.
+
+---
+
+# 44. README — ARCHITECTURE
 
 Document:
 
-client
-server
-MongoDB
-API
-authentication
-state management
+```text
+project/
+├── client/
+├── server/
+├── .agent-logs/
+├── CAPTURE-TEST.md
+├── README.md
+└── ...
+```
 
-Show a folder structure.
+Use the actual repository structure rather than assuming these exact directories.
+
+Explain:
+
+* frontend architecture
+* backend architecture
+* API architecture
+* authentication
+* database
+* admin authorization
+* deployment
 
 ---
 
-# 43. README — API DOCUMENTATION
+# 45. README — API DOCUMENTATION
 
-Document the main endpoints.
+Document major APIs.
 
 Example:
 
+```text
 Authentication
-
-POST /api/auth/register
-POST /api/auth/login
-GET /api/auth/me
-
 Products
-
-GET /api/products
-GET /api/products/:id
-
+Categories
+Brands
 Cart
-
-GET /api/cart
-POST /api/cart
-PATCH /api/cart/:id
-DELETE /api/cart/:id
-
 Wishlist
-
-GET /api/wishlist
-POST /api/wishlist
-DELETE /api/wishlist/:id
-
 Orders
-
-POST /api/orders
-GET /api/orders
-GET /api/orders/:id
-
 Reviews
+Coupons
+Deals
+Admin
+Analytics
+Inventory
+Users
+```
 
-GET /api/products/:id/reviews
-POST /api/products/:id/reviews
+For admin endpoints clearly indicate:
 
-Use the actual implemented routes, not hypothetical routes.
-
----
-
-# 44. README — SETUP
-
-Include exact:
-
-1. clone
-2. install client
-3. install server
-4. environment variables
-5. database setup
-6. seed command
-7. run backend
-8. run frontend
-9. production build
-
-Commands must actually work.
+```text
+Requires authentication
+Requires admin role
+```
 
 ---
 
-# 45. README — DEMO FLOW
+# 46. README — ENVIRONMENT VARIABLES
 
-Add:
+Document required environment variables without exposing secrets.
 
-## Recommended Demo Flow
+Example:
 
+```env
+MONGODB_URI=
+JWT_SECRET=
+VITE_API_URL=
+```
+
+Only document variables actually used.
+
+---
+
+# 47. README — LOCAL DEVELOPMENT
+
+Provide exact setup:
+
+```bash
+git clone ...
+npm install
+cd client
+npm install
+cd ../server
+npm install
+```
+
+Use the project's real commands.
+
+Document:
+
+```bash
+npm run dev
+```
+
+or the actual commands used by this repository.
+
+---
+
+# 48. README — ADMIN SETUP
+
+Document:
+
+```text
+How to create an admin user
+How to login
+Admin URL
+Admin role
+```
+
+Do not put real credentials in README.
+
+---
+
+# 49. README — DEMO FLOW
+
+Add a practical walkthrough:
+
+```text
 1. Open homepage
 2. Search for a product
-3. Apply filters
+3. Filter products
 4. Open product
 5. Add to wishlist
 6. Add to cart
-7. Change quantity
-8. Login
-9. Checkout
-10. Apply coupon
-11. Place order
-12. Open order history
-13. Track order
-14. Buy again
+7. Checkout
+8. Place order
+9. View order
+10. Login as admin
+11. Open admin dashboard
+12. View analytics
+13. Manage products
+14. Manage orders
+15. Manage customers
+16. Manage inventory
+17. Manage coupons/deals
+18. Moderate reviews
+```
 
-This should reflect actual implemented functionality.
-
----
-
-# 46. README — KNOWN LIMITATIONS
-
-Document anything intentionally not implemented.
-
-For example:
-
-* Real payment gateway
-* Seller marketplace
-* Advanced personalization
-* Production recommendation ML
-* Real shipping provider integration
-
-Do not hide limitations.
-
-Do not claim Amazon's real backend functionality.
+This should match the actual application.
 
 ---
 
-# 47. FINAL TESTING
+# 50. README — KNOWN LIMITATIONS
 
-Before finishing, perform an actual end-to-end smoke test.
+Be honest.
 
-TEST 1:
+If payment is simulated:
 
-Register user.
+```text
+Payment processing is currently simulated.
+```
 
-TEST 2:
+If shipping is simulated:
 
-Login.
+```text
+Shipping calculations/tracking are simulated.
+```
 
-TEST 3:
+If recommendations are deterministic:
 
-Search product.
+```text
+Recommendations currently use deterministic business rules rather than machine-learning personalization.
+```
 
-TEST 4:
-
-Filter.
-
-TEST 5:
-
-Sort.
-
-TEST 6:
-
-Open product.
-
-TEST 7:
-
-Add wishlist.
-
-TEST 8:
-
-Add cart.
-
-TEST 9:
-
-Change quantity.
-
-TEST 10:
-
-Checkout.
-
-TEST 11:
-
-Select address.
-
-TEST 12:
-
-Apply coupon.
-
-TEST 13:
-
-Place order.
-
-TEST 14:
-
-Verify MongoDB order.
-
-TEST 15:
-
-Open order history.
-
-TEST 16:
-
-Open order tracking.
-
-TEST 17:
-
-Buy again.
-
-TEST 18:
-
-Submit review if eligible.
-
-TEST 19:
-
-Open wishlist.
-
-TEST 20:
-
-Test mobile layout.
-
-TEST 21:
-
-Test logout/login again.
-
-Fix every obvious failure found during this process.
+Do NOT pretend these are real integrations.
 
 ---
 
-# 48. AGENT CAPTURE REQUIREMENT
+# 51. README — DEPLOYMENT
 
-The 8x assignment requires automatic agent capture.
+Document:
 
-Do NOT disable or modify the existing capture system unless necessary.
+* frontend deployment
+* backend deployment
+* MongoDB Atlas
+* environment variables
+* CORS
+* production API URL
+* build commands
 
-Continue recording:
+Again, use the actual platform/configuration.
 
-* prompts
-* final responses
-* timestamps
-* model
+---
 
-Keep:
+# 52. AGENT CAPTURE — ABSOLUTELY DO NOT BREAK
 
+This project contains:
+
+```text
 .agent-logs/
+CAPTURE-TEST.md
+```
 
-committed.
+These are required by the assignment.
 
-Do not manually rewrite logs.
+DO NOT:
 
-Do not delete previous logs.
+* delete them
+* rename them
+* modify their capture mechanism unnecessarily
+* add them to `.gitignore`
+* replace their contents with fake logs
 
-Do not add logs to `.gitignore`.
+Continue automatic capture for every session.
 
----
-
-# 49. GIT COMMITS
-
-Commit logically during the upgrade.
-
-Examples:
-
-feat: add advanced product filters
-feat: add wishlist system
-feat: add product reviews
-feat: add product comparison
-feat: add coupon system
-feat: add order tracking
-feat: improve Amazon homepage
-feat: improve search experience
-feat: improve responsive UI
-fix: resolve checkout persistence issue
-fix: resolve product image loading
-docs: update README with phase 2 features
-
-Do not create one giant final commit.
+If the existing capture system is working, preserve it exactly.
 
 ---
 
-# 50. FINAL PRIORITY
+# 53. GIT
 
-If time becomes limited, use this order:
+Make logical commits during implementation.
 
-1. Fix existing bugs
-2. Improve homepage
-3. Improve search/filter/sorting
-4. Wishlist
-5. Reviews
-6. Order tracking
-7. Coupons
-8. Recently viewed
-9. Product comparison
-10. Recommendations
-11. Account improvements
-12. UI polish
-13. Responsive QA
-14. Deployment
-15. README
-16. Final smoke test
+Example:
 
-Do NOT spend hours implementing a complicated payment gateway while core shopping flows still have bugs.
+```text
+feat: add admin authentication
+feat: add admin dashboard
+feat: add product management
+feat: add order management
+feat: add customer management
+feat: add inventory management
+feat: add coupon and deal management
+feat: add analytics
+fix: production api configuration
+fix: responsive admin layout
+docs: update readme
+```
 
----
+Do not create one giant meaningless commit.
 
-# 51. FINAL QUALITY BAR
-
-Before declaring the project complete, ask yourself:
-
-Can a new visitor understand the site immediately?
-
-Does the site visually resemble Amazon?
-
-Can the visitor search?
-
-Can they filter?
-
-Can they open a product?
-
-Can they see realistic product information?
-
-Can they wishlist?
-
-Can they add to cart?
-
-Can they checkout?
-
-Can they place an order?
-
-Can they view the order?
-
-Can they track it?
-
-Can they buy again?
-
-Can they leave a review?
-
-Does the UI work on mobile?
-
-Are loading/error/empty states handled?
-
-Does the backend persist important data?
-
-Is the repository clean?
-
-Is README accurate?
-
-Is the project deployable?
-
-If any core answer is no, fix it before adding another low-priority feature.
+Do not commit secrets.
 
 ---
 
-# 52. START
+# 54. FINAL QA CHECKLIST
 
-Start by auditing the existing implementation.
+Before declaring completion, test all of the following.
 
-Return a concise report containing:
+## Customer
 
-1. What already exists
-2. What is partially implemented
-3. What is missing
-4. What you will upgrade first
-5. Any bugs you discover
+* [ ] Register
+* [ ] Login
+* [ ] Logout
+* [ ] Search
+* [ ] Category filter
+* [ ] Brand filter
+* [ ] Price filter
+* [ ] Rating filter
+* [ ] Sorting
+* [ ] Product details
+* [ ] Wishlist
+* [ ] Recently viewed
+* [ ] Cart
+* [ ] Address
+* [ ] Coupon
+* [ ] Checkout
+* [ ] Order placement
+* [ ] Order history
+* [ ] Order tracking
+* [ ] Review
+* [ ] Notifications
+* [ ] Account dashboard
 
-Then begin implementation immediately.
+## Admin
 
-Do not rebuild existing functionality.
+* [ ] Admin login
+* [ ] Customer cannot access admin
+* [ ] Admin dashboard
+* [ ] Revenue analytics
+* [ ] Order analytics
+* [ ] Product CRUD
+* [ ] Category CRUD
+* [ ] Brand CRUD
+* [ ] Order management
+* [ ] Customer management
+* [ ] Review moderation
+* [ ] Coupon CRUD
+* [ ] Deal CRUD
+* [ ] Inventory
+* [ ] Low-stock alerts
+* [ ] Notifications
+* [ ] Admin logout
 
-Do not create a generic e-commerce template.
+## Integration
 
-Do not stop at visual mockups.
+* [ ] Admin-created product appears to customers
+* [ ] Customer purchase updates inventory
+* [ ] Customer order appears in admin
+* [ ] Admin order status appears to customer
+* [ ] Admin coupon works at checkout
+* [ ] Admin deal appears on customer side
+* [ ] Admin review moderation affects customer visibility
 
-Build a polished, functional, high-fidelity Amazon-style MERN marketplace.
+## Responsive
 
-The final result must look professional, behave professionally, and be ready for a live assignment walkthrough.
+* [ ] 390px
+* [ ] 430px
+* [ ] 768px
+* [ ] 1024px
+* [ ] 1280px
+* [ ] 1440px
+
+## Production
+
+* [ ] Frontend builds
+* [ ] Backend starts
+* [ ] MongoDB connects
+* [ ] Production API works
+* [ ] Authentication works
+* [ ] Admin authentication works
+* [ ] No localhost API remains in production
+* [ ] CORS works
+* [ ] No secrets committed
+* [ ] Public deployed URL works
+
+---
+
+# 55. PRIORITY SYSTEM — VERY IMPORTANT
+
+Because this is a time-limited assignment, prioritize correctly.
+
+## P0 — MUST WORK
+
+1. Admin authentication
+2. Admin authorization
+3. Admin dashboard
+4. Product management
+5. Order management
+6. Customer management
+7. Inventory
+8. Analytics
+9. Existing customer shopping flow
+10. Production deployment
+11. README
+12. Responsive QA
+
+## P1 — HIGH VALUE
+
+13. Review moderation
+14. Coupon management
+15. Deal management
+16. Notifications
+17. Advanced analytics
+18. Bulk operations
+
+## P2 — POLISH
+
+19. Animations
+20. Advanced transitions
+21. Additional dashboard visualizations
+22. Extra micro-interactions
+
+If time is limited, finish P0 completely before spending time on P2.
+
+---
+
+# 56. IMPORTANT IMPLEMENTATION RULE
+
+Before changing anything:
+
+### STEP 1
+
+Audit the current repository.
+
+### STEP 2
+
+Identify what already exists.
+
+### STEP 3
+
+Reuse existing models, APIs, components, and styles where possible.
+
+### STEP 4
+
+Implement the missing admin architecture.
+
+### STEP 5
+
+Connect admin functionality to the existing MongoDB data.
+
+### STEP 6
+
+Test customer/admin integration.
+
+### STEP 7
+
+Fix production configuration.
+
+### STEP 8
+
+Perform responsive/visual QA.
+
+### STEP 9
+
+Update README with ONLY implemented features.
+
+### STEP 10
+
+Run final smoke tests.
+
+---
+
+# FINAL EXPECTATION
+
+When finished, the application should feel like a complete full-stack e-commerce product rather than a frontend demo.
+
+There should be two clearly integrated experiences:
+
+## CUSTOMER
+
+```text
+Amazon-style shopping experience
+```
+
+and
+
+## ADMIN
+
+```text
+Amazon-style e-commerce operations dashboard
+```
+
+Both must operate on the same backend and MongoDB database.
+
+The admin dashboard must be functional, responsive, secure, data-driven, and visually consistent with the customer-facing Amazon design.
+
+DO NOT stop after creating UI mockups.
+
+Every major admin screen must connect to real backend functionality.
+
+DO NOT create fake analytics.
+
+DO NOT create placeholder buttons.
+
+DO NOT create dead navigation links.
+
+DO NOT claim features in README that do not work.
+
+Do not remove working features just to simplify the implementation.
+
+Start by auditing the current repository, then implement the highest-priority missing functionality immediately.

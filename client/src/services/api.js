@@ -2,10 +2,10 @@ import axios from "axios"
 
 const configuredApiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/api" : "http://localhost:5000/api")
 const normalizedApiUrl = configuredApiUrl.replace(/\/$/, "")
-const apiBaseUrl = normalizedApiUrl.endsWith("/api") || normalizedApiUrl.startsWith("/") ? normalizedApiUrl : `${normalizedApiUrl}/api`
+const apiBaseUrlValue = normalizedApiUrl.endsWith("/api") || normalizedApiUrl.startsWith("/") ? normalizedApiUrl : `${normalizedApiUrl}/api`
 
 export const api = axios.create({
-  baseURL: apiBaseUrl,
+  baseURL: apiBaseUrlValue,
   headers: { "Content-Type": "application/json" },
 })
 
@@ -25,7 +25,7 @@ api.interceptors.response.use((response) => response, (error) => {
 })
 
 export const adminClient = axios.create({
-  baseURL: apiBaseUrl,
+  baseURL: apiBaseUrlValue,
   headers: { "Content-Type": "application/json" },
 })
 
@@ -194,6 +194,16 @@ export const adminApi = {
   },
 }
 
+export const apiBaseUrl = apiBaseUrlValue
+
 export function errorMessage(error, fallback = "Something went wrong. Please try again.") {
+  const status = error?.response?.status
+  const contentType = String(error?.response?.headers?.["content-type"] || "")
+  // A deployed backend behind Vercel deployment protection answers with HTML
+  // instead of JSON, and a missing function answers 404. Both look identical
+  // to a shopper, so surface an actionable message instead of a raw status.
+  if (status === 404 && contentType.includes("text/html")) return `The API is not available at ${apiBaseUrl}. Check VITE_API_URL and the backend deployment.`
+  if (status === 403 && contentType.includes("text/html")) return "The API rejected this browser (CORS or deployment protection). Add the frontend origin to CLIENT_URL."
+  if (!error?.response && (error?.code === "ERR_NETWORK" || /Network Error/i.test(error?.message || ""))) return `Cannot reach the API at ${apiBaseUrl}. Check your connection or the backend deployment.`
   return error?.response?.data?.message || error?.message || fallback
 }

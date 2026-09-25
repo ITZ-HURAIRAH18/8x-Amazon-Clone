@@ -67,7 +67,16 @@ export function createApp() {
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   )
-  app.use(express.json({ limit: "1mb" }))
+  const jsonParser = express.json({ limit: "1mb" })
+  app.use((req, res, next) => {
+    // Vercel may parse the request body before Express receives it. Mark it as
+    // consumed so body-parser does not try to read the already-ended stream.
+    if (req.body !== undefined) {
+      req._body = true
+      return next()
+    }
+    return jsonParser(req, res, next)
+  })
   app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"))
   app.get("/api/health", (_req, res) => res.json({ data: { status: "ok", database: databaseReady() ? "connected" : "demo-fallback" } }))
   app.use("/api/products", productRoutes)

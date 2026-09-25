@@ -31,19 +31,32 @@ const check = (condition, message) => {
   ok(message)
 }
 
+const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms) })
+
 async function request(path, { method = "GET", body, token, allowStatus = [] } = {}) {
   const headers = { "Content-Type": "application/json" }
   if (token) headers.Authorization = `Bearer ${token}`
-  const response = await fetch(`${baseUrl}${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined })
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok && !allowStatus.includes(response.status)) {
-    throw new Error(`${method} ${path} failed (${response.status}): ${payload.message || "unknown error"}`)
+  // The API rate limits auth and checkout endpoints on purpose. The smoke test
+  // waits out the window instead of failing so it can be re-run safely.
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const response = await fetch(`${baseUrl}${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined })
+    const payload = await response.json().catch(() => ({}))
+    if (response.status === 429 && attempt < 3) {
+      const retryAfter = Number(response.headers.get("retry-after") || 0)
+      await wait(retryAfter > 0 ? Math.min(retryAfter, 70) * 1000 : 20000)
+      continue
+    }
+    if (!response.ok && !allowStatus.includes(response.status)) {
+      throw new Error(`${method} ${path} failed (${response.status}): ${payload.message || "unknown error"}`)
+    }
+    return { status: response.status, body: payload }
   }
-  return { status: response.status, body: payload }
+  throw new Error(`${method} ${path} remained rate limited`)
 }
 
 const get = (path, token) => request(path, { token }).then((result) => result.body)
-const admin = (path, method = "GET", body, allowStatus) => request(path, { method, body, token: adminToken, allowStatus }).then((result) => result.body)
+const adminCall = (path, method = "GET", body, allowStatus) => request(path, { method, body, token: adminToken, allowStatus })
+const admin = (path, method = "GET", body, allowStatus) => adminCall(path, method, body, allowStatus).then((result) => result.body)
 const asCustomer = (path, method = "GET", body, allowStatus) => request(path, { method, body, token: customerToken, allowStatus })
 
 async function cleanup() {
@@ -142,7 +155,7 @@ async function run() {
     featured: true,
   })
   created.product = createdProduct.data.id
-  check(createdProduct.status === 201 && createdProduct.data.sku === sku, "admin creates a catalog product")
+  check(createdProduct.success === true && createdProduct.data?.sku === sku, "admin creates a catalog product")
   const publicProduct = (await get(`/products/${created.product}`)).data
   check(publicProduct?.id === created.product, "admin-created product is immediately visible to customers")
   const duplicate = await request("/admin/products", { method: "POST", token: adminToken, allowStatus: [409, 500], body: { title: "Duplicate", description: "Duplicate SKU attempt for validation.", sku, price: 1, originalPrice: 1, category: source.category, brand: source.brand, images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e"] } })
@@ -213,12 +226,26 @@ async function run() {
   check(customerOrder.status === "Processing", "admin status change is visible to the customer")
   const invalidStatus = await request(`/admin/orders/${order.body.data.id}/status`, { method: "PATCH", token: adminToken, allowStatus: [400, 409], body: { status: "Delivered" } })
   check([400, 409].includes(invalidStatus.status), "invalid order transitions are rejected")
+
+  // 7. Review moderation (the same order makes the created product reviewable)
+  const review = await asCustomer(`/products/${created.product}/reviews`, "POST", { rating: 4, title: "Admin smoke review", comment: "Moderation visibility check for the admin smoke test." })
+  const reviewId = review.body.data.id
+  ok("customer writes a verified purchase review")
+  await admin(`/admin/reviews/${reviewId}`, "PATCH", { status: "Hidden" })
+  const publicReviews = (await get(`/products/${created.product}/reviews`)).data.reviews || []
+  check(!publicReviews.some((row) => row.id === reviewId), "hidden reviews disappear from the customer product page")
+  const moderationQueue = await admin("/admin/reviews?status=pending")
+  check(moderationQueue.meta.total >= 0, "admin review queue supports status filtering")
+  await admin(`/admin/reviews/${reviewId}`, "PATCH", { status: "Approved" })
+  const approvedReviews = (await get(`/products/${created.product}/reviews`)).data.reviews || []
+  check(approvedReviews.some((row) => row.id === reviewId), "approved reviews are visible to customers again")
+
   const cancelled = await admin(`/admin/orders/${order.body.data.id}/status`, "PATCH", { status: "Cancelled" })
   check(cancelled.data.status === "Cancelled", "admin cancels an order")
   const inventoryAfterCancel = await admin(`/admin/inventory?search=${sku}`)
   check(Number(inventoryAfterCancel.data[0]?.stock) === 25, "cancelling an order restores inventory")
 
-  // 7. Deal management and storefront deals
+  // 8. Deal management and storefront deals
   const deal = await admin("/admin/deals", "POST", {
     name: `Smoke Deal ${runId}`,
     description: "Temporary deal created by the admin smoke test.",
@@ -238,23 +265,6 @@ async function run() {
   created.deal = null
   const dealsAfter = await get("/products?deal=true&limit=100")
   check(!dealsAfter.data.some((row) => row.id === created.product), "removing a deal restores product pricing")
-
-  // 8. Review moderation
-  const reviewable = (await get("/products?limit=1&sort=newest")).data[0]
-  await asCustomer("/cart", "POST", { productId: reviewable.id, quantity: 1 })
-  const reviewAddress = (await asCustomer("/addresses", "POST", { fullName: "Admin Smoke Customer", street: "9 Commerce Way", city: "Seattle", state: "WA", postalCode: "98101", isDefault: true })).body.data
-  await asCustomer("/orders", "POST", { addressId: reviewAddress.id, deliveryMethod: "standard", paymentMethod: "Card", clientRequestId: `admin-smoke-review-${runId}` })
-  const review = await asCustomer(`/products/${reviewable.id}/reviews`, "POST", { rating: 4, title: "Admin smoke review", comment: "Moderation visibility check for the admin smoke test." })
-  const reviewId = review.body.data.id
-  ok("customer writes a verified purchase review")
-  await admin(`/admin/reviews/${reviewId}`, "PATCH", { status: "Hidden" })
-  const publicReviews = await get(`/products/${reviewable.id}/reviews`)
-  check(!publicReviews.data.some((row) => row.id === reviewId), "hidden reviews disappear from the customer product page")
-  const moderationQueue = await admin("/admin/reviews?status=pending")
-  check(moderationQueue.meta.total >= 0, "admin review queue supports status filtering")
-  await admin(`/admin/reviews/${reviewId}`, "PATCH", { status: "Approved" })
-  const approvedReviews = await get(`/products/${reviewable.id}/reviews`)
-  check(approvedReviews.data.some((row) => row.id === reviewId), "approved reviews are visible to customers again")
 
   // 9. Customer management
   const users = await admin(`/admin/users?search=${customerEmail}`)

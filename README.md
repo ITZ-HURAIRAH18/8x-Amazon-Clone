@@ -286,7 +286,7 @@ All routes are prefixed with `/api`.
 - `GET /orders`
 - `POST /orders`
 - `GET /orders/:id`
-- `PATCH /orders/:id/status` (customer-scoped transitions)
+- `PATCH /orders/:id/status` (legacy operations endpoint; requires the `x-order-status-token` header. Normal status changes are made in `/admin/orders` or by customer support workflows.)
 
 ### Administration
 
@@ -347,7 +347,7 @@ npm run seed
 npm run seed:coupons
 ```
 
-`npm run seed` replaces the product catalog with the checked-in demo catalog. `npm run seed:coupons` upserts `SAVE10`, `WELCOME5`, and `FREESHIP` without deleting products.
+`npm run seed` replaces the product catalog with the checked-in demo catalog and rebuilds matching category and brand records (existing deals are removed because seeded products receive new identifiers). `npm run seed:coupons` upserts `SAVE10`, `WELCOME5`, and `FREESHIP` without deleting products. `npm run seed:admin` creates or updates the administrator account from `ADMIN_*` variables.
 
 ### Run locally
 
@@ -358,6 +358,8 @@ npm run dev
 - Frontend: `http://localhost:5173`
 - API: `http://localhost:5000/api`
 - Health: `http://localhost:5000/api/health`
+
+Run the root `npm run dev` command only once. It starts both the client and backend; do not also run `npm run dev --workspace server` in another terminal. If you run the backend alone, use that workspace command by itself. If you change the backend port, update both `server/.env` (`PORT`) and `client/.env` (`VITE_API_URL`).
 
 If MongoDB is unavailable in development, the API remains usable with demo catalog data and in-memory account/commerce state. Production mode fails closed instead of silently using demo data.
 
@@ -402,6 +404,25 @@ GET https://<backend-domain>/api/health
 
 The public frontend may be deployed independently, but authentication, carts, checkout, and orders are only fully live after the backend origin and its environment variables are configured.
 
+### Diagnose a deployment with one command
+
+```bash
+npm run verify:deploy -- --api=https://<backend-domain> --client=https://<frontend-domain>
+```
+
+The check prints a pass/fail line for the backend health endpoint, the MongoDB connection, the admin API, CORS for the frontend origin, the SPA route, and the API base URL baked into the deployed bundle. It exits with code 1 on failure and prints the remediation steps.
+
+A typical report looks like this:
+
+```text
+PASS Frontend API base URL
+     Bundle targets https://api.example.com (normalized to https://api.example.com/api).
+FAIL Backend /api/health
+     HTTP 404 (text/plain). The page could not be found
+```
+
+That combination means the frontend is configured correctly but the backend domain is not serving the API. A plain-text `404` (rather than an HTML login page) means no serverless function matched the request, which happens when the deployment lacks a function at `api/index.js`.
+
 ### Admin in production
 
 1. Set `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` on the backend host (Render, Vercel, or a `.env` file) and run `npm run seed:admin` once with the same values.
@@ -409,6 +430,22 @@ The public frontend may be deployed independently, but authentication, carts, ch
 3. Add the deployed frontend origin to `CLIENT_URL` so CORS allows the admin client.
 4. Sign in at `https://<frontend-domain>/admin/login`, confirm the dashboard loads, then sign out and confirm the token is revoked.
 5. Rotate the administrator password by re-running the seed command; every issued admin token is invalidated.
+
+### Vercel backend layout
+
+The repository keeps `api/index.js` at the root so Vercel detects a Node function, and `vercel.json` rewrites every path to it:
+
+```json
+{
+  "functions": { "api/index.js": { "maxDuration": 30 } },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/api/index" }
+  ]
+}
+```
+
+If the backend domain answers `404` for `/api/health`, the deployment was built without that function. Redeploy the repository root (not `client/`) with the backend project, then re-run `npm run verify:deploy`.
 
 ## Local smoke test
 

@@ -15,7 +15,8 @@
     "seed:coupons": "npm run seed:coupons --workspace server",
     "seed:admin": "npm run seed:admin --workspace server",
     "smoke": "npm run smoke --workspace server",
-    "smoke:admin": "npm run smoke:admin --workspace server"
+    "smoke:admin": "npm run smoke:admin --workspace server",
+    "verify:deploy": "node scripts/verify-deployment.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
