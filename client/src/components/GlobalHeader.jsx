@@ -42,8 +42,10 @@ export default function GlobalHeader() {
   }, [term])
   useEffect(() => {
     const close = (event) => { if (event.key === "Escape") { setLocationOpen(false); setLanguageOpen(false); setAccountOpen(false); setNotificationOpen(false); setSearchOpen(false) } }
+    const outside = (event) => { if (!event.target.closest(".header-popover-wrap") && !event.target.closest(".search-input-wrap")) { setAccountOpen(false); setNotificationOpen(false); setSearchOpen(false) } }
     document.addEventListener("keydown", close)
-    return () => document.removeEventListener("keydown", close)
+    document.addEventListener("click", outside)
+    return () => { document.removeEventListener("keydown", close); document.removeEventListener("click", outside) }
   }, [])
   const accountName = user?.name?.split(" ")[0] || "sign in"
   const displaySuggestions = useMemo(() => term.trim().length >= 2 ? suggestions : recentSearches.slice(0, 5).map((value) => ({ recent: value })), [suggestions, recentSearches, term])

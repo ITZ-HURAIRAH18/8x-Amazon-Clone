@@ -16,6 +16,15 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use((response) => response, (error) => {
+  if (error?.response?.status === 401) {
+    localStorage.removeItem("amazon_clone_token")
+    localStorage.removeItem("amazon_clone_user")
+    window.dispatchEvent(new Event("amazon:session-expired"))
+  }
+  return Promise.reject(error)
+})
+
 const unwrap = (response) => response.data?.data ?? response.data
 
 export const productApi = {

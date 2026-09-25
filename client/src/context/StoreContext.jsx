@@ -45,6 +45,11 @@ export function AuthProvider({ children }) {
     return nextUser
   }
   useEffect(() => {
+    const expired = () => { setUser(null); setReady(true) }
+    window.addEventListener("amazon:session-expired", expired)
+    return () => window.removeEventListener("amazon:session-expired", expired)
+  }, [])
+  useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY)
     if (!token) {
       setReady(true)

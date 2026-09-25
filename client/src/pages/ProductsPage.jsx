@@ -38,6 +38,12 @@ export default function ProductsPage() {
   const activeFilterCount = Object.values(filterValues).filter(Boolean).length + (deals ? 1 : 0) + (featured ? 1 : 0)
 
   useEffect(() => {
+    if (!mobileFilters) return undefined
+    const onKeyDown = (event) => { if (event.key === "Escape") setMobileFilters(false) }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [mobileFilters])
+  useEffect(() => {
     let active = true
     productApi.facets().then((result) => { if (active && result) setFacets((current) => ({ ...current, ...result })) }).catch(() => {})
     return () => { active = false }
@@ -95,7 +101,7 @@ export default function ProductsPage() {
     if (search) next.set("q", search)
     setParams(next)
   }
-  const removeFilter = (key) => updateParam(key, "")
+  const removeFilters = (keys) => { const next = new URLSearchParams(params); keys.forEach((key) => next.delete(key)); next.delete("page"); setParams(next) }
   const activeChips = [
     ...(filterValues.brand ? [{ key: "brand", label: `Brand: ${filterValues.brand}` }] : []),
     ...(filterValues.rating ? [{ key: "rating", label: `${filterValues.rating}+ stars` }] : []),
@@ -104,6 +110,7 @@ export default function ProductsPage() {
     ...(filterValues.minDiscount ? [{ key: "minDiscount", label: `${filterValues.minDiscount}% off or more` }] : []),
     ...(deals ? [{ key: "deals", label: "Deals" }] : []),
     ...(featured ? [{ key: "featured", label: "Featured" }] : []),
+    ...(filterValues.prime ? [{ key: "prime", label: "Prime-style delivery" }] : []),
   ]
   const pageCount = Math.max(1, Number(meta.pages) || 1)
   const goPage = (nextPage) => updateParam("page", Math.min(pageCount, Math.max(1, nextPage)))
@@ -111,10 +118,10 @@ export default function ProductsPage() {
   return <div className="products-page"><div className="container">
     <div className="breadcrumbs"><span>Home</span><span>›</span><strong>{category === "All" ? "All products" : category}</strong></div>
     <div className="results-heading"><div><h1>{heading}</h1><span>{loading ? "Searching…" : `${meta.total || products.length} result${meta.total === 1 ? "" : "s"}`}</span></div><button className="mobile-filter-button" type="button" onClick={() => setMobileFilters(true)}><Filter size={17} /> Filters {activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button></div>
-    {activeChips.length > 0 && <div className="active-filter-chips" aria-label="Active filters">{activeChips.map((chip) => <button type="button" className="filter-chip" key={chip.key} onClick={() => chip.key === "price" ? (removeFilter("minPrice"), removeFilter("maxPrice")) : removeFilter(chip.key)}>{chip.label}<X size={13} /></button>)}<button type="button" className="clear-filter-link" onClick={clearFilters}>Clear all</button></div>}
+    {activeChips.length > 0 && <div className="active-filter-chips" aria-label="Active filters">{activeChips.map((chip) => <button type="button" className="filter-chip" key={chip.key} onClick={() => chip.key === "price" ? removeFilters(["minPrice", "maxPrice"]) : removeFilters([chip.key])}>{chip.label}<X size={13} /></button>)}<button type="button" className="clear-filter-link" onClick={clearFilters}>Clear all</button></div>}
     <div className="results-layout">
       {mobileFilters && <button type="button" className="filter-overlay" aria-label="Close filters" onClick={() => setMobileFilters(false)} />}
-      <aside className={`filter-sidebar ${mobileFilters ? "filter-sidebar--open" : ""}`} aria-label="Product filters">
+      <aside className={`filter-sidebar ${mobileFilters ? "filter-sidebar--open" : ""}`} role={mobileFilters ? "dialog" : undefined} aria-modal={mobileFilters ? "true" : undefined} aria-label="Product filters">
         <div className="filter-sidebar__mobile-head"><strong>Filters</strong><button type="button" className="icon-button" onClick={() => setMobileFilters(false)} aria-label="Close filters"><X size={20} /></button></div>
         <div className="filter-title"><SlidersHorizontal size={17} /><strong>Filters</strong>{activeFilterCount > 0 && <button type="button" onClick={clearFilters}>Clear all</button>}</div>
         <FilterGroup title="Category"><label className="filter-radio"><input type="radio" name="category" checked={category === "All"} onChange={() => setCategory("All")} /> All</label>{[...new Set([...defaultCategories.slice(1), ...facets.categories])].map((option) => <label className="filter-radio" key={option}><input type="radio" name="category" checked={category === option} onChange={() => setCategory(option)} /> {option}</label>)}</FilterGroup>
