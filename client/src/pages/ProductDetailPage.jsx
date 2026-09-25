@@ -47,13 +47,19 @@ export default function ProductDetailPage() {
     return () => { active = false }
   }, [id])
   useEffect(() => {
-    if (!product) return
+    if (!product) return undefined
     setSelectedImage(0); setImageFailed(false); setQuantity(1); addRecent(product)
+    const structuredData = document.createElement("script")
+    structuredData.type = "application/ld+json"
+    structuredData.dataset.amazonCloneProduct = "true"
+    structuredData.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "Product", name: product.title, description: product.description, image: product.images?.[0], brand: { "@type": "Brand", name: product.brand }, aggregateRating: product.rating ? { "@type": "AggregateRating", ratingValue: product.rating, reviewCount: product.reviewCount || 0 } : undefined, offers: { "@type": "Offer", priceCurrency: "USD", price: product.price, availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" } })
+    document.head.appendChild(structuredData)
     productApi.recommendations(product.id).then((items) => setRelated((items || []).map(normalizeProduct))).catch(() => {
       const source = [...demoProducts].sort((a, b) => (b.category === product.category) - (a.category === product.category) || (b.brand === product.brand) - (a.brand === product.brand) || b.rating - a.rating)
       setRelated(source.filter((item) => item.id !== product.id).slice(0, 8).map(normalizeProduct))
     })
     productApi.reviews(product.id, { sort: "recent" }).then((result) => setReviews(result.data || result)).catch(() => {})
+    return () => structuredData.remove()
   }, [product])
   const images = product?.images?.length ? product.images : product?.image ? [product.image] : []
   const isSaved = product ? contains(product) : false

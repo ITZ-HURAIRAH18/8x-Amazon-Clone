@@ -281,7 +281,14 @@ Deploy `server/` as a Node service with:
 - `NODE_ENV=production`
 - `ORDER_STATUS_TOKEN` set if status updates will be operated manually
 
-The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML instead of JSON.
+The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML or 404 instead of JSON. Verify the deployed pair explicitly:
+
+```text
+GET https://<backend-domain>/api/health
+→ { "data": { "status": "ok", "database": "connected" } }
+```
+
+The public frontend may be deployed independently, but authentication, carts, checkout, and orders are only fully live after the backend origin and its environment variables are configured.
 
 ## Local smoke test
 
