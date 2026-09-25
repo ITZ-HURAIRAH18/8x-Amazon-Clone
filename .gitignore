@@ -1,2 +1,24 @@
+# Dependencies
 node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment files (Root, Client, Server)
+.env
+.env.*
+!.env.example
+client/.env
+client/.env.*
+!client/.env.example
+server/.env
+server/.env.*
+!server/.env.example
+
+# Build outputs
+dist/
 client/dist/
+
+# Logs & OS metadata
+*.log
+.DS_Store
+Thumbs.db
