@@ -11,6 +11,7 @@ import { env } from "./config/env.js"
 
 export function createApp() {
   const app = express()
+  app.disable("x-powered-by")
   const allowedOrigins = new Set([env.clientUrl, "http://localhost:5173", "http://127.0.0.1:5173"])
   app.use(cors({ origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin)), credentials: true }))
   app.use(express.json({ limit: "1mb" }))
