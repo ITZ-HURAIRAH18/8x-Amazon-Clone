@@ -327,6 +327,7 @@ It creates a temporary user, exercises search, wishlist, saved-cart behavior, co
 - Recommendations are deterministic same-category/same-brand logic, not machine learning.
 - Product photography uses reliable external demo image URLs and may require replacement with a production image CDN.
 - The local development fallback is not a production persistence strategy.
+- JWTs are currently stored in browser localStorage for the SPA; an HttpOnly-cookie/session hardening pass is recommended before a high-security production launch.
 - The optional order-status mutation endpoint requires an operations token and is not exposed in the customer UI.
 - Seller marketplace tools, fulfillment operations, taxes by jurisdiction, and advanced fraud detection are outside this assignment.
 

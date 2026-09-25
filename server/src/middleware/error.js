@@ -6,10 +6,10 @@ export function notFound(req, res, next) {
 export function errorHandler(error, _req, res, _next) {
   console.error("API error", { name: error?.name || "Error", code: error?.code || "UNKNOWN" })
   if (error?.name === "ValidationError") {
-    return res.status(400).json({ message: "Validation failed", code: "VALIDATION_ERROR", details: Object.values(error.errors || {}) })
+    return res.status(400).json({ message: "Validation failed", code: "VALIDATION_ERROR" })
   }
   if (error?.code === 11000) {
-    return res.status(409).json({ message: "An account with that email already exists", code: "DUPLICATE" })
+    return res.status(409).json({ message: "A record with that value already exists", code: "DUPLICATE" })
   }
   const status = error.statusCode || (error.name === "CastError" ? 400 : 500)
   const safeMessage = status >= 500 ? "Unexpected server error" : (error.message || "Request could not be completed")

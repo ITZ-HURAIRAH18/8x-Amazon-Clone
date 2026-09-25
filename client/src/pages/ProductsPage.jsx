@@ -74,7 +74,15 @@ export default function ProductsPage() {
         if (filterValues.minDiscount) fallback = fallback.filter((item) => item.discount >= Number(filterValues.minDiscount))
         if (deals) fallback = fallback.filter((item) => item.deal)
         if (featured) fallback = fallback.filter((item) => item.featured)
-        fallback.sort((a, b) => sort === "priceAsc" ? a.price - b.price : sort === "priceDesc" ? b.price - a.price : sort === "rating" ? b.rating - a.rating : Number(b.bestseller) - Number(a.bestseller))
+        fallback.sort((a, b) => {
+          if (sort === "priceAsc" || sort === "price-low") return a.price - b.price
+          if (sort === "priceDesc" || sort === "price-high") return b.price - a.price
+          if (sort === "rating") return b.rating - a.rating || b.reviewCount - a.reviewCount
+          if (sort === "reviews") return b.reviewCount - a.reviewCount
+          if (sort === "biggest-discount") return b.discount - a.discount || b.rating - a.rating
+          if (sort === "newest") return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+          return Number(b.featured) - Number(a.featured) || Number(b.bestseller) - Number(a.bestseller) || b.rating - a.rating
+        })
         setProducts(fallback)
         setMeta({ page: 1, pages: 1, total: fallback.length })
       })

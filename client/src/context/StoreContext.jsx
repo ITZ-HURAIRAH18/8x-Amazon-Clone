@@ -296,7 +296,7 @@ export function NotificationProvider({ children }) {
     setLoading(true)
     try { const result = await notificationApi.list(); setItems(result.data || []) } catch { setItems([]) } finally { setLoading(false) }
   }, [user])
-  useEffect(() => { void load() }, [load])
+  useEffect(() => { void load(); const interval = window.setInterval(() => { if (document.visibilityState === "visible") void load() }, 60_000); return () => window.clearInterval(interval) }, [load])
   const markRead = useCallback(async (id) => { setItems((current) => current.map((item) => item.id === id ? { ...item, read: true } : item)); try { await notificationApi.markRead(id) } catch { void load() } }, [load])
   const markAllRead = useCallback(async () => { setItems((current) => current.map((item) => ({ ...item, read: true }))); try { await notificationApi.markAllRead() } catch { void load() } }, [load])
   const value = useMemo(() => ({ items, loading, unreadCount: items.filter((item) => !item.read).length, load, markRead, markAllRead }), [items, loading, load, markRead, markAllRead])
