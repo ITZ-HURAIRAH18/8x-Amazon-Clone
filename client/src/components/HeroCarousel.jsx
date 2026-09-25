@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const slides = [
-  { kicker: "Prime Day", title: "Big savings, big possibilities.", detail: "Save across the deals you love.", cta: "Shop Prime Day", href: "/search?deals=true", image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1600&q=82", position: "center" },
-  { kicker: "New season finds", title: "Make room for what matters.", detail: "Refresh your everyday with thoughtful essentials.", cta: "Explore home", href: "/search?category=Home", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=82", position: "center" },
+  { kicker: "Prime Day", title: "Big savings, big possibilities.", detail: "Save across the deals you love.", cta: "Shop Prime Day", href: "/search?deals=true", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=82", position: "center" },
+  { kicker: "New season finds", title: "Make room for what matters.", detail: "Refresh your everyday with thoughtful essentials.", cta: "Explore home", href: "/search?category=Home", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1600&q=82", position: "center" },
   { kicker: "Tech essentials", title: "More power for your day.", detail: "Upgrade your setup with technology that keeps up.", cta: "Shop electronics", href: "/search?category=Electronics", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=82", position: "center" },
 ]
 
