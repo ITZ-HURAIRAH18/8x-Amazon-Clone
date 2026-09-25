@@ -43,6 +43,7 @@ export const cartApi = {
   add: async (productId, quantity) => unwrap(await api.post("/cart", { productId, quantity })),
   update: async (itemId, quantity) => unwrap(await api.patch(`/cart/${itemId}`, { quantity })),
   remove: async (itemId) => unwrap(await api.delete(`/cart/${itemId}`)),
+  clear: async () => unwrap(await api.delete("/cart")),
   merge: async (items) => unwrap(await api.post("/cart/merge", { items })),
   saveForLater: async (itemId) => unwrap(await api.post(`/cart/${itemId}/save-for-later`)),
   moveSavedToCart: async (itemId) => unwrap(await api.post(`/cart/saved/${itemId}/move-to-cart`)),

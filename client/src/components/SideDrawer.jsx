@@ -5,8 +5,8 @@ import { useAuth } from "../context/StoreContext"
 
 const drawerGroups = [
   { title: "Shop by Department", links: [["Electronics", "/search?category=Electronics"], ["Computers", "/search?category=Computers"], ["Home & Kitchen", "/search?category=Kitchen"], ["Fashion", "/search?category=Fashion"]] },
-  { title: "Programs & Features", links: [["Today's Deals", "/search?deals=true"], ["Best Sellers", "/search?featured=true"], ["New Releases", "/search?sort=newest"]] },
-  { title: "Help & Settings", links: [["Customer Service", "/account"], ["Your Orders", "/account/orders"], ["Your Account", "/account"]] },
+  { title: "Programs & Features", links: [["Today's Deals", "/deals"], ["Best Sellers", "/search?sort=best-sellers"], ["New Releases", "/search?sort=newest"], ["Compare Products", "/compare"]] },
+  { title: "Help & Settings", links: [["Customer Service", "/account"], ["Your Orders", "/account/orders"], ["Your Account", "/account"], ["Your Wishlist", "/wishlist"]] },
 ]
 
 export default function SideDrawer({ open, onClose }) {

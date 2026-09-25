@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { ChevronDown, Menu } from "lucide-react"
 
 const links = [
-  ["Today's Deals", "/search?deals=true"],
+  ["Today's Deals", "/deals"],
   ["Customer Service", "/account"],
   ["Registry", "/search?category=Home"],
   ["Gift Cards", "/search?category=Books"],

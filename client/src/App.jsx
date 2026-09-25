@@ -13,6 +13,10 @@ import OrderDetailPage from "./pages/OrderDetailPage"
 import CheckoutPage from "./pages/CheckoutPage"
 import OrderConfirmationPage from "./pages/OrderConfirmationPage"
 import NotFoundPage from "./pages/NotFoundPage"
+import WishlistPage from "./pages/WishlistPage"
+import ComparePage from "./pages/ComparePage"
+import DealsPage from "./pages/DealsPage"
+import NotificationsPage from "./pages/NotificationsPage"
 
 function ProtectedRoute({ children }) {
   const { user, ready } = useAuth()
@@ -37,10 +41,14 @@ export default function App() {
       <Route path="search" element={<ProductsPage />} />
       <Route path="category/:category" element={<ProductsPage />} />
       <Route path="product/:id" element={<ProductDetailPage />} />
+      <Route path="deals" element={<DealsPage />} />
+      <Route path="wishlist" element={<WishlistPage />} />
+      <Route path="compare" element={<ComparePage />} />
       <Route path="cart" element={<CartPage />} />
       <Route path="account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
       <Route path="account/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
       <Route path="account/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
+      <Route path="account/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
       <Route path="checkout/confirmation/:orderId" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFoundPage />} />
