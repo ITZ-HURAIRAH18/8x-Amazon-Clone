@@ -1,0 +1,24 @@
+import dotenv from "dotenv"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
+dotenv.config({ path: path.join(root, "server", ".env") })
+dotenv.config({ path: path.join(root, ".env") })
+
+const number = (value, fallback) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+export const env = {
+  port: number(process.env.PORT, 5000),
+  mongoUri: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/amazon_clone",
+  jwtSecret: process.env.JWT_SECRET || "amazon-clone-development-secret-change-me",
+  clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  nodeEnv: process.env.NODE_ENV || "development",
+}
+
+if (env.nodeEnv === "production" && env.jwtSecret === "amazon-clone-development-secret-change-me") {
+  throw new Error("JWT_SECRET must be set in production")
+}
