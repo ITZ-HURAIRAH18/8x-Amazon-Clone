@@ -10,6 +10,7 @@ import addressRoutes from "./routes/addressRoutes.js"
 import couponRoutes from "./routes/couponRoutes.js"
 import notificationRoutes from "./routes/notificationRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js"
 import { errorHandler, notFound } from "./middleware/error.js"
 import { rateLimit, securityHeaders } from "./middleware/security.js"
 import { databaseReady } from "./config/db.js"
@@ -78,6 +79,7 @@ export function createApp() {
   app.use("/api/coupons", couponRoutes)
   app.use("/api/notifications", notificationRoutes)
   app.use("/api/reviews", reviewRoutes)
+  app.use("/api/admin", adminRoutes)
   app.use(notFound)
   app.use(errorHandler)
   return app

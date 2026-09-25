@@ -1,4 +1,37 @@
+import demoProducts from "./products.js"
+
+for (const product of demoProducts) {
+  product.active ??= true
+  product.lowStockThreshold ??= 10
+}
+
+const categories = [...new Set(demoProducts.map((product) => product.category))].map((name) => ({
+  _id: `category-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+  name,
+  slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+  description: `${name} products`,
+  image: "",
+  active: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}))
+
+const brands = [...new Set(demoProducts.map((product) => product.brand))].map((name) => ({
+  _id: `brand-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+  name,
+  slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+  description: `${name} products`,
+  logo: "",
+  active: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}))
+
 export const memory = {
+  products: demoProducts,
+  categories,
+  brands,
+  deals: [],
   users: [],
   carts: new Map(),
   wishlists: new Map(),
@@ -18,7 +51,9 @@ export const memory = {
       expiresAt: new Date("2030-12-31T23:59:59.000Z"),
       active: true,
       usageLimit: null,
+      perUserLimit: null,
       usageCount: 0,
+      redemptions: [],
     },
     {
       _id: "coupon-welcome5",
@@ -32,7 +67,9 @@ export const memory = {
       expiresAt: new Date("2030-12-31T23:59:59.000Z"),
       active: true,
       usageLimit: null,
+      perUserLimit: null,
       usageCount: 0,
+      redemptions: [],
     },
     {
       _id: "coupon-freeship",
@@ -46,9 +83,28 @@ export const memory = {
       expiresAt: new Date("2030-12-31T23:59:59.000Z"),
       active: true,
       usageLimit: null,
+      perUserLimit: null,
       usageCount: 0,
+      redemptions: [],
     },
   ],
+  settings: {
+    storeName: "Amazon Clone",
+    supportEmail: "support@example.com",
+    customerServiceEmail: "support@example.com",
+    currency: "USD",
+    defaultOrderStatus: "Pending",
+    lowStockThreshold: 10,
+    freeShippingThreshold: 35,
+    standardShippingFee: 5.99,
+    taxRate: 8,
+    lowStockNotifications: true,
+    orderNotifications: true,
+    reviewNotifications: true,
+    couponExpiryDays: 7,
+    dealExpiryDays: 7,
+    maintenanceMessage: "",
+  },
 }
 
 export function id(prefix) {

@@ -6,13 +6,14 @@ import { databaseReady } from "../config/db.js"
 import { memory, id } from "../data/memory.js"
 import demoProducts from "../data/products.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { createAdminNotification } from "./notificationController.js"
 
-const demoProduct = (productId) => demoProducts.find((product) => String(product._id) === String(productId) || product.slug === productId)
+const demoProduct = (productId) => demoProducts.find((product) => product.active !== false && (String(product._id) === String(productId) || product.slug === productId))
 
 async function resolveProduct(productId) {
   if (databaseReady()) {
     if (!mongoose.isValidObjectId(productId)) return null
-    return Product.findById(productId)
+    return Product.findOne({ _id: productId, active: { $ne: false } })
   }
   return demoProduct(productId) || null
 }
@@ -61,9 +62,9 @@ function reviewJson(review) {
   }
 }
 
-async function updateProductRating(productId) {
+export async function updateProductRating(productId) {
   if (!databaseReady()) return
-  const reviews = await Review.find({ product: productId }).select("rating").lean()
+  const reviews = await Review.find({ product: productId, $or: [{ status: "Approved" }, { status: { $exists: false } }] }).select("rating").lean()
   if (!reviews.length) {
     await Product.updateOne({ _id: productId }, { $set: { rating: 0, reviewCount: 0 } })
     return
@@ -86,9 +87,9 @@ export const listReviews = asyncHandler(async (req, res) => {
   if (!product) return res.status(404).json({ message: "Product not found", code: "PRODUCT_NOT_FOUND" })
   let reviews
   if (databaseReady()) {
-    reviews = await Review.find({ product: product._id }).populate("user", "name").sort({ createdAt: -1 }).lean()
+    reviews = await Review.find({ product: product._id, $or: [{ status: "Approved" }, { status: { $exists: false } }] }).populate("user", "name").sort({ createdAt: -1 }).lean()
   } else {
-    reviews = memory.reviews.filter((review) => String(review.product) === String(product._id)).map((review) => ({ ...review, user: { name: review.userName } }))
+    reviews = memory.reviews.filter((review) => String(review.product) === String(product._id) && (!review.status || review.status === "Approved")).map((review) => ({ ...review, user: { name: review.userName } }))
   }
   const ordered = sortReviews(reviews, req.query.sort)
   return res.json({ data: { reviews: ordered.map(reviewJson), summary: summary(reviews) } })
@@ -104,15 +105,17 @@ export const createReview = asyncHandler(async (req, res) => {
     if (!order) return res.status(403).json({ message: "Only customers who purchased this product can review it", code: "REVIEW_NOT_ELIGIBLE" })
     const existing = await Review.findOne({ user: req.user._id, product: product._id })
     if (existing) return res.status(409).json({ message: "You have already reviewed this product", code: "REVIEW_EXISTS" })
-    const review = await Review.create({ user: req.user._id, product: product._id, order: order._id, rating, title, comment, verifiedPurchase: true })
+    const review = await Review.create({ user: req.user._id, product: product._id, order: order._id, rating, title, comment, verifiedPurchase: true, status: "Approved" })
     await updateProductRating(product._id)
+    try { await createAdminNotification({ type: "admin-review", title: "New customer review", message: `${req.user.name} reviewed ${product.title}.`, link: "/admin/reviews", metadata: { reviewId: String(review._id), productId: String(product._id) } }) } catch { /* review remains authoritative */ }
     return res.status(201).json({ data: reviewJson(review) })
   }
   const purchased = memory.orders.some((entry) => String(entry.user) === String(req.user._id) && entry.status !== "Cancelled" && entry.items.some((item) => String(item.product) === String(product._id)))
   if (!purchased) return res.status(403).json({ message: "Only customers who purchased this product can review it", code: "REVIEW_NOT_ELIGIBLE" })
   if (memory.reviews.some((review) => String(review.user) === String(req.user._id) && String(review.product) === String(product._id))) return res.status(409).json({ message: "You have already reviewed this product", code: "REVIEW_EXISTS" })
-  const review = { _id: id("rev"), user: String(req.user._id), userName: req.user.name, product: String(product._id), rating, title, comment, verifiedPurchase: true, helpfulCount: 0, createdAt: new Date(), updatedAt: new Date() }
+  const review = { _id: id("rev"), user: String(req.user._id), userName: req.user.name, product: String(product._id), rating, title, comment, verifiedPurchase: true, helpfulCount: 0, status: "Approved", createdAt: new Date(), updatedAt: new Date() }
   memory.reviews.push(review)
+  try { await createAdminNotification({ type: "admin-review", title: "New customer review", message: `${req.user.name} reviewed ${product.title}.`, link: "/admin/reviews", metadata: { reviewId: review._id, productId: String(product._id) } }) } catch { /* best effort in fallback mode */ }
   return res.status(201).json({ data: reviewJson(review) })
 })
 
@@ -122,6 +125,7 @@ export const updateReview = asyncHandler(async (req, res) => {
     const review = await Review.findOne({ _id: req.params.reviewId, user: req.user._id })
     if (!review) return res.status(404).json({ message: "Review not found", code: "REVIEW_NOT_FOUND" })
     Object.assign(review, { rating, title, comment })
+    if (review.status && review.status !== "Approved") review.status = "Pending"
     await review.save()
     await updateProductRating(review.product)
     return res.json({ data: reviewJson(review) })
@@ -129,6 +133,7 @@ export const updateReview = asyncHandler(async (req, res) => {
   const review = memory.reviews.find((entry) => String(entry._id) === String(req.params.reviewId) && String(entry.user) === String(req.user._id))
   if (!review) return res.status(404).json({ message: "Review not found", code: "REVIEW_NOT_FOUND" })
   Object.assign(review, { rating, title, comment, updatedAt: new Date() })
+  if (review.status && review.status !== "Approved") review.status = "Pending"
   return res.json({ data: reviewJson(review) })
 })
 

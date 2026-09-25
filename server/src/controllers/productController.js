@@ -2,7 +2,10 @@ import mongoose from "mongoose"
 import { Product } from "../models/Product.js"
 import { databaseReady } from "../config/db.js"
 import demoProducts from "../data/products.js"
+import { memory } from "../data/memory.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { activeBrandNames, activeCategoryNames } from "../services/taxonomyService.js"
+import { refreshDealStates } from "../services/dealService.js"
 
 const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 const objectId = (value) => (mongoose.isValidObjectId(value) ? value : null)
@@ -119,8 +122,26 @@ export const listProducts = asyncHandler(async (req, res) => {
   const query = { ...req.query, search: req.query.search || req.query.q || "" }
   let products
   let total
+  try { await refreshDealStates() } catch { /* customer browsing remains available if a deal refresh fails */ }
   if (databaseReady()) {
     const filter = buildDbFilter(query)
+    filter.active = { $ne: false }
+    if (query.deal === "true" || query.deals === "true") {
+      filter.$and ||= []
+      filter.$and.push({ deal: true, $or: [{ dealEndsAt: null }, { dealEndsAt: { $exists: false } }, { dealEndsAt: { $gt: new Date() } }] })
+    }
+    const [activeCategories, activeBrands] = await Promise.all([activeCategoryNames(), activeBrandNames()])
+    if (activeCategories.configured) {
+      const requested = query.category ? [...activeCategories].find((name) => name.toLowerCase() === String(query.category).toLowerCase()) : null
+      filter.category = query.category ? (requested || "__unavailable_category__") : { $in: [...activeCategories] }
+    }
+    if (activeBrands.configured) {
+      const brandValues = String(query.brand || "").split(",").map((entry) => entry.trim()).filter(Boolean)
+      if (brandValues.length) {
+        const requested = brandValues.map((value) => [...activeBrands].find((name) => name.toLowerCase() === value.toLowerCase())).filter(Boolean)
+        filter.brand = { $in: requested.length ? requested : ["__unavailable_brand__"] }
+      } else filter.brand = { $in: [...activeBrands] }
+    }
     const [rows, count] = await Promise.all([
       Product.find(filter).sort(dbSort(query.sort)).skip((page - 1) * limit).limit(limit).lean(),
       Product.countDocuments(filter),
@@ -128,7 +149,10 @@ export const listProducts = asyncHandler(async (req, res) => {
     products = rows.map((row) => ({ ...row, id: String(row._id) }))
     total = count
   } else {
-    const filtered = sortDemo(filterDemo(query), query.sort)
+    const activeCategories = new Set(memory.categories.filter((entry) => entry.active).map((entry) => entry.name.toLowerCase()))
+    const activeBrands = new Set(memory.brands.filter((entry) => entry.active).map((entry) => entry.name.toLowerCase()))
+    const now = Date.now()
+    const filtered = sortDemo(filterDemo(query).filter((product) => product.active !== false && activeCategories.has(product.category.toLowerCase()) && activeBrands.has(product.brand.toLowerCase()) && (!(query.deal === "true" || query.deals === "true") || (!product.dealEndsAt || new Date(product.dealEndsAt).getTime() > now))), query.sort)
     total = filtered.length
     products = filtered.slice((page - 1) * limit, page * limit).map(fallbackProduct)
   }
@@ -137,24 +161,41 @@ export const listProducts = asyncHandler(async (req, res) => {
 
 export const getProductFacets = asyncHandler(async (_req, res) => {
   if (databaseReady()) {
-    const [categories, brands, range] = await Promise.all([
+    const [categories, brands, [activeCategories, activeBrands], range] = await Promise.all([
       Product.distinct("category"),
       Product.distinct("brand"),
-      Product.aggregate([{ $group: { _id: null, minPrice: { $min: "$price" }, maxPrice: { $max: "$price" } } }]),
+      Promise.all([activeCategoryNames(), activeBrandNames()]),
+      Product.aggregate([{ $match: { active: { $ne: false } } }, { $group: { _id: null, minPrice: { $min: "$price" }, maxPrice: { $max: "$price" } } }]),
     ])
     const bounds = range[0] || {}
-    return res.json({ data: { categories: categories.sort(), brands: brands.sort(), minPrice: Number(bounds.minPrice || 0), maxPrice: Number(bounds.maxPrice || 0) } })
+    return res.json({ data: { categories: categories.filter((name) => activeCategories.has(name)).sort(), brands: brands.filter((name) => activeBrands.has(name)).sort(), minPrice: Number(bounds.minPrice || 0), maxPrice: Number(bounds.maxPrice || 0) } })
   }
-  const prices = demoProducts.map((item) => item.price)
-  return res.json({ data: { categories: [...new Set(demoProducts.map((item) => item.category))].sort(), brands: [...new Set(demoProducts.map((item) => item.brand))].sort(), minPrice: Math.min(...prices), maxPrice: Math.max(...prices) } })
+  const activeCategories = new Set(memory.categories.filter((entry) => entry.active).map((entry) => entry.name))
+  const activeBrands = new Set(memory.brands.filter((entry) => entry.active).map((entry) => entry.name))
+  const products = memory.products.filter((entry) => entry.active !== false)
+  const prices = products.map((item) => item.price)
+  return res.json({ data: { categories: [...new Set(products.map((item) => item.category))].filter((name) => activeCategories.has(name)).sort(), brands: [...new Set(products.map((item) => item.brand))].filter((name) => activeBrands.has(name)).sort(), minPrice: prices.length ? Math.min(...prices) : 0, maxPrice: prices.length ? Math.max(...prices) : 0 } })
 })
 
 async function resolveProduct(id) {
+  try { await refreshDealStates() } catch { /* product lookup remains available */ }
   if (databaseReady()) {
-    const query = objectId(id) ? { $or: [{ _id: id }, { slug: id }] } : { slug: id }
-    return Product.findOne(query).lean()
+    const query = objectId(id) ? { active: { $ne: false }, $or: [{ _id: id }, { slug: id }] } : { active: { $ne: false }, slug: id }
+    const [product, activeCategories, activeBrands] = await Promise.all([
+      Product.findOne(query).lean(),
+      activeCategoryNames(),
+      activeBrandNames(),
+    ])
+    if (!product) return null
+    if (activeCategories.configured && !activeCategories.has(product.category)) return null
+    if (activeBrands.configured && !activeBrands.has(product.brand)) return null
+    return product
   }
-  return demoProducts.find((item) => String(item._id) === id || item.slug === id) || null
+  const product = memory.products.find((item) => item.active !== false && (String(item._id) === id || item.slug === id)) || null
+  if (!product) return null
+  if (!memory.categories.some((entry) => entry.active && entry.name === product.category)) return null
+  if (!memory.brands.some((entry) => entry.active && entry.name === product.brand)) return null
+  return product
 }
 
 export const getProduct = asyncHandler(async (req, res) => {
@@ -167,10 +208,17 @@ export const getRecommendations = asyncHandler(async (req, res) => {
   const product = await resolveProduct(req.params.id)
   if (!product) return res.status(404).json({ message: "Product not found", code: "PRODUCT_NOT_FOUND" })
   if (databaseReady()) {
-    const rows = await Product.find({ _id: { $ne: product._id }, $or: [{ category: product.category }, { brand: product.brand }] }).sort({ bestseller: -1, rating: -1 }).limit(8).lean()
+    const [activeCategories, activeBrands] = await Promise.all([activeCategoryNames(), activeBrandNames()])
+    const rows = await Product.find({
+      _id: { $ne: product._id },
+      active: { $ne: false },
+      category: { $in: activeCategories.configured ? [...activeCategories] : [product.category] },
+      brand: { $in: activeBrands.configured ? [...activeBrands] : [product.brand] },
+      $or: [{ category: product.category }, { brand: product.brand }],
+    }).sort({ bestseller: -1, rating: -1 }).limit(8).lean()
     return res.json({ data: rows.map((row) => ({ ...row, id: String(row._id) })) })
   }
-  const rows = demoProducts.filter((item) => item._id !== product._id && (item.category === product.category || item.brand === product.brand)).sort((a, b) => Number(b.bestseller) - Number(a.bestseller) || b.rating - a.rating).slice(0, 8)
+  const rows = memory.products.filter((item) => item.active !== false && item._id !== product._id && (item.category === product.category || item.brand === product.brand) && memory.categories.some((entry) => entry.active && entry.name === item.category) && memory.brands.some((entry) => entry.active && entry.name === item.brand)).sort((a, b) => Number(b.bestseller) - Number(a.bestseller) || b.rating - a.rating).slice(0, 8)
   return res.json({ data: rows.map(fallbackProduct) })
 })
 

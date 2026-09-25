@@ -6,8 +6,9 @@ import { databaseReady } from "../config/db.js"
 import { memory, id } from "../data/memory.js"
 import demoProducts from "../data/products.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { activeBrandNames, activeCategoryNames } from "../services/taxonomyService.js"
 
-const demoProduct = (productId) => demoProducts.find((product) => String(product._id) === String(productId) || product.slug === productId)
+const demoProduct = (productId) => demoProducts.find((product) => product.active !== false && (String(product._id) === String(productId) || product.slug === productId))
 const productJson = (product) => ({ ...product, id: String(product._id) })
 
 function demoList(userId) {
@@ -24,15 +25,19 @@ function serializeDemo(items) {
 async function serializeDb(wishlist) {
   if (!wishlist) return []
   await wishlist.populate({ path: "items.product", select: "-__v" })
-  return wishlist.items.filter((item) => item.product).map((item) => ({ id: String(item._id || item.product._id), product: { ...item.product.toJSON(), id: String(item.product._id) }, addedAt: item.addedAt }))
+  return wishlist.items.filter((item) => item.product && item.product.active !== false).map((item) => ({ id: String(item._id || item.product._id), product: { ...item.product.toJSON(), id: String(item.product._id) }, addedAt: item.addedAt }))
 }
 
 async function findProduct(productId) {
   if (databaseReady()) {
     if (!mongoose.isValidObjectId(productId)) return null
-    return Product.findById(productId)
+    const [product, categories, brands] = await Promise.all([Product.findOne({ _id: productId, active: { $ne: false } }), activeCategoryNames(), activeBrandNames()])
+    if (!product || (categories.configured && !categories.has(product.category)) || (brands.configured && !brands.has(product.brand))) return null
+    return product
   }
-  return demoProduct(productId) || null
+  const product = demoProduct(productId) || null
+  if (!product || !memory.categories.some((entry) => entry.active && entry.name === product.category) || !memory.brands.some((entry) => entry.active && entry.name === product.brand)) return null
+  return product
 }
 
 export const getWishlist = asyncHandler(async (req, res) => {

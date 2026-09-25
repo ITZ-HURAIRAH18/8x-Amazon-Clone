@@ -8,8 +8,9 @@ import { memory, id } from "../data/memory.js"
 import demoProducts from "../data/products.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { calculateTotals, estimatedDelivery, isCompleteAddress, normalizeAddress } from "../utils/pricing.js"
-import { findCoupon, recordCouponUsage } from "./couponController.js"
-import { createNotification } from "./notificationController.js"
+import { couponAvailable, decrementCouponUsage, findCoupon, recordCouponUsage } from "./couponController.js"
+import { createAdminNotification, createNotification } from "./notificationController.js"
+import { releaseDealStock, reserveDealStock } from "../services/dealService.js"
 
 const money = (value) => Math.round(Number(value || 0) * 100) / 100
 const demoProduct = (productId) => demoProducts.find((product) => String(product._id) === String(productId) || product.slug === productId)
@@ -23,11 +24,82 @@ const statusTransitions = {
   Delivered: new Set(),
   Cancelled: new Set(),
 }
+const statusLabels = {
+  Pending: "Order placed",
+  Processing: "Processing",
+  Shipped: "Shipped",
+  "Out for delivery": "Out for delivery",
+  Delivered: "Delivered",
+  Cancelled: "Cancelled",
+}
+
+async function notifyLowStockAfterOrder(item, remaining, product) {
+  const threshold = Number(product?.lowStockThreshold ?? 10)
+  if (remaining > threshold) return
+  try {
+    await createAdminNotification({
+      type: "admin-stock",
+      title: "Low stock after order",
+      message: `${product.title} has ${remaining} unit(s) left.`,
+      link: "/admin/inventory",
+      metadata: { productId: String(item.product), stock: remaining, threshold, orderId: String(item.product) },
+    }, { dedupeKey: `low-stock:${item.product}:${threshold}`, dedupeHours: 12 })
+  } catch { /* inventory remains authoritative */ }
+}
+
+export async function applyOrderStatus(order, nextStatus) {
+  if (!statusTransitions[order.status]) throw Object.assign(new Error("Current order status is invalid"), { statusCode: 409, code: "STATUS_INVALID" })
+  if (order.status === nextStatus) return order
+  if (!statusTransitions[order.status].has(nextStatus)) throw Object.assign(new Error(`Order cannot move from ${order.status} to ${nextStatus}`), { statusCode: 409, code: "STATUS_TRANSITION_INVALID" })
+
+  if (databaseReady()) {
+    if (nextStatus === "Cancelled" && !order.inventoryRestored) {
+      await Promise.all(order.items.map((item) => Product.updateOne({ _id: item.product }, { $inc: { stock: item.quantity } })))
+      order.inventoryRestored = true
+      order.cancelledAt = new Date()
+      if (order.paymentStatus === "Paid") order.paymentStatus = "Refunded"
+      const storedReservations = order.dealReservations || (await Order.findById(order._id).select("+dealReservations").lean())?.dealReservations || []
+      if (storedReservations.length) {
+        await releaseDealStock(storedReservations)
+        order.dealReservations = []
+      }
+      if (order.couponCode) await decrementCouponUsage(order.couponCode, order.user)
+    }
+    order.status = nextStatus
+    order.statusHistory.push({ status: nextStatus, label: statusLabels[nextStatus], at: new Date() })
+    await order.save()
+  } else {
+    if (nextStatus === "Cancelled" && !order.inventoryRestored) {
+      order.items.forEach((item) => {
+        const product = demoProduct(item.product)
+        if (product) product.stock += item.quantity
+      })
+      order.inventoryRestored = true
+      order.cancelledAt = new Date()
+      if (order.paymentStatus === "Paid") order.paymentStatus = "Refunded"
+      if (order.dealReservations?.length) {
+        await releaseDealStock(order.dealReservations)
+        order.dealReservations = []
+      }
+      if (order.couponCode) await decrementCouponUsage(order.couponCode, order.user)
+    }
+    order.status = nextStatus
+    order.statusHistory ||= []
+    order.statusHistory.push({ status: nextStatus, label: statusLabels[nextStatus], at: new Date() })
+    order.updatedAt = new Date()
+  }
+  try {
+    await createNotification(order.user, { type: "order", title: nextStatus === "Cancelled" ? "Order cancelled" : `Order ${nextStatus.toLowerCase()}`, message: `Your order ${order.orderNumber || order._id} is ${nextStatus.toLowerCase()}.`, link: `/account/orders/${order._id}`, metadata: { orderId: String(order._id), status: nextStatus } })
+    await createAdminNotification({ type: "admin-order", title: "Order status updated", message: `${order.orderNumber || order._id} is now ${nextStatus}.`, link: "/admin/orders", metadata: { orderId: String(order._id), status: nextStatus } })
+  } catch { /* the persisted status remains authoritative */ }
+  return order
+}
 
 function orderJson(order) {
   const value = typeof order.toJSON === "function" ? order.toJSON() : order
+  const { dealReservations: _dealReservations, ...publicValue } = value
   return {
-    ...value,
+    ...publicValue,
     id: String(value._id || value.id),
     orderNumber: value.orderNumber || `AMZ-${String(value._id || value.id).slice(-8).toUpperCase()}`,
     itemCount: (value.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0),
@@ -49,12 +121,13 @@ async function selectedAddress(req) {
   return normalizeAddress(req.body.shippingAddress)
 }
 
-async function couponFor(code, subtotal, deliveryMethod) {
+async function couponFor(code, subtotal, deliveryMethod, userId) {
   if (!code) return { coupon: null, totals: calculateTotals([{ unitPrice: subtotal, quantity: 1 }], { deliveryMethod }) }
   const coupon = await findCoupon(code)
   if (!coupon) return { error: "This coupon is expired or unavailable", code: "COUPON_INVALID" }
   if (subtotal < Number(coupon.minimumOrder || 0)) return { error: `This coupon requires a minimum order of $${Number(coupon.minimumOrder).toFixed(2)}`, code: "COUPON_MINIMUM" }
   if (coupon.usageLimit != null && Number(coupon.usageCount || 0) >= Number(coupon.usageLimit)) return { error: "This coupon has reached its usage limit", code: "COUPON_LIMIT" }
+  if (!couponAvailable(coupon, userId)) return { error: "You have reached this coupon's per-customer limit", code: "COUPON_USER_LIMIT" }
   return { coupon, totals: calculateTotals([{ unitPrice: subtotal, quantity: 1 }], { coupon, deliveryMethod }) }
 }
 
@@ -76,14 +149,17 @@ export const createOrder = asyncHandler(async (req, res) => {
     const items = []
     for (const item of cart.items) {
       const product = item.product
-      if (!product || product.stock < item.quantity) return res.status(409).json({ message: "One or more items are no longer available", code: "OUT_OF_STOCK" })
+      if (!product || product.active === false || product.stock < item.quantity) return res.status(409).json({ message: "One or more items are no longer available", code: "OUT_OF_STOCK" })
       items.push({ product: product._id, title: product.title, image: product.images?.[0] || product.image, unitPrice: product.price, quantity: item.quantity })
     }
     const subtotal = money(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0))
-    const couponResult = await couponFor(req.body.couponCode, subtotal, deliveryMethod)
+    const couponResult = await couponFor(req.body.couponCode, subtotal, deliveryMethod, req.user._id)
     if (couponResult.error) return res.status(400).json({ message: couponResult.error, code: couponResult.code })
     const amounts = calculateTotals(items, { coupon: couponResult.coupon, deliveryMethod })
-    const order = await Order.create({
+    const dealReservations = await reserveDealStock(items)
+    let order
+    try {
+      order = await Order.create({
       orderNumber: `AMZ-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
       user: req.user._id,
       items,
@@ -96,21 +172,47 @@ export const createOrder = asyncHandler(async (req, res) => {
       estimatedDelivery: estimatedDelivery(deliveryMethod),
       trackingNumber: `AMZ-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
       statusHistory: [{ status: "Pending", label: "Order placed", at: new Date() }],
+      dealReservations: dealReservations.map((reservation) => ({ deal: reservation.dealId, product: reservation.product, quantity: reservation.quantity })),
       clientRequestId,
-    })
+      })
+    } catch (error) {
+      await releaseDealStock(dealReservations)
+      throw error
+    }
     const decremented = []
+    const lowStockCandidates = []
     for (const item of items) {
       const updated = await Product.findOneAndUpdate({ _id: item.product, stock: { $gte: item.quantity } }, { $inc: { stock: -item.quantity } }, { new: false })
       if (!updated) {
         await Promise.all(decremented.map((entry) => Product.updateOne({ _id: entry.product }, { $inc: { stock: entry.quantity } })))
+        await releaseDealStock(dealReservations)
         await Order.deleteOne({ _id: order._id })
         return res.status(409).json({ message: "Stock changed while placing the order", code: "OUT_OF_STOCK" })
       }
       decremented.push(item)
+      lowStockCandidates.push({ item, remaining: Math.max(0, Number(updated.stock || 0) - Number(item.quantity || 0)), product: updated })
+    }
+    if (couponResult.coupon) {
+      let recorded
+      try {
+        recorded = await recordCouponUsage(couponResult.coupon.code, req.user._id)
+      } catch (error) {
+        await Promise.all(decremented.map((entry) => Product.updateOne({ _id: entry.product }, { $inc: { stock: entry.quantity } })))
+        await releaseDealStock(dealReservations)
+        await Order.deleteOne({ _id: order._id })
+        throw error
+      }
+      if (!recorded) {
+        await Promise.all(decremented.map((entry) => Product.updateOne({ _id: entry.product }, { $inc: { stock: entry.quantity } })))
+        await releaseDealStock(dealReservations)
+        await Order.deleteOne({ _id: order._id })
+        return res.status(409).json({ success: false, message: "This coupon was just used by another customer", code: "COUPON_LIMIT" })
+      }
     }
     await Cart.deleteOne({ user: req.user._id })
-    if (couponResult.coupon) { try { await recordCouponUsage(couponResult.coupon.code) } catch { /* order remains authoritative if analytics side effect fails */ } }
+    await Promise.all(lowStockCandidates.map(({ item, remaining, product }) => notifyLowStockAfterOrder(item, remaining, product)))
     try { await createNotification(req.user._id, { type: "order", title: "Order placed", message: `We received order ${order.orderNumber || order._id}.`, link: `/account/orders/${order._id}`, metadata: { orderId: String(order._id) } }) } catch { /* do not turn a placed order into a failed request */ }
+    try { await createAdminNotification({ type: "admin-order", title: "New order placed", message: `Order ${order.orderNumber || order._id} was placed.`, link: "/admin/orders", metadata: { orderId: String(order._id), total: order.total } }) } catch { /* order remains authoritative */ }
     return res.status(201).json({ data: orderJson(order) })
   }
 
@@ -123,16 +225,20 @@ export const createOrder = asyncHandler(async (req, res) => {
   const items = []
   for (const item of cart.items) {
     const product = demoProduct(item.productId)
-    if (!product || product.stock < item.quantity) return res.status(409).json({ message: "One or more items are no longer available", code: "OUT_OF_STOCK" })
+    if (!product || product.active === false || product.stock < item.quantity) return res.status(409).json({ message: "One or more items are no longer available", code: "OUT_OF_STOCK" })
     items.push({ product: product._id, title: product.title, image: product.images[0], unitPrice: product.price, quantity: item.quantity })
   }
   const subtotal = money(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0))
-  const couponResult = await couponFor(req.body.couponCode, subtotal, deliveryMethod)
+  const couponResult = await couponFor(req.body.couponCode, subtotal, deliveryMethod, req.user._id)
   if (couponResult.error) return res.status(400).json({ message: couponResult.error, code: couponResult.code })
   const amounts = calculateTotals(items, { coupon: couponResult.coupon, deliveryMethod })
+  const dealReservations = await reserveDealStock(items)
+  const lowStockCandidates = []
   for (const item of items) {
     const product = demoProduct(item.product)
-    product.stock -= item.quantity
+    const remaining = Math.max(0, Number(product.stock || 0) - Number(item.quantity || 0))
+    product.stock = remaining
+    lowStockCandidates.push({ item, remaining, product })
   }
   const createdAt = new Date()
   const order = {
@@ -150,14 +256,26 @@ export const createOrder = asyncHandler(async (req, res) => {
     trackingNumber: `AMZ-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
     status: "Pending",
     statusHistory: [{ status: "Pending", label: "Order placed", at: createdAt }],
+    dealReservations: dealReservations.map((reservation) => ({ deal: reservation.dealId, product: reservation.product, quantity: reservation.quantity })),
     clientRequestId,
     createdAt,
     updatedAt: createdAt,
   }
   memory.orders.push(order)
+  if (couponResult.coupon) {
+    const recorded = await recordCouponUsage(couponResult.coupon.code, req.user._id)
+    if (!recorded) {
+      items.forEach((item) => { const product = demoProduct(item.product); if (product) product.stock += item.quantity })
+      await releaseDealStock(dealReservations)
+      const failedIndex = memory.orders.findIndex((entry) => String(entry._id) === String(order._id))
+      if (failedIndex >= 0) memory.orders.splice(failedIndex, 1)
+      return res.status(409).json({ success: false, message: "This coupon was just used by another customer", code: "COUPON_LIMIT" })
+    }
+  }
   memory.carts.delete(String(req.user._id))
-  if (couponResult.coupon) { try { await recordCouponUsage(couponResult.coupon.code) } catch { /* best effort */ } }
+  await Promise.all(lowStockCandidates.map(({ item, remaining, product }) => notifyLowStockAfterOrder(item, remaining, product)))
   try { await createNotification(req.user._id, { type: "order", title: "Order placed", message: `We received order ${order.orderNumber}.`, link: `/account/orders/${order._id}`, metadata: { orderId: order._id } }) } catch { /* best effort */ }
+  try { await createAdminNotification({ type: "admin-order", title: "New order placed", message: `Order ${order.orderNumber} was placed.`, link: "/admin/orders", metadata: { orderId: order._id, total: order.total } }) } catch { /* best effort */ }
   return res.status(201).json({ data: orderJson(order) })
 })
 
@@ -185,24 +303,16 @@ export const getOrder = asyncHandler(async (req, res) => {
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   const status = String(req.body.status || "")
   const allowed = ["Pending", "Processing", "Shipped", "Out for delivery", "Delivered", "Cancelled"]
-  if (!allowed.includes(status)) return res.status(400).json({ message: "Invalid order status", code: "STATUS_INVALID" })
+  if (!allowed.includes(status)) return res.status(400).json({ success: false, message: "Invalid order status", code: "STATUS_INVALID" })
   if (databaseReady()) {
-    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Order not found", code: "ORDER_NOT_FOUND" })
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ success: false, message: "Order not found", code: "ORDER_NOT_FOUND" })
     const order = await Order.findOne({ _id: req.params.id, user: req.user._id })
-    if (!order) return res.status(404).json({ message: "Order not found", code: "ORDER_NOT_FOUND" })
-    if (order.status !== status && !statusTransitions[order.status]?.has(status)) return res.status(409).json({ message: `Order cannot move from ${order.status} to ${status}`, code: "STATUS_TRANSITION_INVALID" })
-    order.status = status
-    order.statusHistory.push({ status, label: status, at: new Date() })
-    await order.save()
-    if (["Shipped", "Delivered"].includes(status)) { try { await createNotification(req.user._id, { type: "order", title: `Order ${status.toLowerCase()}`, message: `Your order ${order.orderNumber || order._id} is ${status.toLowerCase()}.`, link: `/account/orders/${order._id}` }) } catch { /* status remains authoritative */ } }
-    return res.json({ data: orderJson(order) })
+    if (!order) return res.status(404).json({ success: false, message: "Order not found", code: "ORDER_NOT_FOUND" })
+    await applyOrderStatus(order, status)
+    return res.json({ success: true, data: orderJson(order) })
   }
   const order = memory.orders.find((entry) => String(entry._id) === String(req.params.id) && String(entry.user) === String(req.user._id))
-  if (!order) return res.status(404).json({ message: "Order not found", code: "ORDER_NOT_FOUND" })
-  if (order.status !== status && !statusTransitions[order.status]?.has(status)) return res.status(409).json({ message: `Order cannot move from ${order.status} to ${status}`, code: "STATUS_TRANSITION_INVALID" })
-  order.status = status
-  order.statusHistory ||= []
-  order.statusHistory.push({ status, label: status, at: new Date() })
-  try { await createNotification(req.user._id, { type: "order", title: `Order ${status.toLowerCase()}`, message: `Your order ${order.orderNumber} is ${status.toLowerCase()}.`, link: `/account/orders/${order._id}` }) } catch { /* status remains authoritative */ }
-  return res.json({ data: orderJson(order) })
+  if (!order) return res.status(404).json({ success: false, message: "Order not found", code: "ORDER_NOT_FOUND" })
+  await applyOrderStatus(order, status)
+  return res.json({ success: true, data: orderJson(order) })
 })

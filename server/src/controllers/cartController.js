@@ -6,9 +6,10 @@ import { databaseReady } from "../config/db.js"
 import { memory, id } from "../data/memory.js"
 import demoProducts from "../data/products.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { activeBrandNames, activeCategoryNames } from "../services/taxonomyService.js"
 
 function findDemoProduct(productId) {
-  return demoProducts.find((product) => String(product._id) === String(productId) || product.slug === productId)
+  return demoProducts.find((product) => product.active !== false && (String(product._id) === String(productId) || product.slug === productId))
 }
 
 function demoProductJson(product) {
@@ -18,9 +19,13 @@ function demoProductJson(product) {
 async function findProduct(productId) {
   if (databaseReady()) {
     if (!mongoose.isValidObjectId(productId)) return null
-    return Product.findById(productId)
+    const [product, categories, brands] = await Promise.all([Product.findOne({ _id: productId, active: { $ne: false } }), activeCategoryNames(), activeBrandNames()])
+    if (!product || (categories.configured && !categories.has(product.category)) || (brands.configured && !brands.has(product.brand))) return null
+    return product
   }
-  return findDemoProduct(productId) || null
+  const product = findDemoProduct(productId) || null
+  if (!product || !memory.categories.some((entry) => entry.active && entry.name === product.category) || !memory.brands.some((entry) => entry.active && entry.name === product.brand)) return null
+  return product
 }
 
 function serializeDemoItems(items = []) {
@@ -43,7 +48,7 @@ async function serializeDbCart(cart) {
   const serialize = (item) => item.product ? { id: String(item._id), quantity: item.quantity, product: { ...item.product.toJSON(), id: String(item.product._id) } } : null
   const items = cart.items.map(serialize).filter(Boolean)
   const savedItems = cart.savedItems.map(serialize).filter(Boolean)
-  const unavailableItems = [...cart.items, ...cart.savedItems].filter((item) => !item.product || item.product.stock < 1).map((item) => ({ id: String(item._id), productId: item.product ? String(item.product._id) : String(item.product), quantity: item.quantity }))
+  const unavailableItems = [...cart.items, ...cart.savedItems].filter((item) => !item.product || item.product.active === false || item.product.stock < 1).map((item) => ({ id: String(item._id), productId: item.product ? String(item.product._id) : String(item.product), quantity: item.quantity }))
   return { id: String(cart._id), items, savedItems, unavailableItems, updatedAt: cart.updatedAt }
 }
 

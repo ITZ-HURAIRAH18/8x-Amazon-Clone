@@ -2,6 +2,9 @@ import mongoose from "mongoose"
 import { connectDatabase, disconnectDatabase } from "./config/db.js"
 import { Product } from "./models/Product.js"
 import { Coupon } from "./models/Coupon.js"
+import { Category } from "./models/Category.js"
+import { Brand } from "./models/Brand.js"
+import { Deal } from "./models/Deal.js"
 import demoProducts from "./data/products.js"
 
 const connected = await connectDatabase()
@@ -21,6 +24,13 @@ if (!connected) {
     dealEndsAt: product.deal ? new Date(Date.now() + (8 * 60 * 60 * 1000)) : null,
   }))
   await Product.insertMany(products)
+  const categoryNames = [...new Set(products.map((product) => product.category))]
+  const brandNames = [...new Set(products.map((product) => product.brand))]
+  await Category.deleteMany({})
+  await Brand.deleteMany({})
+  await Deal.deleteMany({})
+  await Category.insertMany(categoryNames.map((name) => ({ name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), description: `${name} products`, active: true })))
+  await Brand.insertMany(brandNames.map((name) => ({ name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), description: `${name} products`, active: true })))
   await Coupon.deleteMany({})
   await Coupon.insertMany([
     {
@@ -53,7 +63,8 @@ if (!connected) {
       active: true,
     },
   ])
-  console.log(`Seeded ${products.length} products and 3 coupons`)
+  console.log(`Seeded ${products.length} products, ${categoryNames.length} categories, ${brandNames.length} brands, and 3 coupons`)
+  console.log("Existing deals were removed because seeded products receive new identifiers.")
   await disconnectDatabase()
 }
 
