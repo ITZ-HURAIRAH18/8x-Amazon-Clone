@@ -159,19 +159,42 @@ List endpoints accept `page`, `limit`, `search`, and resource-specific filters a
 
 ### Create an admin safely
 
-Admin credentials are never stored in the frontend or README. Set these server environment variables and run the explicit seed command:
-
-```env
-ADMIN_NAME=Operations Administrator
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=use-a-long-random-password
-```
+Run this once from the repository root (or from `server/`):
 
 ```bash
 npm run seed:admin
 ```
 
-The seed command requires MongoDB, hashes the password with bcrypt, and upserts the account with the `admin` role. Re-running it resets the password and revokes existing sessions.
+If `ADMIN_EMAIL` and `ADMIN_PASSWORD` are not set, the command asks for them:
+
+```text
+Amazon Clone - administrator account setup
+------------------------------------------
+No ADMIN_EMAIL / ADMIN_PASSWORD found, so this wizard will ask for them.
+Nothing is saved until both password entries match.
+
+Administrator name [Administrator]: Operations Administrator
+Administrator email: you@example.com
+Password (12+ characters): ********
+Confirm password: ********
+
+Administrator you@example.com was created.
+
+Next steps
+  1. Start the app:      npm run dev
+  2. Open admin sign in: http://localhost:5173/admin/login
+```
+
+The password is read without echo, hashed with bcrypt, and stored with the `admin` role. Re-running the command resets the password and revokes every issued admin session. To run it without prompts, set the variables first:
+
+```powershell
+$env:ADMIN_NAME = "Operations Administrator"
+$env:ADMIN_EMAIL = "you@example.com"
+$env:ADMIN_PASSWORD = "a-long-random-password"
+npm run seed:admin
+```
+
+The same three variables can live in `server/.env`. Admin credentials never belong in the frontend or in this README.
 
 ---
 
@@ -332,7 +355,7 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=use-a-long-random-password
 ```
 
-Run `npm run seed:admin` explicitly; the password is hashed server-side and no admin credential belongs in the frontend or README. The optional `ORDER_STATUS_TOKEN` and `PRODUCT_ADMIN_TOKEN` variables are reserved for explicitly documented emergency operations paths; normal administration uses the admin role.
+Run `npm run seed:admin` explicitly; it prompts for the administrator name, email, and password when they are not already in `server/.env`. The optional `ORDER_STATUS_TOKEN` and `PRODUCT_ADMIN_TOKEN` variables are reserved for explicitly documented emergency operations paths; normal administration uses the admin role.
 
 For Atlas SRV records in restricted networks, configure:
 
