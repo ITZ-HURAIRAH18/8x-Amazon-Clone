@@ -17,4 +17,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: node --check server/src/server.js
+      - name: Server syntax check
+        run: |
+          find server/src server/api -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Secret scan
+        run: |
+          if git grep -nEI "(mongodb(\+srv)?://[^[:space:]]+:[^[:space:]]+@|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----)" -- . ':!*.example' ':!.agent-logs'; then
+            echo "Potential secret found in the repository"
+            exit 1
+          fi
+          echo "No committed secrets detected"
