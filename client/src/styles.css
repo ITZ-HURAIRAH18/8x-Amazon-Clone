@@ -13,8 +13,10 @@
   --amz-search: #febd69;
   --amz-buy: #ffd814;
   --amz-buy-hover: #f7ca00;
+  --amz-buy-dark: #d5a000;
   --amz-success: #007600;
   --amz-warning: #b12704;
+  --amz-danger: #b12704;
   --shadow-card: 0 1px 4px rgba(15, 17, 17, 0.12);
   --max-width: 1500px;
   font-family: Arial, Helvetica, sans-serif;
@@ -58,10 +60,13 @@ h1, h2, h3 { line-height: 1.25; }
 .delivery-location span, .header-account span, .header-orders span { display: flex; flex-direction: column; align-items: flex-start; line-height: 14px; }
 .delivery-location small, .header-account small, .header-orders small { font-size: 11px; color: #d6dbdb; }
 .delivery-location strong, .header-account strong, .header-orders strong { font-size: 13px; font-weight: 700; }
-.search-form { height: 40px; min-width: 0; flex: 1 1 auto; display: flex; align-items: stretch; border-radius: 4px; overflow: hidden; }
-.search-form select { width: 96px; flex: 0 0 96px; min-width: 0; border: 0; background: #e6e6e6; color: #333; padding: 0 8px; font-size: 12px; }
-.search-form input { min-width: 0; flex: 1; border: 0; padding: 0 12px; outline: 0; }
-.search-submit { width: 48px; flex: 0 0 48px; border: 0; background: var(--amz-search); color: #131921; display: grid; place-items: center; }
+.search-form { height: 44px; min-width: 0; flex: 1 1 auto; display: flex; align-items: stretch; border-radius: 6px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.search-form select { width: 104px; flex: 0 0 104px; min-width: 0; height: 44px; border: 0; border-right: 1px solid #cdd2d5; background: #e6e6e6; color: #333; padding: 0 26px 0 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.search-form input { min-width: 0; flex: 1; height: 44px; border: 0; background: #fff; color: var(--amz-ink); padding: 0 38px 0 12px; outline: 0; font-size: 15px; }
+.search-form input::placeholder { color: #6b7280; }
+.search-form:focus-within { box-shadow: 0 0 0 3px rgba(255,153,0,.45); }
+.search-form select:focus-visible, .search-submit:focus-visible { outline: 2px solid var(--amz-accent); outline-offset: -3px; }
+.search-submit { width: 52px; flex: 0 0 52px; height: 44px; border: 0; background: var(--amz-search); color: #131921; display: grid; place-items: center; }
 .search-submit:hover { background: #f3ae52; }
 .language-button { display: flex; align-items: center; gap: 3px; color: #fff; background: transparent; border: 0; padding: 7px 3px; white-space: nowrap; }
 .language-button:hover { color: var(--amz-accent); }
@@ -117,6 +122,16 @@ h1, h2, h3 { line-height: 1.25; }
 .primary-button:hover { background: var(--amz-buy-hover); color: var(--amz-ink); }
 .secondary-button { background: linear-gradient(to bottom, #f6f6f6, #e5e5e5); border-color: #b8b8b8; color: var(--amz-ink); box-shadow: 0 1px 1px rgba(0,0,0,.08); }
 .secondary-button:hover { background: #f1f1f1; color: var(--amz-ink); }
+/* Wishlist "Move to cart" — a solid Amazon-style action rather than a flat link. */
+.wishlist-item__actions { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+.wishlist-move-button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 20px; border: 1px solid var(--amz-buy-dark); border-radius: 999px; background: var(--amz-buy); color: var(--amz-ink); font-size: 13px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.12); transition: background .15s, transform .05s, box-shadow .15s; }
+.wishlist-move-button:hover:not(:disabled) { background: var(--amz-buy-hover); }
+.wishlist-move-button:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.wishlist-move-button:disabled { background: #e7e7e7; border-color: #cdd2d5; color: var(--amz-muted); cursor: not-allowed; }
+.wishlist-move-button__spinner { width: 14px; height: 14px; border: 2px solid rgba(0,0,0,.2); border-top-color: var(--amz-ink); border-radius: 50%; animation: wishlist-spin .7s linear infinite; }
+@keyframes wishlist-spin { to { transform: rotate(360deg); } }
+.wishlist-item__actions .delete-link { min-height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 4px; border: 0; background: transparent; color: var(--amz-link); font-size: 13px; font-weight: 400; }
+.wishlist-item__actions .delete-link:hover { color: var(--amz-danger); text-decoration: underline; }
 .breadcrumbs { min-height: 42px; display: flex; align-items: center; gap: 8px; color: var(--amz-muted); font-size: 12px; }
 .breadcrumbs a { color: var(--amz-link); }
 .breadcrumbs strong { font-weight: 400; color: var(--amz-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -658,7 +673,7 @@ h1, h2, h3 { line-height: 1.25; }
 .search-input-wrap { position: relative; min-width: 0; flex: 1 1 auto; display: flex; align-items: center; }
 .search-input-wrap input { width: 100%; }
 .search-clear { position: absolute; right: 7px; display: grid; place-items: center; border: 0; background: transparent; color: var(--amz-muted); padding: 5px; }
-.search-suggestions { position: absolute; z-index: 70; top: 40px; left: 0; right: 0; overflow: hidden; background: #fff; color: var(--amz-ink); border: 1px solid var(--amz-border); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
+.search-suggestions { position: absolute; z-index: 70; top: 46px; left: 0; right: 0; overflow: hidden; background: #fff; color: var(--amz-ink); border: 1px solid var(--amz-border); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
 .search-suggestions button { width: 100%; display: flex; align-items: center; gap: 9px; min-height: 35px; padding: 7px 11px; border: 0; background: #fff; color: var(--amz-ink); text-align: left; font-size: 13px; }
 .search-suggestions button:hover { background: #f3f3f3; color: var(--amz-link); }
 .search-suggestions button small { margin-left: auto; color: var(--amz-muted); font-size: 10px; }

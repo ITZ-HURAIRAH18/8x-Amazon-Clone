@@ -27,6 +27,8 @@ The project is intentionally a functional commerce demo rather than a claim of A
 
 ### Shopping
 
+- 190-product catalog across 13 categories with 10–15 products in every category, seeded from `server/src/data/products.js`
+- Verified real product photography: every image URL is checked with `npm run verify:images` before it reaches the database
 - Amazon-style homepage with hero carousel, category browsing, service strip, product carousels, Prime-style promotion, and deal sections
 - Product search across title, description, category, brand, and features
 - URL-backed category, brand, price, rating, stock, discount, deal, Prime-style, featured, and bestseller filters
@@ -381,7 +383,13 @@ npm run seed
 npm run seed:coupons
 ```
 
-`npm run seed` replaces the product catalog with the checked-in demo catalog and rebuilds matching category and brand records (existing deals are removed because seeded products receive new identifiers). `npm run seed:coupons` upserts `SAVE10`, `WELCOME5`, and `FREESHIP` without deleting products. `npm run seed:admin` creates or updates the administrator account from `ADMIN_*` variables.
+`npm run seed` replaces the product catalog with the checked-in demo catalog (190 products across 13 categories, 10–15 per category) and rebuilds matching category and brand records (existing deals are removed because seeded products receive new identifiers). `npm run seed:coupons` upserts `SAVE10`, `WELCOME5`, and `FREESHIP` without deleting products. `npm run seed:admin` creates or updates the administrator account from `ADMIN_*` variables.
+
+To confirm that no product image is broken, verify the image pool against Unsplash before seeding:
+
+```bash
+npm run verify:images
+```
 
 ### Run locally
 

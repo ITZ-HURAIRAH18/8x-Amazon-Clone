@@ -16,7 +16,8 @@
     "seed:admin": "npm run seed:admin --workspace server",
     "smoke": "npm run smoke --workspace server",
     "smoke:admin": "npm run smoke:admin --workspace server",
-    "verify:deploy": "node scripts/verify-deployment.mjs"
+    "verify:deploy": "node scripts/verify-deployment.mjs",
+    "verify:images": "node scripts/verify-images.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

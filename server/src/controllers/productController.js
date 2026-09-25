@@ -101,24 +101,29 @@ function buildDbFilter(query) {
   return filter
 }
 
+// Every sort ends with _id so ordering is total. Without a unique tiebreaker
+// equal values can shuffle between requests and the same product can appear on
+// two pages while another is skipped.
 function dbSort(sort) {
-  return {
-    newest: { createdAt: -1 },
-    priceAsc: { price: 1 },
-    "price-low": { price: 1 },
-    priceDesc: { price: -1 },
-    "price-high": { price: -1 },
-    rating: { rating: -1, reviewCount: -1 },
-    reviews: { reviewCount: -1 },
-    featured: { featured: -1, rating: -1, reviewCount: -1 },
-    "best-sellers": { bestseller: -1, reviewCount: -1 },
-    "biggest-discount": { discount: -1, rating: -1 },
-  }[sort] || { featured: -1, rating: -1, reviewCount: -1 }
+  const orders = {
+    newest: { createdAt: -1, _id: 1 },
+    priceAsc: { price: 1, _id: 1 },
+    "price-low": { price: 1, _id: 1 },
+    priceDesc: { price: -1, _id: 1 },
+    "price-high": { price: -1, _id: 1 },
+    rating: { rating: -1, reviewCount: -1, _id: 1 },
+    reviews: { reviewCount: -1, _id: 1 },
+    featured: { featured: -1, rating: -1, reviewCount: -1, _id: 1 },
+    "best-sellers": { bestseller: -1, reviewCount: -1, _id: 1 },
+    "biggest-discount": { discount: -1, rating: -1, _id: 1 },
+  }
+  return orders[sort] || orders.featured
 }
 
 export const listProducts = asyncHandler(async (req, res) => {
-  const page = Math.max(1, Number(req.query.page) || 1)
-  const limit = Math.min(48, Math.max(1, Number(req.query.limit) || 24))
+  const page = Math.max(1, Math.min(500, Number(req.query.page) || 1))
+  // Capped to keep a single response light; the catalog is browsed page by page.
+  const limit = Math.min(60, Math.max(1, Number(req.query.limit) || 24))
   const query = { ...req.query, search: req.query.search || req.query.q || "" }
   let products
   let total

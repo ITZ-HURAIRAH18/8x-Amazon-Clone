@@ -47,6 +47,25 @@ try {
   const catalog = await api("/products?search=headphones&sort=price-low&limit=5")
   if (!catalog.data.length) throw new Error("Smoke test could not find a product")
   const product = catalog.data[0]
+
+  // Every category must carry a real range of products, and paging through the
+  // whole catalog must not repeat or skip a product.
+  const facets = await api("/products/facets")
+  const thin = []
+  for (const name of facets.data.categories) {
+    const scoped = await api(`/products?category=${encodeURIComponent(name)}&limit=1`)
+    if (scoped.meta.total < 10) thin.push(`${name}=${scoped.meta.total}`)
+  }
+  if (thin.length) throw new Error(`Categories with fewer than 10 products: ${thin.join(", ")}`)
+
+  const first = await api("/products?limit=60&page=1&sort=featured")
+  const walked = []
+  for (let page = 1; page <= first.meta.pages; page += 1) {
+    const result = page === 1 ? first : await api(`/products?limit=60&page=${page}&sort=featured`)
+    walked.push(...result.data.map((entry) => String(entry.id)))
+  }
+  if (walked.length !== first.meta.total) throw new Error(`Pagination returned ${walked.length} of ${first.meta.total} products`)
+  if (new Set(walked).size !== walked.length) throw new Error("Pagination returned duplicate products across pages")
   await api("/wishlist", { method: "POST", body: JSON.stringify({ productId: product.id }) })
   await api(`/wishlist/${product.id}`, { method: "DELETE" })
   const address = (await api("/addresses", { method: "POST", body: JSON.stringify({ fullName: "Smoke Tester", street: "1 Test Street", city: "New York", state: "NY", postalCode: "10001", isDefault: true }) })).data
@@ -69,7 +88,7 @@ try {
   const login = await api("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) })
   if (!login.data.token) throw new Error("Login persistence check failed")
   token = login.data.token
-  console.log(`Smoke test passed: search, wishlist, cart, coupon, order, review, notifications, and login (${order.id})`)
+  console.log(`Smoke test passed: category coverage (${facets.data.categories.length} categories, 10+ products each), pagination, search, wishlist, cart, coupon, order, review, notifications, and login (${order.id})`)
 } catch (error) {
   console.error(`Smoke test failed: ${error.message}`)
   process.exitCode = 1

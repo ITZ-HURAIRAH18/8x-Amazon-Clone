@@ -258,12 +258,14 @@ async function run() {
   })
   created.deal = deal.data.id
   check(deal.data.products.length === 1, "admin creates a deal with selected products")
-  const deals = await get("/products?deal=true&limit=100")
+  // The catalog can hold more deals than one page, so search by the new
+  // product's own title instead of scanning only the first page.
+  const deals = await get(`/products?deal=true&search=${encodeURIComponent("Admin Smoke Product")}&limit=20`)
   check(deals.data.some((row) => row.id === created.product), "admin deal appears on the customer deals feed")
   await admin(`/admin/deals/${created.deal}`, "DELETE")
   await Deal.deleteOne({ _id: created.deal })
   created.deal = null
-  const dealsAfter = await get("/products?deal=true&limit=100")
+  const dealsAfter = await get(`/products?deal=true&search=${encodeURIComponent("Admin Smoke Product")}&limit=20`)
   check(!dealsAfter.data.some((row) => row.id === created.product), "removing a deal restores product pricing")
 
   // 9. Customer management

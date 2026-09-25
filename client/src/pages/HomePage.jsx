@@ -11,17 +11,30 @@ import { normalizeProduct } from "../utils/format"
 import { useShoppingMemory } from "../context/StoreContext"
 import { usePageMeta } from "../utils/seo"
 
-const categories = ["Electronics", "Home", "Kitchen", "Fashion", "Beauty", "Books"]
+const homepageCategories = ["Electronics", "Computers", "Phones", "Home", "Kitchen", "Fashion", "Beauty", "Books", "Toys", "Grocery", "Sports", "Gaming", "Cameras"]
 
 export default function HomePage() {
   const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState(homepageCategories)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const { recent } = useShoppingMemory()
   usePageMeta("Amazon Clone — Shop Electronics, Home, Fashion and More", "Shop electronics, computers, home, kitchen, fashion, beauty, books, and more with fast delivery.")
   useEffect(() => {
     let active = true
-    productApi.list({ limit: 48, sort: "featured" }).then((result) => { if (active) setProducts((result.data || []).map(normalizeProduct)) }).catch((requestError) => { if (active) { setProducts(demoProducts); setError(errorMessage(requestError)) } }).finally(() => { if (active) setLoading(false) })
+    // The catalog is larger than a single page, so the homepage pulls the first
+    // four pages in parallel to fill every category tile and carousel.
+    Promise.all([1, 2, 3, 4].map((page) => productApi.list({ limit: 60, page, sort: "featured" })))
+      .then((pages) => {
+        if (!active) return
+        const merged = pages.flatMap((result) => result.data || []).map(normalizeProduct)
+        const unique = [...new Map(merged.map((product) => [product.id, product])).values()]
+        setProducts(unique)
+        const present = [...new Set(unique.map((product) => product.category).filter(Boolean))]
+        setCategories(homepageCategories.filter((name) => present.includes(name)).length >= 4 ? homepageCategories.filter((name) => present.includes(name)) : present.slice(0, 6))
+      })
+      .catch((requestError) => { if (active) { setProducts(demoProducts); setError(errorMessage(requestError)) } })
+      .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
   const groups = useMemo(() => {
