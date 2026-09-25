@@ -41,6 +41,8 @@ A high-fidelity Amazon-inspired shopping experience built with React, Vite, Expr
    - API: `http://localhost:5000/api`
    - Health check: `http://localhost:5000/api/health`
 
+The client includes `client/vercel.json` for SPA history rewrites. Set `VITE_API_URL` to the deployed API URL for production.
+
 ## Core routes
 
 - `/` — dense Amazon-style home page
