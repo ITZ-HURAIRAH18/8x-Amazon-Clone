@@ -1,3 +1,4 @@
+import dns from "node:dns"
 import mongoose from "mongoose"
 import { env } from "./env.js"
 
@@ -9,6 +10,8 @@ function safeMongoError(error) {
 }
 
 export async function connectDatabase() {
+  const dnsServers = String(process.env.MONGO_DNS_SERVERS || "").split(",").map((value) => value.trim()).filter(Boolean)
+  if (dnsServers.length) dns.setServers(dnsServers)
   mongoose.connection.on("connected", () => console.log("MongoDB connected"))
   mongoose.connection.on("error", (error) => {
     const safe = safeMongoError(error)

@@ -43,6 +43,8 @@ A high-fidelity Amazon-inspired shopping experience built with React, Vite, Expr
 
 The client includes `client/vercel.json` for SPA history rewrites. Set `VITE_API_URL` to the deployed API URL for production.
 
+If Atlas is reachable but the local OS resolver cannot resolve MongoDB SRV records, set `MONGO_DNS_SERVERS=8.8.8.8` in `server/.env` and restart the API.
+
 ## Core routes
 
 - `/` — dense Amazon-style home page
