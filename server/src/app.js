@@ -9,6 +9,7 @@ import wishlistRoutes from "./routes/wishlistRoutes.js"
 import addressRoutes from "./routes/addressRoutes.js"
 import couponRoutes from "./routes/couponRoutes.js"
 import notificationRoutes from "./routes/notificationRoutes.js"
+import reviewRoutes from "./routes/reviewRoutes.js"
 import { errorHandler, notFound } from "./middleware/error.js"
 import { databaseReady } from "./config/db.js"
 import { env } from "./config/env.js"
@@ -28,6 +29,8 @@ export function createApp() {
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://amazon-clone-client-five.vercel.app",
@@ -68,6 +71,7 @@ export function createApp() {
   app.use("/api/addresses", addressRoutes)
   app.use("/api/coupons", couponRoutes)
   app.use("/api/notifications", notificationRoutes)
+  app.use("/api/reviews", reviewRoutes)
   app.use(notFound)
   app.use(errorHandler)
   return app

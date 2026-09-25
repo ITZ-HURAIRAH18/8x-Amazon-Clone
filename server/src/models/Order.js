@@ -11,22 +11,45 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false },
 )
 
+const orderEventSchema = new mongoose.Schema(
+  {
+    status: { type: String, required: true },
+    label: { type: String, required: true },
+    at: { type: Date, default: Date.now },
+  },
+  { _id: false },
+)
+
 const orderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     items: { type: [orderItemSchema], required: true },
     shippingAddress: { type: mongoose.Schema.Types.Mixed, required: true },
     paymentMethod: { type: String, required: true },
+    paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed", "Refunded"], default: "Paid" },
+    deliveryMethod: { type: String, enum: ["standard", "priority", "express"], default: "standard" },
     subtotal: { type: Number, required: true, min: 0 },
+    discount: { type: Number, default: 0, min: 0 },
+    couponCode: { type: String, default: "" },
     shipping: { type: Number, required: true, min: 0 },
     tax: { type: Number, required: true, min: 0 },
     total: { type: Number, required: true, min: 0 },
-    status: { type: String, enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"], default: "Pending", index: true },
+    status: {
+      type: String,
+      enum: ["Pending", "Processing", "Shipped", "Out for delivery", "Delivered", "Cancelled"],
+      default: "Pending",
+      index: true,
+    },
+    estimatedDelivery: { type: Date, default: null },
+    trackingNumber: { type: String, default: "" },
+    statusHistory: { type: [orderEventSchema], default: [] },
     clientRequestId: { type: String, index: true },
   },
   { timestamps: true },
 )
 
 orderSchema.index({ user: 1, clientRequestId: 1 }, { unique: true, sparse: true })
+orderSchema.index({ user: 1, createdAt: -1 })
+orderSchema.index({ status: 1, estimatedDelivery: 1 })
 
 export const Order = mongoose.models.Order || mongoose.model("Order", orderSchema)

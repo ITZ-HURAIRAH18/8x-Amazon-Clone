@@ -128,7 +128,7 @@ function getDbNameFromUri(uri) {
 let connectionPromise = null;
 
 async function connectDB() {
-  const uri = process.env.MONGODB_URI || process.env.MONGO_URI || env.mongoUri;
+  const uri = env.mongoUri;
 
   if (!uri) {
     throw new Error(
@@ -163,7 +163,8 @@ async function connectDB() {
       console.log("⏳ Connecting to MongoDB (SRV)...");
       // Set DNS to Google/Cloudflare in case system DNS is partially broken
       try {
-        dns.setServers(["8.8.8.8", "1.1.1.1", "8.8.4.4"]);
+        const servers = String(env.mongoDnsServers || "").split(",").map((server) => server.trim()).filter(Boolean);
+        if (servers.length) dns.setServers(servers);
       } catch (dnsErr) {
         // ignore if custom dns set error
       }

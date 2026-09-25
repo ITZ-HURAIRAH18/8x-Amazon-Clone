@@ -22,6 +22,8 @@ const productSchema = new mongoose.Schema(
     prime: { type: Boolean, default: true },
     delivery: { type: String, default: "FREE delivery" },
     features: [{ type: String }],
+    specifications: { type: mongoose.Schema.Types.Mixed, default: {} },
+    dealEndsAt: { type: Date, default: null, index: true },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 )

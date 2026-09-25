@@ -12,5 +12,6 @@ export function errorHandler(error, _req, res, _next) {
     return res.status(409).json({ message: "An account with that email already exists", code: "DUPLICATE" })
   }
   const status = error.statusCode || (error.name === "CastError" ? 400 : 500)
-  return res.status(status).json({ message: error.message || "Unexpected server error", code: error.code || "SERVER_ERROR" })
+  const safeMessage = status >= 500 ? "Unexpected server error" : (error.message || "Request could not be completed")
+  return res.status(status).json({ message: safeMessage, code: error.code || "SERVER_ERROR" })
 }

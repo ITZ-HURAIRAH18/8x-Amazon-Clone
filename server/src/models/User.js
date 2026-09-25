@@ -2,24 +2,26 @@ import mongoose from "mongoose"
 
 const addressSchema = new mongoose.Schema(
   {
-    name: { type: String, trim: true },
-    line1: { type: String, trim: true },
-    line2: { type: String, trim: true },
-    city: { type: String, trim: true },
-    state: { type: String, trim: true },
-    postalCode: { type: String, trim: true },
-    country: { type: String, trim: true, default: "United States" },
-    phone: { type: String, trim: true },
+    fullName: { type: String, trim: true, maxlength: 120 },
+    phone: { type: String, trim: true, maxlength: 40 },
+    street: { type: String, trim: true, maxlength: 160 },
+    apartment: { type: String, trim: true, maxlength: 120 },
+    city: { type: String, trim: true, maxlength: 80 },
+    state: { type: String, trim: true, maxlength: 80 },
+    postalCode: { type: String, trim: true, maxlength: 24 },
+    country: { type: String, trim: true, maxlength: 80, default: "United States" },
+    isDefault: { type: Boolean, default: false },
   },
-  { _id: false },
+  { timestamps: true },
 )
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true, maxlength: 120 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
     passwordHash: { type: String, required: true, select: false },
-    address: { type: addressSchema, default: () => ({}) },
+    addresses: { type: [addressSchema], default: [] },
+    defaultAddressId: { type: mongoose.Schema.Types.ObjectId, default: null },
   },
   { timestamps: true },
 )
