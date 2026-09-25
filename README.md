@@ -103,6 +103,7 @@ The project is intentionally a functional commerce demo rather than a claim of A
 │   │   └── styles.css        # Amazon-style tokens and responsive CSS
 │   └── vercel.json           # SPA history rewrites
 ├── server/
+│   ├── api/                # Optional Vercel Node-function entry
 │   └── src/
 │       ├── config/           # Environment and MongoDB connection
 │       ├── controllers/      # Auth, products, cart, orders, reviews, etc.
