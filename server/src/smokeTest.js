@@ -65,7 +65,11 @@ try {
   await api(`/products/${product.id}/reviews`, { method: "POST", body: JSON.stringify({ rating: 5, title: "Smoke review", comment: "Verified purchase review." }) })
   const notifications = await api("/notifications")
   if (!notifications.meta.unread) throw new Error("Order notification was not created")
-  console.log(`Smoke test passed: search, wishlist, cart, coupon, order, review, and notifications (${order.id})`)
+  await api("/auth/me")
+  const login = await api("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) })
+  if (!login.data.token) throw new Error("Login persistence check failed")
+  token = login.data.token
+  console.log(`Smoke test passed: search, wishlist, cart, coupon, order, review, notifications, and login (${order.id})`)
 } catch (error) {
   console.error(`Smoke test failed: ${error.message}`)
   process.exitCode = 1

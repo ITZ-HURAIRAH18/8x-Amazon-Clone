@@ -15,6 +15,14 @@ const money = (value) => Math.round(Number(value || 0) * 100) / 100
 const demoProduct = (productId) => demoProducts.find((product) => String(product._id) === String(productId) || product.slug === productId)
 const allowedDelivery = new Set(["standard", "priority", "express"])
 const allowedPayment = new Set(["Card", "PayPal", "Gift card"])
+const statusTransitions = {
+  Pending: new Set(["Processing", "Cancelled"]),
+  Processing: new Set(["Shipped", "Cancelled"]),
+  Shipped: new Set(["Out for delivery"]),
+  "Out for delivery": new Set(["Delivered"]),
+  Delivered: new Set(),
+  Cancelled: new Set(),
+}
 
 function orderJson(order) {
   const value = typeof order.toJSON === "function" ? order.toJSON() : order
@@ -76,6 +84,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     if (couponResult.error) return res.status(400).json({ message: couponResult.error, code: couponResult.code })
     const amounts = calculateTotals(items, { coupon: couponResult.coupon, deliveryMethod })
     const order = await Order.create({
+      orderNumber: `AMZ-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
       user: req.user._id,
       items,
       shippingAddress,
@@ -181,6 +190,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Order not found", code: "ORDER_NOT_FOUND" })
     const order = await Order.findOne({ _id: req.params.id, user: req.user._id })
     if (!order) return res.status(404).json({ message: "Order not found", code: "ORDER_NOT_FOUND" })
+    if (order.status !== status && !statusTransitions[order.status]?.has(status)) return res.status(409).json({ message: `Order cannot move from ${order.status} to ${status}`, code: "STATUS_TRANSITION_INVALID" })
     order.status = status
     order.statusHistory.push({ status, label: status, at: new Date() })
     await order.save()
@@ -189,6 +199,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   }
   const order = memory.orders.find((entry) => String(entry._id) === String(req.params.id) && String(entry.user) === String(req.user._id))
   if (!order) return res.status(404).json({ message: "Order not found", code: "ORDER_NOT_FOUND" })
+  if (order.status !== status && !statusTransitions[order.status]?.has(status)) return res.status(409).json({ message: `Order cannot move from ${order.status} to ${status}`, code: "STATUS_TRANSITION_INVALID" })
   order.status = status
   order.statusHistory ||= []
   order.statusHistory.push({ status, label: status, at: new Date() })

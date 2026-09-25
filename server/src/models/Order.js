@@ -22,6 +22,7 @@ const orderEventSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    orderNumber: { type: String, unique: true, sparse: true, index: true, default: () => `AMZ-${Math.random().toString(36).slice(2, 10).toUpperCase()}` },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     items: { type: [orderItemSchema], required: true },
     shippingAddress: { type: mongoose.Schema.Types.Mixed, required: true },
