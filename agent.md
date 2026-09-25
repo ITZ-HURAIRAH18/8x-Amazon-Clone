@@ -1,1402 +1,1686 @@
-# Amazon.com Clone — MERN Full-Stack Implementation
+# Amazon Clone — Phase 2 Power Upgrade
 
-You are my senior full-stack engineer and UI implementation agent.
+We already have a working MERN Amazon.com clone.
 
-We are building a high-fidelity Amazon.com e-commerce clone as a time-limited software engineering assignment.
+Do NOT rebuild the project from scratch.
 
-The goal is to reproduce the Amazon shopping experience as closely as practical, including its visual hierarchy, layout density, navigation patterns, product browsing, cart behavior, authentication, and checkout flow.
+Do NOT remove existing functionality.
 
-Do NOT create a generic e-commerce website.
+Do NOT replace the current architecture.
 
-Do NOT redesign Amazon into a modern SaaS-style interface.
+First inspect the entire existing repository and understand what has already been implemented.
 
-The result should immediately feel like Amazon when someone opens it.
+The project already contains:
 
-Use the provided Amazon design-system information below as the primary visual reference.
-
----
-
-# 1. Technology — MUST USE MERN
-
-Use:
-
-* MongoDB
-* Express.js
-* React
-* Node.js
-
-Frontend:
-
-* React
-* Vite
-* React Router
-* Tailwind CSS or well-structured CSS
-* Axios
-* Context API or Redux Toolkit where appropriate
-
-Backend:
-
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* JWT authentication
-* REST APIs
-
-Do not replace MERN with Django, Firebase, Supabase, or another backend.
-
----
-
-# 2. Development Philosophy
-
-Build the application from scratch.
-
-Before implementing a feature:
-
-1. Inspect the existing project.
-2. Understand the current architecture.
-3. Reuse existing components where appropriate.
-4. Do not unnecessarily rewrite working code.
-5. Keep frontend and backend properly separated.
-6. Keep components reusable.
-7. Keep API logic separate from UI components.
-8. Keep MongoDB models clean and normalized.
-9. Implement real functionality instead of fake buttons.
-10. Prioritize working core functionality over low-value features.
-
-Every major interaction should actually work.
-
-If something cannot realistically be implemented within the remaining assignment time, prioritize the user-visible core flow rather than spending excessive time on edge functionality.
-
----
-
-# 3. PRIMARY OBJECTIVE
-
-Create a high-fidelity Amazon.com clone containing:
-
-* Amazon-style global header
-* Amazon-style secondary navigation
-* Search
-* Category browsing
-* Product listing
+* MERN architecture
+* 24 seeded products
+* Product APIs
+* Product browsing
 * Product details
-* Product images
-* Product ratings
-* Product pricing
-* Discounts
-* Product availability
-* Add to cart
-* Cart quantity controls
-* Cart subtotal
-* Remove from cart
+* Search
+* Cart
 * Authentication
-* User account
 * Orders
-* Checkout
-* Order creation
-* Order history
-* Responsive design
-* Footer
-* Side navigation drawer
-* Product carousels
-* Hero/banner sections
-* Loading states
-* Empty states
-* Error states
+* Agent capture logs
+* Git workflow
+* Initial Amazon-style UI
 
-The application must feel like one coherent Amazon shopping experience.
+There are approximately 21 hours remaining.
+
+Our goal now is to transform the current implementation into a much more complete, polished, professional, high-fidelity Amazon-style shopping experience.
+
+The result should feel like a serious production e-commerce application, not a basic assignment demo.
 
 ---
 
-# 4. DO NOT MAKE IT LOOK AI-GENERATED
+# 1. CRITICAL RULES
 
-The UI must NOT look like a generic AI-generated website.
+Before changing anything:
 
-Avoid:
+1. Inspect the current project.
+2. Understand the existing architecture.
+3. Identify what is already implemented.
+4. Reuse existing components and APIs.
+5. Do not duplicate existing functionality.
+6. Do not break the existing agent-capture setup.
+7. Do not remove `.agent-logs/`.
+8. Do not add `.agent-logs/` to `.gitignore`.
+9. Continue committing the logs as required by the assignment.
+10. Do not rewrite working code unnecessarily.
 
-* excessive rounded cards
-* excessive gradients
-* glassmorphism
-* huge empty spaces
-* random animations
-* oversized typography
-* purple/blue AI-style color palettes
-* unnecessary decorative illustrations
-* excessive shadows
-* generic SaaS dashboard layouts
-* unnecessary emojis
-* fake-looking placeholder UI
+Every new feature must integrate with the existing application.
 
-Do not use emojis as visual decoration.
-
-Use icons where Amazon uses icons.
-
-The interface should feel dense, practical, commercial, and production-oriented.
+Do not create a second competing implementation.
 
 ---
 
-# 5. AMAZON VISUAL LANGUAGE
+# 2. MAIN GOAL
 
-Follow this visual hierarchy:
+Upgrade the current project into a powerful Amazon-style marketplace with:
 
-1. Dark Amazon-style global header
-2. Dominant search bar
-3. Secondary dark navigation
-4. Large promotional/hero area
-5. Light-grey commerce background
-6. White category/product surfaces
-7. Product carousels
-8. Dense product information
-9. Large multi-column footer
-
-Use Amazon's familiar visual language:
-
-* dark navy/black navigation
-* white content surfaces
-* Amazon yellow for primary commerce actions
-* orange for Amazon/search accents
-* blue for links
-* light grey page background
-* compact typography
-* square/low-radius cards
-* dense information layout
-
-Do NOT turn this into a modern minimalist storefront.
-
----
-
-# 6. COLOR TOKENS
-
-Create reusable CSS variables/design tokens.
-
-Use:
-
---amz-nav-dark: #131921;
---amz-nav-secondary: #232F3E;
---amz-ink: #0F1111;
---amz-muted: #565959;
---amz-canvas: #E3E6E6;
---amz-surface: #FFFFFF;
---amz-border: #D5D9D9;
---amz-border-strong: #BBBFBF;
---amz-link: #2162A1;
---amz-link-hover: #C7511F;
---amz-accent: #FF9900;
---amz-search: #FEBD69;
---amz-buy: #FFD814;
---amz-buy-hover: #F7CA00;
---amz-success: #007600;
---amz-warning: #B12704;
-
-Do not scatter random colors throughout the code.
-
-Use semantic design tokens.
-
----
-
-# 7. TYPOGRAPHY
-
-Use:
-
-font-family: Arial, sans-serif;
-
-Base:
-
-14px / 20px
-
-Header:
-
-12px–14px
-
-Card headings:
-
-21px bold
-
-Product text:
-
-12px–14px
-
-Large hero headings:
-
-32px–48px depending on available space.
-
-Typography should be compact.
-
-Do not use oversized modern landing-page typography.
-
----
-
-# 8. GLOBAL HEADER
-
-Build a highly accurate Amazon-style header.
-
-Desktop structure:
-
----
-
-Logo | Deliver To | Search | Language | Account |
-Orders | Cart
--------------
-
-The search bar must visually dominate the header.
-
-Include:
-
-* Amazon-style logo treatment
-* delivery/location section
-* category dropdown
-* search input
-* search button
-* language selector
-* account/login section
-* orders section
-* cart section
-* cart item count
-
-Interactions:
-
-* search must work
-* category dropdown must work
-* cart must navigate to cart
-* account must navigate to account/login
-* logo must return home
-* location section can open a delivery/location panel
-
-Header must remain dense and compact.
-
----
-
-# 9. SECONDARY NAVIGATION
-
-Create a second dark navigation row.
-
-Include:
-
-* hamburger menu
-* All
-* Today's Deals
-* Customer Service
-* Registry
-* Gift Cards
-* Sell
-
-The menu should resemble Amazon's navigation density.
-
-Hover/focus states must be visible.
-
----
-
-# 10. SIDE DRAWER
-
-Implement a left-side navigation drawer.
-
-When the hamburger button is clicked:
-
-* drawer opens from left
-* background overlay appears
-* drawer contains navigation categories
-* close button works
-* clicking overlay closes drawer
-* Escape closes drawer
-* keyboard focus must remain usable
-
-Example structure:
-
-Hello, sign in
-
-Digital Content & Devices
-
-Shop by Department
-
-Programs & Features
-
-Help & Settings
-
----
-
-# 11. HOME PAGE
-
-The homepage should reproduce Amazon's dense commerce layout.
-
-Structure:
-
-1. Global header
-2. Secondary navigation
-3. Hero/banner carousel
-4. Delivery/location notice where appropriate
-5. Category cards
-6. Product carousels
-7. Deals section
-8. Bestseller section
-9. Additional product/category sections
-10. Footer
-
-Do not make the homepage sparse.
-
-Use real product photography wherever legally/technically appropriate.
-
-Do not use emoji placeholders.
-
----
-
-# 12. PRODUCT DATA
-
-Create a MongoDB Product model.
-
-Fields should include:
-
-* title
-* description
-* price
-* originalPrice
-* discount
-* images
-* category
-* brand
-* rating
-* reviewCount
-* stock
-* bestseller
-* featured
-* deal
-* createdAt
-
-Seed the database with a realistic catalog.
-
-Use real product categories such as:
-
-* Electronics
-* Computers
-* Phones
-* Home
-* Kitchen
-* Fashion
-* Beauty
-* Books
-* Toys
-* Grocery
-* Sports
-
-Product images should be actual product photography from appropriate image sources, not colored placeholder boxes.
-
-If external images are used, keep URLs reliable.
-
----
-
-# 13. PRODUCT LISTING PAGE
-
-Implement:
-
-* category title
-* result count
-* sorting
+* better homepage
+* better navigation
+* advanced search
 * filters
-* product grid
-* product image
-* product title
-* rating
-* review count
-* price
-* discount
-* Prime-style delivery information where appropriate
-* Add to Cart
-
-Filters should include useful commerce filters such as:
-
-* category
-* price
-* rating
-* availability
-* brand
-
-The page must handle:
-
-* loading
-* empty results
-* API errors
-* many products
-* long titles
-
----
-
-# 14. SEARCH
-
-Search must be functional.
-
-When a user searches:
-
-Example:
-
-"laptop"
-
-the backend should return matching products.
-
-Search should support:
-
-* title matching
-* category matching
-* brand matching
-
-Create:
-
-GET /api/products
-
-with query parameters for:
-
-* search
-* category
-* minPrice
-* maxPrice
-* rating
-* sort
-* page
-* limit
-
-Do not implement search as a fake frontend-only filter if the backend can reasonably support it.
-
----
-
-# 15. PRODUCT DETAILS PAGE
-
-Create an Amazon-style product detail page.
-
-Layout:
-
-Left:
-
-* image gallery
-* main product image
-* thumbnails
-
-Middle:
-
-* product title
-* rating
-* review count
-* description
-* features
-* brand/category information
-
-Right:
-
-* price
-* discount
-* delivery information
-* stock
-* quantity selector
-* Add to Cart
-* Buy Now
-
-The purchase panel should visually resemble Amazon's commerce panel.
-
-Implement:
-
-* image switching
-* quantity changes
-* add to cart
-* buy now
-* stock validation
-
----
-
-# 16. CART
-
-Create a real shopping cart.
-
-Cart must support:
-
-* product image
-* product title
-* price
-* quantity
-* increase quantity
-* decrease quantity
-* remove item
-* subtotal
-* total item count
-* checkout button
-
-Cart state must persist appropriately.
-
-Use backend persistence for authenticated users.
-
-For guests, use localStorage if needed.
-
-Do not make the cart merely visual.
-
----
-
-# 17. AUTHENTICATION
-
-Implement:
-
-* Sign up
-* Login
-* Logout
-* Protected account/order routes
-
-MongoDB User model:
-
-* name
-* email
-* passwordHash
-* address
-* createdAt
-
-Use secure password hashing.
-
-Use JWT authentication.
-
-Do not store plain-text passwords.
-
----
-
-# 18. ACCOUNT PAGE
-
-Create an Amazon-style account area.
-
-Include sections such as:
-
-* Your Orders
-* Your Addresses
-* Login & Security
-* Your Account
-* Payment-related information where appropriate
-
-Keep the layout practical and Amazon-like.
-
----
-
-# 19. CHECKOUT
-
-Create a working checkout flow.
-
-Steps:
-
-1. Cart
-2. Delivery address
-3. Order summary
-4. Payment method UI
-5. Place order
-6. Order confirmation
-
-For this assignment, do not spend excessive time integrating a real payment gateway unless already available.
-
-A simulated payment method is acceptable.
-
-But placing the order must actually create an Order record in MongoDB.
-
----
-
-# 20. ORDER MODEL
-
-Create:
-
-Order
-
-Fields:
-
-* user
-* items
-* shippingAddress
-* paymentMethod
-* subtotal
-* shipping
-* tax
-* total
-* status
-* createdAt
-
-Order status:
-
-* Pending
-* Processing
-* Shipped
-* Delivered
-* Cancelled
-
-Create APIs for:
-
-* create order
-* get user's orders
-* get single order
-
----
-
-# 21. DATABASE API STRUCTURE
-
-Use clean REST endpoints.
-
-Example:
-
-GET    /api/products
-GET    /api/products/:id
-POST   /api/products
-
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/auth/me
-
-GET    /api/cart
-POST   /api/cart
-PATCH  /api/cart/:itemId
-DELETE /api/cart/:itemId
-
-POST   /api/orders
-GET    /api/orders
-GET    /api/orders/:id
-
-Keep controllers, routes, models, middleware, and services organized.
-
----
-
-# 22. RESPONSIVE DESIGN
-
-Desktop is the primary target because Amazon desktop is the primary visual reference.
-
-But the application must also work on:
-
-* 1440px
-* 1280px
-* 1024px
-* 768px
-* 390px
-
-On mobile:
-
-* desktop header must transform appropriately
-* search remains usable
-* navigation becomes compact
-* product grids become responsive
-* horizontal carousels can scroll
-* cards must not overflow
-* buttons must remain touch-friendly
-
-Do not simply shrink the desktop design.
-
----
-
-# 23. ACCESSIBILITY
-
-Follow WCAG 2.2 AA principles.
-
-Must include:
-
-* semantic HTML
-* keyboard navigation
-* visible focus states
-* meaningful button labels
-* alt text
-* sufficient contrast
-* form labels
-* accessible dialogs
-* Escape handling for drawers/modals
-* logical tab order
-
-Every interactive element must be usable with keyboard and pointer/touch input.
-
----
-
-# 24. COMPONENT ARCHITECTURE
-
-Create reusable components such as:
-
-AmazonShell
-GlobalHeader
-AmazonLogo
-DeliveryLocation
-SearchBar
-CategorySelect
-AccountMenu
-CartIcon
-SecondaryNav
-SideDrawer
-HeroCarousel
-CategoryCard
-ProductCard
-ProductCarousel
-DealCard
-RatingStars
-Price
-QuantitySelector
-FilterSidebar
-SortDropdown
-ProductGallery
-PurchasePanel
-CartItem
-CartSummary
-CheckoutSteps
-AddressCard
-OrderCard
-Footer
-FooterColumn
-
-Avoid one giant React component.
-
----
-
-# 25. STATES
-
-Every important component must handle:
-
-* default
-* hover
-* focus
-* active
-* disabled
-* loading
-* error
-* empty
-
-Examples:
-
-Loading products:
-
-Show Amazon-style skeleton/loading UI.
-
-No search results:
-
-Show a useful empty state.
-
-Cart empty:
-
-Show an Amazon-style empty-cart experience.
-
-API failure:
-
-Show a clear retry message.
-
-Out of stock:
-
-Disable purchase actions appropriately.
-
----
-
-# 26. IMAGES
-
-Use high-quality real product/category photography.
-
-Do not use:
-
-* emoji as product images
-* random generated illustrations
-* generic gradient placeholders
-* obvious AI-generated decorative artwork
-* unrelated stock illustrations
-
-Use product photography that visually resembles a real commerce catalog.
-
-Do not use fake image URLs.
-
-If an image source fails, provide a graceful fallback.
-
----
-
-# 27. HERO SECTION
-
-Create an Amazon-style promotional hero carousel.
-
-Requirements:
-
-* large commerce banner
-* real product/category photography
-* left/right controls
-* multiple slides
-* automatic rotation can be used
-* manual navigation must work
-* pause/interaction behavior should remain accessible
-
-Do not create an artistic marketing landing page.
-
-It must feel like a retail promotion.
-
----
-
-# 28. PRODUCT CAROUSELS
-
-Implement horizontally scrollable product sections.
-
-Each carousel should include:
-
-* title
-* product cards
-* previous button
-* next button
-* horizontal scrolling
-* responsive behavior
-
-Do not allow product cards to become excessively large.
-
----
-
-# 29. CATEGORY CARDS
-
-Create Amazon-style category cards.
-
-Typical structure:
-
-Heading
-
-2x2 product/category image grid
-
-"Shop now" / "See more" link
-
-Cards should be square/flat with minimal radius.
-
-Avoid modern floating SaaS cards.
-
----
-
-# 30. FOOTER
-
-Build a large Amazon-style footer.
-
-Include:
-
-Back to top
-
-Get to Know Us
-
-Make Money with Us
-
-Amazon Payment Products
-
-Let Us Help You
-
-Language selector
-
-Country selector
-
-Currency selector
-
-Amazon services/sub-brands
-
-Copyright/legal links
-
-The footer should be visually dense.
-
----
-
-# 31. ERROR HANDLING
-
-Implement proper frontend and backend error handling.
-
-Backend:
-
-* validation errors
-* authentication errors
-* missing product
-* insufficient stock
-* database errors
-
-Frontend:
-
-* loading
-* errors
-* retry
-* empty states
-* invalid routes
-
-Create a proper 404 page.
-
----
-
-# 32. PERFORMANCE
-
-Prioritize:
-
-* fast initial load
-* optimized images
-* lazy loading
-* reusable components
-* avoiding unnecessary API requests
-* pagination where appropriate
-* efficient MongoDB queries
-
-Do not over-engineer.
-
----
-
-# 33. CODE QUALITY
-
-Use:
-
-* meaningful component names
-* meaningful variable names
-* reusable functions
-* environment variables
-* clean folder structure
-* no hardcoded secrets
-* no duplicated API logic
-* no unnecessary dependencies
-
-Create:
-
-.env.example
-
-Never commit secrets.
-
----
-
-# 34. PROJECT STRUCTURE
-
-Prefer:
-
-client/
-
-src/
-components/
-pages/
-layouts/
-hooks/
-context/
-services/
-utils/
-assets/
-
-server/
-
-controllers/
-models/
-routes/
-middleware/
-services/
-config/
-utils/
-
-Use a clean MERN architecture.
-
----
-
-# 35. ENVIRONMENT VARIABLES
-
-Example:
-
-client:
-
-VITE_API_URL=
-
-server:
-
-PORT=
-MONGODB_URI=
-JWT_SECRET=
-
-Use environment variables instead of hardcoding secrets.
-
----
-
-# 36. SEED DATA
-
-Create a seed script.
-
-The project should be easy to start with realistic products.
-
-Include enough products to make the homepage and category pages feel populated.
-
-Create realistic:
-
-* names
-* prices
-* ratings
-* reviews
-* discounts
-* categories
-* stock
-* images
-
-Do not repeat the same product excessively.
-
----
-
-# 37. HOME PAGE DENSITY
-
-The homepage must not look empty.
-
-Aim for a dense commerce page with:
-
-* hero
-* multiple category cards
-* multiple product carousels
+* sorting
+* product discovery
+* wishlist
+* recently viewed products
+* product comparison
+* reviews and ratings
+* recommendations
 * deals
-* bestsellers
-* recommended products
-* additional categories
-* footer
+* coupons
+* shopping cart improvements
+* saved addresses
+* order tracking
+* reorder
+* notifications
+* account dashboard
+* checkout improvements
+* professional loading states
+* error handling
+* responsive design
+* accessibility
+* performance improvements
+* polished Amazon-style UI
 
-The page should visually communicate a large marketplace.
-
----
-
-# 38. AMAZON-STYLE DETAILS
-
-Pay attention to details that make the experience feel authentic:
-
-* compact header typography
-* search-first layout
-* cart count
-* Prime-style delivery indicators
-* blue commerce links
-* yellow purchase buttons
-* orange search accent
-* rating stars
-* review counts
-* crossed-out original prices
-* discount percentages
-* delivery dates
-* stock messaging
-* "See more" links
-* product badges
-* category dropdown
-* account navigation
-* side drawer
-* back-to-top footer
-* dense footer navigation
-
-These details matter.
+Prioritize features that are visible during a reviewer walkthrough.
 
 ---
 
-# 39. DO NOT OVERBUILD LOW-VALUE FEATURES
+# 3. PRIORITY SYSTEM
 
-Because this is a time-limited assignment, prioritize:
+Use this priority order.
 
-P0 — MUST WORK
+## P0 — MUST BE PERFECT
+
+These must be stable:
 
 * Homepage
 * Header
 * Search
 * Product listing
 * Product details
-* Cart
 * Authentication
+* Cart
 * Checkout
 * Orders
-* MongoDB
-* REST API
-* Responsive UI
+* MongoDB persistence
+* Responsive design
 * Deployment readiness
 
-P1 — SHOULD WORK
+## P1 — HIGH-VALUE FEATURES
 
+Implement these next:
+
+* advanced filtering
+* sorting
+* wishlist
+* reviews
+* recently viewed
+* product comparison
+* coupons
+* order tracking
+* reorder
+* saved addresses
+* account dashboard
+* recommendations
+* deals page
+* notifications
+
+## P2 — POLISH
+
+After P0/P1:
+
+* skeleton loaders
+* animations
+* micro-interactions
+* improved empty states
+* better error states
+* accessibility improvements
+* performance optimization
+* SEO metadata
+* 404 page
+* professional README
+
+Do not sacrifice P0 stability for P2 polish.
+
+---
+
+# 4. AMAZON-STYLE HOMEPAGE UPGRADE
+
+Make the homepage significantly richer.
+
+Structure:
+
+HEADER
+
+* Amazon-style top navigation
+* logo
+* delivery location
+* search
+* category selector
+* language
+* account
+* orders
+* cart
+
+SECONDARY NAV
+
+* All
+* Today's Deals
+* Customer Service
+* Registry
+* Gift Cards
+* Sell
+* other appropriate navigation
+
+MAIN CONTENT
+
+1. Hero carousel
+2. Shop by category
+3. Today's Deals
+4. Best Sellers
+5. Featured products
+6. Electronics
+7. Computers
+8. Home & Kitchen
+9. Fashion
+10. Beauty
+11. Books
+12. Recommended for you
+13. Recently viewed
+14. Prime-style promotional section
+15. More products
+16. Footer
+
+The homepage should feel dense and marketplace-oriented.
+
+Do not create huge empty spaces.
+
+---
+
+# 5. PROFESSIONAL HEADER
+
+Improve the header substantially.
+
+Add:
+
+* search category dropdown
+* search suggestions
+* recent searches
+* clear search button
+* delivery location selector
+* account dropdown
+* orders shortcut
+* wishlist shortcut
+* cart count
+* cart subtotal preview
+* responsive mobile header
+* side navigation drawer
+
+Search suggestions should appear while typing.
+
+Example:
+
+User types:
+
+"lap"
+
+Show:
+
+Laptop
+Laptop Stand
+Laptop Bag
+Laptop Charger
+
+Clicking a suggestion must perform the appropriate search/navigation.
+
+---
+
+# 6. ADVANCED SEARCH
+
+Upgrade the current search system.
+
+Backend:
+
+Support:
+
+* keyword search
+* title
+* description
+* brand
+* category
+* price range
+* rating
+* stock
+* discount
+* bestseller
+* deal
+* sorting
+* pagination
+
+Support URL query parameters.
+
+Example:
+
+/products?search=laptop&category=electronics&minPrice=300&maxPrice=1500&rating=4&sort=price-low
+
+Frontend:
+
+* search input
+* suggestions
 * filters
 * sorting
-* carousels
-* side drawer
-* account page
-* order history
-* delivery/location UI
+* result count
+* pagination
+* clear filters
+* mobile filter drawer
 
-P2 — ONLY IF TIME REMAINS
-
-* advanced recommendations
-* complex payment integration
-* sophisticated personalization
-* advanced seller functionality
-* admin dashboard
-* extensive review system
-* advanced recommendation algorithms
-
-Do not sacrifice P0 features for P2 features.
+Add a "No results" experience.
 
 ---
 
-# 40. IMPORTANT ASSIGNMENT RULE
+# 7. FILTER SYSTEM
 
-The application must be a real working product, not a screenshot or static mockup.
+Complete the existing backend brand filtering with a professional UI.
 
-A reviewer should be able to:
+Filters:
 
-1. Open the deployed website.
-2. Browse products.
-3. Search.
-4. Open a product.
-5. Add it to cart.
-6. Change quantity.
-7. Login/register.
-8. Checkout.
-9. Place an order.
-10. View the order.
+* Category
+* Brand
+* Price
+* Customer Rating
+* Availability
+* Discount
+* Deals
+* Prime-style delivery
 
-These flows must work.
+Desktop:
+
+Sticky filter sidebar.
+
+Mobile:
+
+Filter drawer.
+
+Show active filter chips.
+
+Example:
+
+Brand: Apple
+Rating: 4+
+Price: $500-$1000
+
+Allow:
+
+* remove individual filter
+* clear all filters
 
 ---
 
-# 41. VISUAL QUALITY BAR
+# 8. SORTING
 
-Before considering the project complete, compare the implementation against Amazon's actual visual patterns.
+Add:
+
+* Featured
+* Price: Low to High
+* Price: High to Low
+* Avg. Customer Review
+* Newest
+* Best Sellers
+* Biggest Discount
+
+Sorting must update the backend query.
+
+---
+
+# 9. PAGINATION
+
+Implement proper pagination.
+
+Show:
+
+Previous
+1
+2
+3
+4
+5
+Next
+
+Do not load hundreds of products unnecessarily.
+
+Display:
+
+"1-24 of 120 results"
+
+Use backend pagination.
+
+---
+
+# 10. WISHLIST
+
+Add a real wishlist.
+
+Users can:
+
+* add product to wishlist
+* remove product
+* view wishlist
+* move wishlist item to cart
+* remove all wishlist items
+
+Add heart/favorite control to ProductCard and ProductDetails.
+
+For authenticated users:
+
+Store wishlist in MongoDB.
+
+For guests:
+
+Use localStorage.
+
+Wishlist page:
+
+/wishlist
+
+Use an Amazon-style dense product layout.
+
+---
+
+# 11. RECENTLY VIEWED PRODUCTS
+
+Track products opened by the user.
+
+Store the last 10–20 products.
+
+Display:
+
+"Recently viewed"
+
+on homepage and product pages.
+
+Avoid duplicate products.
+
+For logged-in users, persist where practical.
+
+For guests, localStorage is acceptable.
+
+---
+
+# 12. PRODUCT COMPARISON
+
+Add product comparison.
+
+Users can select up to 3 or 4 products.
+
+Show:
+
+* image
+* title
+* price
+* rating
+* reviews
+* brand
+* category
+* availability
+* discount
+* important specifications
+
+Add:
+
+"Compare"
+
+button.
+
+Create:
+
+/compare
+
+The comparison page should look like a real commerce comparison table.
+
+---
+
+# 13. PRODUCT DETAILS UPGRADE
+
+Make product pages much more professional.
+
+Include:
+
+LEFT:
+
+* image gallery
+* thumbnail navigation
+* zoom interaction
+* multiple images
+
+CENTER:
+
+* product title
+* rating
+* review count
+* bestseller badge
+* brand
+* product features
+* description
+* specifications
+* shipping information
+
+RIGHT:
+
+* price
+* original price
+* discount
+* delivery date
+* stock
+* quantity
+* Add to Cart
+* Buy Now
+* Add to Wishlist
+
+Below:
+
+* Product details
+* Specifications
+* Customer reviews
+* Related products
+* Frequently bought together
+* Similar products
+* Recently viewed
+
+---
+
+# 14. REVIEWS AND RATINGS
+
+Implement a real review system.
+
+Users can:
+
+* submit review
+* choose 1–5 stars
+* write review
+* edit their own review
+* delete their own review
+
+Only authenticated users who purchased the product should be allowed to submit a review if order data makes that practical.
+
+Review model:
+
+* user
+* product
+* order
+* rating
+* title
+* comment
+* createdAt
+* updatedAt
+
+Display:
+
+* average rating
+* total reviews
+* rating distribution
+* review list
+* verified purchase indicator where applicable
+
+Example:
+
+5 stars ████████
+4 stars ███
+3 stars ██
+2 stars █
+1 star █
+
+Add sorting:
+
+* Most recent
+* Highest rating
+* Lowest rating
+* Most helpful
+
+If time is limited, prioritize creation + display + rating aggregation over an advanced helpful-vote system.
+
+---
+
+# 15. RECOMMENDATION SYSTEM
+
+Create a practical recommendation engine.
+
+Do NOT over-engineer machine learning.
+
+Use deterministic recommendation logic.
+
+Recommend products based on:
+
+* same category
+* same brand
+* similar price
+* related products
+* recently viewed
+* frequently bought together
+* bestseller products
+
+Display:
+
+"Customers who viewed this item also viewed"
+
+"Recommended for you"
+
+"Frequently bought together"
+
+"Similar items"
+
+Recommendations should feel relevant.
+
+---
+
+# 16. DEALS SYSTEM
+
+Create a dedicated:
+
+/deals
+
+page.
+
+Include:
+
+* Today's Deals
+* Lightning-style deals
+* Discount percentage
+* original price
+* current price
+* deal progress
+* limited stock
+* countdown timer
+
+Use seeded deal data.
+
+Countdown must be functional.
+
+Do not fake a countdown that never changes.
+
+---
+
+# 17. COUPONS
+
+Add coupon functionality.
+
+Create Coupon model:
+
+* code
+* discountType
+* discountValue
+* minimumOrder
+* maximumDiscount
+* expiresAt
+* active
+
+Example:
+
+SAVE10
+
+10% OFF
+
+On checkout:
+
+* coupon input
+* Apply
+* Remove
+* validation
+* discount calculation
+
+Display:
+
+Subtotal
+Discount
+Shipping
+Tax
+Total
+
+All calculations must be consistent.
+
+---
+
+# 18. CART UPGRADE
+
+Improve the cart.
+
+Add:
+
+* Save for later
+* Move to wishlist
+* Remove
+* quantity selector
+* stock validation
+* subtotal
+* estimated tax
+* shipping
+* coupon
+* total
+
+Add:
+
+"Frequently bought together"
+
+below the cart.
+
+If product becomes unavailable:
+
+Show an appropriate message.
+
+---
+
+# 19. SAVED ADDRESSES
+
+Upgrade account addresses.
+
+Users can:
+
+* add address
+* edit address
+* delete address
+* set default address
+
+Fields:
+
+* fullName
+* phone
+* street
+* apartment
+* city
+* state
+* postalCode
+* country
+
+Checkout should allow selecting a saved address.
+
+---
+
+# 20. CHECKOUT UPGRADE
+
+Make checkout feel like a real Amazon-style checkout.
+
+Steps:
+
+1. Delivery address
+2. Delivery method
+3. Payment method
+4. Order review
+5. Place order
+
+Show an order summary on the right.
+
+Add:
+
+* address selection
+* add address
+* delivery options
+* payment method selection
+* coupon
+* subtotal
+* shipping
+* tax
+* discount
+* total
+
+Payment gateway remains optional.
+
+For this assignment, a realistic simulated payment method is acceptable.
+
+Clearly structure the code so a real payment gateway can be integrated later.
+
+---
+
+# 21. ORDER TRACKING
+
+Upgrade orders.
+
+Each order should show:
+
+Order placed
+|
+Processing
+|
+Shipped
+|
+Out for delivery
+|
+Delivered
+
+Create a visual order timeline.
+
+Show:
+
+* order number
+* order date
+* products
+* total
+* shipping address
+* status
+* estimated delivery
+* tracking-style information
+
+Add:
+
+"View order"
+
+"Buy again"
+
+"Track package"
+
+---
+
+# 22. BUY AGAIN
+
+Add a "Buy Again" section to the account.
+
+Products from previous orders should be displayed.
+
+Button:
+
+"Buy again"
+
+Clicking it adds the product to cart.
+
+---
+
+# 23. ACCOUNT DASHBOARD
+
+Transform the current account page into a professional Amazon-style account center.
+
+Sections:
+
+Your Orders
+Your Wishlist
+Your Addresses
+Login & Security
+Buy Again
+Recently Viewed
+Your Reviews
+Coupons
+Notifications
+
+Use a clean grid.
+
+Do not make it look like a SaaS dashboard.
+
+Keep it commerce-focused.
+
+---
+
+# 24. NOTIFICATIONS
+
+Create a lightweight notification system.
+
+Examples:
+
+Order placed
+Order shipped
+Order delivered
+Wishlist item price changed
+Product back in stock
+
+Add notification icon/menu.
+
+Unread count should work.
+
+Store notifications in MongoDB for authenticated users.
+
+---
+
+# 25. PRODUCT BADGES
+
+Create reusable badges:
+
+* Best Seller
+* Limited Time Deal
+* New
+* 20% off
+* Prime-style delivery
+* In Stock
+* Low Stock
+
+Do not overload every product with badges.
+
+Use badges only when appropriate.
+
+---
+
+# 26. PRODUCT CARD UPGRADE
+
+Product cards must be highly polished.
+
+Include:
+
+* image
+* title
+* rating
+* review count
+* price
+* original price
+* discount
+* badge
+* delivery information
+* wishlist button
+* Add to Cart
+
+Hover behavior:
+
+* subtle border/shadow
+* image remains stable
+* actions become visible where appropriate
+
+Do not create excessive animations.
+
+---
+
+# 27. LOADING EXPERIENCE
+
+Add professional skeleton loaders for:
+
+* homepage
+* product grid
+* product detail
+* cart
+* orders
+* wishlist
+* account
+
+Do not show blank white screens while data loads.
+
+---
+
+# 28. ERROR STATES
+
+Create useful error states.
+
+Examples:
+
+Product not found
+
+Unable to load products
+
+Network error
+
+Session expired
+
+Cart update failed
+
+Order failed
+
+Payment simulation failed
+
+Use:
+
+Retry
+
+Go Home
+
+Continue Shopping
+
+where appropriate.
+
+---
+
+# 29. EMPTY STATES
+
+Create polished empty states:
+
+Empty cart
+Empty wishlist
+No search results
+No orders
+No notifications
+No recently viewed products
+No reviews
+
+Keep them simple and Amazon-like.
+
+Do not use unnecessary illustrations.
+
+---
+
+# 30. MOBILE EXPERIENCE
+
+Improve mobile significantly.
+
+Test:
+
+390px
+430px
+768px
+1024px
+1280px
+1440px
+
+Mobile:
+
+* compact header
+* search remains prominent
+* horizontal category scrolling
+* product grid
+* filter drawer
+* cart controls
+* checkout
+* account
+* order tracking
+
+No horizontal page overflow.
+
+---
+
+# 31. ACCESSIBILITY
+
+Verify:
+
+* keyboard navigation
+* visible focus
+* semantic HTML
+* aria labels
+* alt text
+* dialog accessibility
+* drawer accessibility
+* Escape handling
+* proper form labels
+* sufficient contrast
+* touch target size
+
+Do not hide focus outlines.
+
+---
+
+# 32. VISUAL POLISH
+
+Perform a full visual QA pass.
 
 Check:
 
-* header height
-* search width
 * spacing
 * typography
+* alignment
+* card heights
+* image ratios
+* header proportions
+* search width
+* button sizes
 * colors
-* product density
-* card dimensions
-* button appearance
-* footer structure
-* mobile behavior
-* hover states
-* focus states
-* loading states
+* borders
+* shadows
+* responsive breakpoints
 
-Fix visual inconsistencies.
+The UI should feel intentionally designed.
 
-Do not stop after creating a rough approximation.
+Do not introduce:
 
----
-
-# 42. FINAL QA
-
-Before finishing, test:
-
-AUTH
-
-[ ] Register works
-[ ] Login works
-[ ] Logout works
-[ ] Protected routes work
-
-SEARCH
-
-[ ] Search works
-[ ] Empty search state works
-[ ] Search results work
-
-PRODUCTS
-
-[ ] Product listing works
-[ ] Product details work
-[ ] Images work
-[ ] Ratings display
-[ ] Prices display
-[ ] Stock works
-
-CART
-
-[ ] Add to cart works
-[ ] Quantity increase works
-[ ] Quantity decrease works
-[ ] Remove works
-[ ] Total updates
-
-CHECKOUT
-
-[ ] Address works
-[ ] Order summary works
-[ ] Place order works
-[ ] Order is saved in MongoDB
-
-ORDERS
-
-[ ] Orders page works
-[ ] Order details work
-
-UI
-
-[ ] Header resembles Amazon
-[ ] Search is dominant
-[ ] Navigation works
-[ ] Side drawer works
-[ ] Hero works
-[ ] Carousels work
-[ ] Footer works
-[ ] Responsive layout works
-
-ACCESSIBILITY
-
-[ ] Keyboard navigation works
-[ ] Focus states visible
-[ ] Images have alt text
-[ ] Buttons have accessible labels
-[ ] Dialogs/drawers can close with Escape
+* excessive rounded corners
+* gradients
+* glass effects
+* huge whitespace
+* purple AI colors
+* random animations
+* unnecessary emoji
+* decorative AI illustrations
 
 ---
 
-# 43. DEPLOYMENT
+# 33. AMAZON-STYLE DESIGN TOKENS
 
-Prepare the project for production deployment.
+Keep the current Amazon token system.
 
-Frontend can be deployed using a suitable frontend hosting provider.
+Use:
 
-Backend can be deployed using a suitable Node.js hosting provider.
+--amz-nav-dark
+--amz-nav-secondary
+--amz-ink
+--amz-muted
+--amz-canvas
+--amz-surface
+--amz-border
+--amz-border-strong
+--amz-link
+--amz-link-hover
+--amz-accent
+--amz-search
+--amz-buy
+--amz-buy-hover
+--amz-success
+--amz-warning
 
-MongoDB should use MongoDB Atlas or another production-compatible MongoDB instance.
+Do not introduce random colors.
 
-Make sure:
+---
 
-* production API URL works
-* CORS is configured
-* environment variables are configured
+# 34. REAL PRODUCT IMAGES
+
+Improve the catalog quality.
+
+Use real product photography from appropriate sources.
+
+Product images should:
+
+* match the product
+* have consistent aspect ratios
+* load reliably
+* have useful alt text
+* support multiple images on product detail pages
+
+Avoid:
+
+* emoji
+* random placeholders
+* decorative generated images
+* broken URLs
+
+---
+
+# 35. PERFORMANCE
+
+Improve:
+
+* image lazy loading
+* pagination
+* API efficiency
+* MongoDB indexes
+* React rendering
+* unnecessary requests
+* component rendering
+* bundle size where practical
+
+Add MongoDB indexes for commonly queried fields where appropriate.
+
+---
+
+# 36. SEO
+
+Add appropriate:
+
+* page titles
+* meta descriptions
+* product metadata
+* canonical URLs where appropriate
+* semantic headings
+
+Product pages should have meaningful titles.
+
+---
+
+# 37. SECURITY
+
+Review:
+
+* JWT handling
+* password hashing
+* authorization
+* input validation
+* API error responses
+* CORS
+* environment variables
+* sensitive data exposure
+
+Never expose:
+
+* passwords
+* JWT secrets
+* MongoDB credentials
+
+Do not commit `.env`.
+
+---
+
+# 38. MONGODB PRODUCTION READINESS
+
+Keep local development working.
+
+Prepare the project for MongoDB Atlas.
+
+Document:
+
+MONGODB_URI
+
+configuration.
+
+Do not break the local MongoDB workflow.
+
+Add clear environment configuration.
+
+---
+
+# 39. DEPLOYMENT READINESS
+
+Prepare both:
+
+Frontend
+Backend
+MongoDB
+
+for deployment.
+
+Verify that:
+
+* frontend production build works
+* backend starts correctly
+* API routes work
+* CORS works
+* environment variables work
 * MongoDB connection works
-* authentication works in production
-* frontend can communicate with backend
-* no localhost URLs remain in production configuration
+* authentication works
+* no localhost API URLs remain in production configuration
 
-The final result must be accessible through a public HTTPS URL.
+If deployment can be completed within the remaining time, deploy it.
 
----
-
-# 44. GIT WORKFLOW
-
-Make logical commits throughout development.
-
-Do not create one giant commit containing everything.
-
-Use meaningful commit messages such as:
-
-feat: create Amazon-style header
-feat: add product API
-feat: implement product details
-feat: implement shopping cart
-feat: add authentication
-feat: implement checkout
-fix: improve responsive product grid
-fix: resolve cart quantity bug
-
-Remember that the assignment requires `.agent-logs/` to remain committed.
-
-Do not add `.agent-logs/` to `.gitignore`.
+Public HTTPS deployment is important for the assignment.
 
 ---
 
-# 45. MOST IMPORTANT INSTRUCTION
+# 40. README UPGRADE — VERY IMPORTANT
 
-Do not spend the entire available time perfecting one page.
+Update README.md to clearly document what has been built.
 
-Build the complete shopping journey first.
+Do not merely write generic setup instructions.
 
-Priority:
+Create a professional project README.
 
-Working product > complete core flow > visual fidelity > secondary features.
+Include:
 
-However, do not use "working functionality" as an excuse for poor UI.
+# Amazon Clone
 
-The final product should have both:
+## Overview
 
-1. Functional MERN architecture
-2. High-fidelity Amazon-style UX/UI
+Explain that this is a high-fidelity MERN e-commerce implementation inspired by Amazon's shopping experience.
+
+## Features
+
+Create a comprehensive feature list.
+
+Example:
+
+### Shopping
+
+* Product browsing
+* Product search
+* Advanced filtering
+* Sorting
+* Pagination
+* Product details
+* Product gallery
+* Categories
+* Deals
+* Recommendations
+* Recently viewed
+* Product comparison
+
+### Cart
+
+* Add to cart
+* Quantity management
+* Remove item
+* Save for later
+* Wishlist integration
+* Coupon application
+* Dynamic totals
+
+### Authentication
+
+* Registration
+* Login
+* Logout
+* Protected routes
+* Account dashboard
+
+### Wishlist
+
+* Add/remove wishlist items
+* Move to cart
+* Persistent wishlist
+
+### Reviews
+
+* Ratings
+* Reviews
+* Verified purchase indicator
+* Review sorting
+
+### Checkout
+
+* Address selection
+* Saved addresses
+* Delivery method
+* Payment method UI
+* Coupons
+* Order summary
+* Order creation
+
+### Orders
+
+* Order history
+* Order details
+* Order tracking
+* Buy again
+* Order status
+
+### UI/UX
+
+* Amazon-style header
+* Search suggestions
+* Side drawer
+* Hero carousel
+* Product carousels
+* Responsive design
+* Skeleton loaders
+* Empty states
+* Error states
+* Accessibility
+
+### Backend
+
+* Node.js
+* Express
+* MongoDB
+* Mongoose
+* JWT
+* REST API
 
 ---
 
-# 46. EXECUTION PLAN
+# 41. README — WHAT WAS ADDED IN THIS PHASE
 
-Work in this order:
+Create a dedicated section:
 
-PHASE 1
-Inspect project and establish architecture.
+## Phase 2 Enhancements
 
-PHASE 2
-Set up React + Vite + styling.
+Document exactly what you added during this upgrade.
 
-PHASE 3
-Set up Express + MongoDB + Mongoose.
+For example:
 
-PHASE 4
-Create Product/User/Cart/Order models.
+* Advanced product filtering UI
+* Product sorting
+* Wishlist
+* Recently viewed products
+* Product comparison
+* Review system
+* Recommendation sections
+* Deals page
+* Coupon system
+* Saved addresses
+* Order tracking
+* Buy Again
+* Notification system
+* Account dashboard improvements
+* Product card improvements
+* Search suggestions
+* Loading skeletons
+* Empty states
+* Error states
+* Accessibility improvements
+* Responsive improvements
+* Performance improvements
+* SEO improvements
+* Deployment configuration
 
-PHASE 5
-Create product APIs and seed data.
+Only list features that actually exist.
 
-PHASE 6
-Build Amazon global header and navigation.
-
-PHASE 7
-Build homepage.
-
-PHASE 8
-Build product listing/search.
-
-PHASE 9
-Build product details.
-
-PHASE 10
-Build authentication.
-
-PHASE 11
-Build cart.
-
-PHASE 12
-Build checkout and orders.
-
-PHASE 13
-Build account/order history.
-
-PHASE 14
-Build footer, drawer, carousels and secondary interactions.
-
-PHASE 15
-Responsive and accessibility pass.
-
-PHASE 16
-Visual polish.
-
-PHASE 17
-Full QA.
-
-PHASE 18
-Production deployment preparation.
-
-Do not wait until the end to discover that the backend or authentication is broken.
-
-Continuously test the application while building.
+Never claim a feature is implemented if it is not.
 
 ---
 
-# 47. WORKING STYLE
+# 42. README — ARCHITECTURE
 
-You are operating inside a time-limited assignment.
+Document:
 
-Be decisive.
+client
+server
+MongoDB
+API
+authentication
+state management
 
-Do not ask me unnecessary questions when a reasonable implementation decision can be made.
-
-If multiple approaches are possible, choose the simplest production-quality approach that satisfies the requirements.
-
-Do not spend excessive time explaining what you are going to do.
-
-Actually implement it.
-
-After each major phase:
-
-1. Verify the application.
-2. Fix obvious errors.
-3. Continue to the next phase.
-
-Never claim a feature works without checking it.
-
-Never leave obvious broken buttons or dead navigation if the feature is part of the core flow.
+Show a folder structure.
 
 ---
 
-# 48. START NOW
+# 43. README — API DOCUMENTATION
 
-First inspect the existing repository and determine:
+Document the main endpoints.
 
-* current files
-* current framework
-* existing dependencies
-* existing frontend
-* existing backend
-* existing database configuration
-* existing agent-capture setup
+Example:
 
-Do not destroy working assignment infrastructure.
+Authentication
 
-Then create a concise implementation plan and begin with the highest-priority working functionality.
+POST /api/auth/register
+POST /api/auth/login
+GET /api/auth/me
 
-Remember:
+Products
 
-This is a high-fidelity Amazon.com clone.
+GET /api/products
+GET /api/products/:id
 
-MERN is mandatory.
+Cart
 
-The UI must feel like Amazon.
+GET /api/cart
+POST /api/cart
+PATCH /api/cart/:id
+DELETE /api/cart/:id
 
-The core shopping journey must actually work.
+Wishlist
 
-The final application must be deployable.
+GET /api/wishlist
+POST /api/wishlist
+DELETE /api/wishlist/:id
 
-Do not build a generic AI-generated e-commerce template.
+Orders
+
+POST /api/orders
+GET /api/orders
+GET /api/orders/:id
+
+Reviews
+
+GET /api/products/:id/reviews
+POST /api/products/:id/reviews
+
+Use the actual implemented routes, not hypothetical routes.
+
+---
+
+# 44. README — SETUP
+
+Include exact:
+
+1. clone
+2. install client
+3. install server
+4. environment variables
+5. database setup
+6. seed command
+7. run backend
+8. run frontend
+9. production build
+
+Commands must actually work.
+
+---
+
+# 45. README — DEMO FLOW
+
+Add:
+
+## Recommended Demo Flow
+
+1. Open homepage
+2. Search for a product
+3. Apply filters
+4. Open product
+5. Add to wishlist
+6. Add to cart
+7. Change quantity
+8. Login
+9. Checkout
+10. Apply coupon
+11. Place order
+12. Open order history
+13. Track order
+14. Buy again
+
+This should reflect actual implemented functionality.
+
+---
+
+# 46. README — KNOWN LIMITATIONS
+
+Document anything intentionally not implemented.
+
+For example:
+
+* Real payment gateway
+* Seller marketplace
+* Advanced personalization
+* Production recommendation ML
+* Real shipping provider integration
+
+Do not hide limitations.
+
+Do not claim Amazon's real backend functionality.
+
+---
+
+# 47. FINAL TESTING
+
+Before finishing, perform an actual end-to-end smoke test.
+
+TEST 1:
+
+Register user.
+
+TEST 2:
+
+Login.
+
+TEST 3:
+
+Search product.
+
+TEST 4:
+
+Filter.
+
+TEST 5:
+
+Sort.
+
+TEST 6:
+
+Open product.
+
+TEST 7:
+
+Add wishlist.
+
+TEST 8:
+
+Add cart.
+
+TEST 9:
+
+Change quantity.
+
+TEST 10:
+
+Checkout.
+
+TEST 11:
+
+Select address.
+
+TEST 12:
+
+Apply coupon.
+
+TEST 13:
+
+Place order.
+
+TEST 14:
+
+Verify MongoDB order.
+
+TEST 15:
+
+Open order history.
+
+TEST 16:
+
+Open order tracking.
+
+TEST 17:
+
+Buy again.
+
+TEST 18:
+
+Submit review if eligible.
+
+TEST 19:
+
+Open wishlist.
+
+TEST 20:
+
+Test mobile layout.
+
+TEST 21:
+
+Test logout/login again.
+
+Fix every obvious failure found during this process.
+
+---
+
+# 48. AGENT CAPTURE REQUIREMENT
+
+The 8x assignment requires automatic agent capture.
+
+Do NOT disable or modify the existing capture system unless necessary.
+
+Continue recording:
+
+* prompts
+* final responses
+* timestamps
+* model
+
+Keep:
+
+.agent-logs/
+
+committed.
+
+Do not manually rewrite logs.
+
+Do not delete previous logs.
+
+Do not add logs to `.gitignore`.
+
+---
+
+# 49. GIT COMMITS
+
+Commit logically during the upgrade.
+
+Examples:
+
+feat: add advanced product filters
+feat: add wishlist system
+feat: add product reviews
+feat: add product comparison
+feat: add coupon system
+feat: add order tracking
+feat: improve Amazon homepage
+feat: improve search experience
+feat: improve responsive UI
+fix: resolve checkout persistence issue
+fix: resolve product image loading
+docs: update README with phase 2 features
+
+Do not create one giant final commit.
+
+---
+
+# 50. FINAL PRIORITY
+
+If time becomes limited, use this order:
+
+1. Fix existing bugs
+2. Improve homepage
+3. Improve search/filter/sorting
+4. Wishlist
+5. Reviews
+6. Order tracking
+7. Coupons
+8. Recently viewed
+9. Product comparison
+10. Recommendations
+11. Account improvements
+12. UI polish
+13. Responsive QA
+14. Deployment
+15. README
+16. Final smoke test
+
+Do NOT spend hours implementing a complicated payment gateway while core shopping flows still have bugs.
+
+---
+
+# 51. FINAL QUALITY BAR
+
+Before declaring the project complete, ask yourself:
+
+Can a new visitor understand the site immediately?
+
+Does the site visually resemble Amazon?
+
+Can the visitor search?
+
+Can they filter?
+
+Can they open a product?
+
+Can they see realistic product information?
+
+Can they wishlist?
+
+Can they add to cart?
+
+Can they checkout?
+
+Can they place an order?
+
+Can they view the order?
+
+Can they track it?
+
+Can they buy again?
+
+Can they leave a review?
+
+Does the UI work on mobile?
+
+Are loading/error/empty states handled?
+
+Does the backend persist important data?
+
+Is the repository clean?
+
+Is README accurate?
+
+Is the project deployable?
+
+If any core answer is no, fix it before adding another low-priority feature.
+
+---
+
+# 52. START
+
+Start by auditing the existing implementation.
+
+Return a concise report containing:
+
+1. What already exists
+2. What is partially implemented
+3. What is missing
+4. What you will upgrade first
+5. Any bugs you discover
+
+Then begin implementation immediately.
+
+Do not rebuild existing functionality.
+
+Do not create a generic e-commerce template.
+
+Do not stop at visual mockups.
+
+Build a polished, functional, high-fidelity Amazon-style MERN marketplace.
+
+The final result must look professional, behave professionally, and be ready for a live assignment walkthrough.
