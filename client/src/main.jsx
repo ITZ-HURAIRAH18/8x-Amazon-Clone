@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import App from "./App"
 import { StoreProvider } from "./context/StoreContext"
+import { AdminAuthProvider } from "./context/AdminAuthContext"
 import "./styles.css"
 
 class AppErrorBoundary extends React.Component {
@@ -25,9 +26,11 @@ class AppErrorBoundary extends React.Component {
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <StoreProvider>
-        <AppErrorBoundary><App /></AppErrorBoundary>
-      </StoreProvider>
+      <AdminAuthProvider>
+        <StoreProvider>
+          <AppErrorBoundary><App /></AppErrorBoundary>
+        </StoreProvider>
+      </AdminAuthProvider>
     </BrowserRouter>
   </React.StrictMode>,
 )

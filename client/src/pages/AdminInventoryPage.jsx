@@ -1,0 +1,20 @@
+import { useEffect, useState } from "react"
+import { Edit3, RefreshCw, Search } from "lucide-react"
+import { adminApi, errorMessage } from "../services/api"
+import { AdminEmpty, AdminError, AdminModal, AdminPageHeader, AdminStatusBadge, AdminTable, AdminToast } from "../components/admin/AdminUI"
+
+const payloadOf = (result) => result?.data?.data || result?.data || result || {}
+
+export default function AdminInventoryPage() {
+  const [search, setSearch] = useState("")
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [editing, setEditing] = useState(null)
+  const [toast, setToast] = useState("")
+  const load = () => { setLoading(true); adminApi.inventory.list({ search, limit: 100 }).then((result) => { const value = payloadOf(result); setRows(Array.isArray(value) ? value : value.data || []) }).catch((requestError) => setError(errorMessage(requestError, "Inventory could not be loaded."))).finally(() => setLoading(false)) }
+  useEffect(load, [search])
+  const save = async (event) => { event.preventDefault(); try { await adminApi.inventory.update(editing.id, { stock: Number(editing.stock), lowStockThreshold: Number(editing.lowStockThreshold || 10) }); setEditing(null); setToast("Inventory updated."); load() } catch (requestError) { setError(errorMessage(requestError, "Inventory could not be updated.")) } }
+  const columns = [{ key: "title", label: "Product", render: (row) => <div className="admin-product-name"><strong>{row.title}</strong><small>{row.sku || "—"}</small></div> }, { key: "stock", label: "Current stock", render: (row) => <strong className={row.stock <= (row.lowStockThreshold || 10) ? "admin-stock-low" : ""}>{row.stock}</strong> }, { key: "lowStockThreshold", label: "Low-stock threshold" }, { key: "status", label: "Status", render: (row) => <AdminStatusBadge value={row.stock <= 0 ? "Out of stock" : row.stock <= (row.lowStockThreshold || 10) ? "Low stock" : "In stock"} /> }, { key: "actions", label: "Actions", render: (row) => <button className="admin-icon-button" type="button" onClick={() => setEditing({ ...row })} aria-label={`Edit inventory for ${row.title}`}><Edit3 size={16} /></button> }]
+  return <div className="admin-page"><AdminPageHeader eyebrow="Catalog operations" title="Inventory" description="Keep stock levels accurate and surface low-stock products before customers encounter them." actions={<button className="admin-secondary-button" type="button" onClick={load}><RefreshCw size={15} /> Refresh</button>} /><AdminToast message={toast} onClose={() => setToast("")} />{error && <AdminError message={error} onRetry={load} />}<div className="admin-toolbar"><div className="admin-search-field"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search inventory…" aria-label="Search inventory" /></div><span className="admin-toolbar__note">Default low-stock threshold: 10</span></div><AdminTable columns={columns} rows={rows} loading={loading} empty={<AdminEmpty title="No inventory records" message="Products with stock information will appear here." />} />{editing && <AdminModal open title="Update inventory" onClose={() => setEditing(null)} footer={<><button className="admin-secondary-button" type="button" onClick={() => setEditing(null)}>Cancel</button><button className="admin-primary-button" type="submit" form="admin-inventory-form">Save inventory</button></>}><form id="admin-inventory-form" className="admin-form-stack" onSubmit={save}><p><strong>{editing.title}</strong><br />{editing.sku}</p><label className="admin-field">Current stock<input type="number" min="0" step="1" value={editing.stock} onChange={(event) => setEditing({ ...editing, stock: event.target.value })} required /></label><label className="admin-field">Low-stock threshold<input type="number" min="0" step="1" value={editing.lowStockThreshold ?? 10} onChange={(event) => setEditing({ ...editing, lowStockThreshold: event.target.value })} /></label></form></AdminModal>}</div>
+}

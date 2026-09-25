@@ -1,9 +1,8 @@
 import axios from "axios"
 
-const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
-const apiBaseUrl = configuredApiUrl.replace(/\/$/, "").endsWith("/api")
-  ? configuredApiUrl.replace(/\/$/, "")
-  : `${configuredApiUrl.replace(/\/$/, "")}/api`
+const configuredApiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/api" : "http://localhost:5000/api")
+const normalizedApiUrl = configuredApiUrl.replace(/\/$/, "")
+const apiBaseUrl = normalizedApiUrl.endsWith("/api") || normalizedApiUrl.startsWith("/") ? normalizedApiUrl : `${normalizedApiUrl}/api`
 
 export const api = axios.create({
   baseURL: apiBaseUrl,
@@ -21,6 +20,26 @@ api.interceptors.response.use((response) => response, (error) => {
     localStorage.removeItem("amazon_clone_token")
     localStorage.removeItem("amazon_clone_user")
     window.dispatchEvent(new Event("amazon:session-expired"))
+  }
+  return Promise.reject(error)
+})
+
+export const adminClient = axios.create({
+  baseURL: apiBaseUrl,
+  headers: { "Content-Type": "application/json" },
+})
+
+adminClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("amazon_clone_admin_token")
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+adminClient.interceptors.response.use((response) => response, (error) => {
+  if (error?.response?.status === 401) {
+    localStorage.removeItem("amazon_clone_admin_token")
+    localStorage.removeItem("amazon_clone_admin_user")
+    window.dispatchEvent(new Event("amazon:admin-session-expired"))
   }
   return Promise.reject(error)
 })
@@ -92,6 +111,86 @@ export const notificationApi = {
   list: async () => (await api.get("/notifications")).data,
   markRead: async (id) => unwrap(await api.patch(`/notifications/${id}/read`)),
   markAllRead: async () => unwrap(await api.patch("/notifications/read-all")),
+}
+
+export const adminApi = {
+  auth: {
+    login: async (credentials) => unwrap(await adminClient.post("/admin/auth/login", credentials)),
+    me: async () => unwrap(await adminClient.get("/admin/auth/me")),
+    logout: async () => unwrap(await adminClient.post("/admin/auth/logout")),
+  },
+  dashboard: async (params = {}) => (await adminClient.get("/admin/dashboard", { params })).data,
+  analytics: async (params = {}) => (await adminClient.get("/admin/analytics", { params })).data,
+  revenue: async (params = {}) => (await adminClient.get("/admin/analytics/revenue", { params })).data,
+  ordersAnalytics: async (params = {}) => (await adminClient.get("/admin/analytics/orders", { params })).data,
+  productsAnalytics: async (params = {}) => (await adminClient.get("/admin/analytics/products", { params })).data,
+  categoriesAnalytics: async (params = {}) => (await adminClient.get("/admin/analytics/categories", { params })).data,
+  customersAnalytics: async (params = {}) => (await adminClient.get("/admin/analytics/customers", { params })).data,
+  products: {
+    list: async (params = {}) => (await adminClient.get("/admin/products", { params })).data,
+    get: async (id) => unwrap(await adminClient.get(`/admin/products/${id}`)),
+    create: async (details) => unwrap(await adminClient.post("/admin/products", details)),
+    update: async (id, details) => unwrap(await adminClient.patch(`/admin/products/${id}`, details)),
+    remove: async (id) => unwrap(await adminClient.delete(`/admin/products/${id}`)),
+    status: async (id, status) => unwrap(await adminClient.patch(`/admin/products/${id}/status`, { status })),
+    bulk: async (action, ids, value) => unwrap(await adminClient.post("/admin/products/bulk", { action, ids, value })),
+  },
+  categories: {
+    list: async (params = {}) => (await adminClient.get("/admin/categories", { params })).data,
+    create: async (details) => unwrap(await adminClient.post("/admin/categories", details)),
+    update: async (id, details) => unwrap(await adminClient.patch(`/admin/categories/${id}`, details)),
+    remove: async (id) => unwrap(await adminClient.delete(`/admin/categories/${id}`)),
+  },
+  brands: {
+    list: async (params = {}) => (await adminClient.get("/admin/brands", { params })).data,
+    create: async (details) => unwrap(await adminClient.post("/admin/brands", details)),
+    update: async (id, details) => unwrap(await adminClient.patch(`/admin/brands/${id}`, details)),
+    remove: async (id) => unwrap(await adminClient.delete(`/admin/brands/${id}`)),
+  },
+  orders: {
+    list: async (params = {}) => (await adminClient.get("/admin/orders", { params })).data,
+    get: async (id) => unwrap(await adminClient.get(`/admin/orders/${id}`)),
+    status: async (id, status) => unwrap(await adminClient.patch(`/admin/orders/${id}/status`, { status })),
+  },
+  users: {
+    list: async (params = {}) => (await adminClient.get("/admin/users", { params })).data,
+    get: async (id) => unwrap(await adminClient.get(`/admin/users/${id}`)),
+    status: async (id, status) => unwrap(await adminClient.patch(`/admin/users/${id}/status`, { status })),
+    role: async (id, role) => unwrap(await adminClient.patch(`/admin/users/${id}/role`, { role })),
+  },
+  reviews: {
+    list: async (params = {}) => (await adminClient.get("/admin/reviews", { params })).data,
+    moderate: async (id, status) => unwrap(await adminClient.patch(`/admin/reviews/${id}`, { status })),
+    remove: async (id) => unwrap(await adminClient.delete(`/admin/reviews/${id}`)),
+  },
+  coupons: {
+    list: async (params = {}) => (await adminClient.get("/admin/coupons", { params })).data,
+    create: async (details) => unwrap(await adminClient.post("/admin/coupons", details)),
+    update: async (id, details) => unwrap(await adminClient.patch(`/admin/coupons/${id}`, details)),
+    remove: async (id) => unwrap(await adminClient.delete(`/admin/coupons/${id}`)),
+  },
+  deals: {
+    list: async (params = {}) => (await adminClient.get("/admin/deals", { params })).data,
+    get: async (id) => unwrap(await adminClient.get(`/admin/deals/${id}`)),
+    create: async (details) => unwrap(await adminClient.post("/admin/deals", details)),
+    update: async (id, details) => unwrap(await adminClient.patch(`/admin/deals/${id}`, details)),
+    remove: async (id) => unwrap(await adminClient.delete(`/admin/deals/${id}`)),
+  },
+  inventory: {
+    list: async (params = {}) => (await adminClient.get("/admin/inventory", { params })).data,
+    update: async (id, details) => unwrap(await adminClient.patch(`/admin/inventory/${id}`, details)),
+  },
+  notifications: {
+    list: async (params = {}) => (await adminClient.get("/admin/notifications", { params })).data,
+    markRead: async (id) => unwrap(await adminClient.patch(`/admin/notifications/${id}/read`)),
+    markAllRead: async () => unwrap(await adminClient.patch("/admin/notifications/read-all")),
+    clear: async () => unwrap(await adminClient.delete("/admin/notifications")),
+  },
+  search: async (q) => (await adminClient.get("/admin/search", { params: { q } })).data,
+  settings: {
+    get: async () => unwrap(await adminClient.get("/admin/settings")),
+    update: async (details) => unwrap(await adminClient.patch("/admin/settings", details)),
+  },
 }
 
 export function errorMessage(error, fallback = "Something went wrong. Please try again.") {

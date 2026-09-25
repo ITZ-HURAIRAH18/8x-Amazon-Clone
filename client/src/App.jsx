@@ -1,4 +1,24 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import { useAdminAuth } from "./context/AdminAuthContext"
+import AdminLayout from "./components/admin/AdminLayout"
+import AdminLoginPage from "./pages/AdminLoginPage"
+import AdminForbiddenPage from "./pages/AdminForbiddenPage"
+import AdminDashboardPage from "./pages/AdminDashboardPage"
+import AdminProductsPage from "./pages/AdminProductsPage"
+import AdminProductFormPage from "./pages/AdminProductFormPage"
+import AdminCatalogPage from "./pages/AdminCatalogPage"
+import AdminOrdersPage from "./pages/AdminOrdersPage"
+import AdminOrderDetailPage from "./pages/AdminOrderDetailPage"
+import AdminUsersPage from "./pages/AdminUsersPage"
+import AdminUserDetailPage from "./pages/AdminUserDetailPage"
+import AdminReviewsPage from "./pages/AdminReviewsPage"
+import AdminCouponsPage from "./pages/AdminCouponsPage"
+import AdminDealsPage from "./pages/AdminDealsPage"
+import AdminInventoryPage from "./pages/AdminInventoryPage"
+import AdminAnalyticsPage from "./pages/AdminAnalyticsPage"
+import AdminNotificationsPage from "./pages/AdminNotificationsPage"
+import AdminSettingsPage from "./pages/AdminSettingsPage"
+import AdminSearchPage from "./pages/AdminSearchPage"
 import AmazonShell from "./components/AmazonShell"
 import { useAuth } from "./context/StoreContext"
 import HomePage from "./pages/HomePage"
@@ -32,8 +52,40 @@ function GuestRoute({ children }) {
   return user ? <Navigate to="/account" replace /> : children
 }
 
+function AdminProtectedRoute({ children }) {
+  const { admin, ready } = useAdminAuth()
+  const { user, ready: customerReady } = useAuth()
+  const location = useLocation()
+  if (!ready || !customerReady) return <div className="route-loading">Loading admin workspace…</div>
+  if (admin?.role === "admin" && admin.status !== "suspended") return children
+  if (user) return <AdminForbiddenPage />
+  return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />
+}
+
 export default function App() {
   return <Routes>
+    <Route path="/admin/login" element={<AdminLoginPage />} />
+    <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+      <Route index element={<Navigate to="dashboard" replace />} />
+      <Route path="dashboard" element={<AdminDashboardPage />} />
+      <Route path="products" element={<AdminProductsPage />} />
+      <Route path="products/new" element={<AdminProductFormPage />} />
+      <Route path="products/:id/edit" element={<AdminProductFormPage />} />
+      <Route path="categories" element={<AdminCatalogPage kind="category" />} />
+      <Route path="brands" element={<AdminCatalogPage kind="brand" />} />
+      <Route path="orders" element={<AdminOrdersPage />} />
+      <Route path="orders/:id" element={<AdminOrderDetailPage />} />
+      <Route path="users" element={<AdminUsersPage />} />
+      <Route path="users/:id" element={<AdminUserDetailPage />} />
+      <Route path="reviews" element={<AdminReviewsPage />} />
+      <Route path="coupons" element={<AdminCouponsPage />} />
+      <Route path="deals" element={<AdminDealsPage />} />
+      <Route path="inventory" element={<AdminInventoryPage />} />
+      <Route path="analytics" element={<AdminAnalyticsPage />} />
+      <Route path="notifications" element={<AdminNotificationsPage />} />
+      <Route path="settings" element={<AdminSettingsPage />} />
+      <Route path="search" element={<AdminSearchPage />} />
+    </Route>
     <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
     <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
     <Route element={<AmazonShell />}>
@@ -43,6 +95,10 @@ export default function App() {
       <Route path="product/:id" element={<ProductDetailPage />} />
       <Route path="deals" element={<DealsPage />} />
       <Route path="wishlist" element={<WishlistPage />} />
+      <Route path="account/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+      <Route path="account/addresses" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+      <Route path="account/reviews" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+      <Route path="account/coupons" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
       <Route path="compare" element={<ComparePage />} />
       <Route path="cart" element={<CartPage />} />
       <Route path="account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
