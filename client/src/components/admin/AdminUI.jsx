@@ -37,11 +37,18 @@ export function AdminPagination({ page = 1, pages = 1, onPage }) {
   return <nav className="admin-pagination" aria-label="Admin pagination"><button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} aria-label="Previous page"><ChevronLeft size={15} /></button>{numbers.map((number) => <button type="button" className={number === page ? "is-active" : ""} aria-current={number === page ? "page" : undefined} onClick={() => onPage(number)} key={number}>{number}</button>)}<button type="button" disabled={page >= pages} onClick={() => onPage(page + 1)} aria-label="Next page"><ChevronRight size={15} /></button></nav>
 }
 
-export function AdminTable({ columns, rows, rowKey = "id", loading, error, onRetry, empty }) {
+export function AdminTable({ columns, rows, rowKey = "id", loading, error, onRetry, empty, sortKey, sortDirection = "asc", onSort }) {
   if (loading) return <AdminSkeleton />
   if (error) return <AdminError message={error} onRetry={onRetry} />
   if (!rows?.length) return empty || <AdminEmpty />
-  return <div className="admin-table-wrap"><table className="admin-table"><thead><tr>{columns.map((column) => <th key={column.key} scope="col" style={column.width ? { width: column.width } : undefined}>{column.label}</th>)}</tr></thead><tbody>{rows.map((row, index) => <tr key={row[rowKey] || row._id || index}>{columns.map((column) => <td key={column.key}>{column.render ? column.render(row) : row[column.key] ?? "—"}</td>)}</tr>)}</tbody></table></div>
+  return <div className="admin-table-wrap"><table className="admin-table"><thead><tr>{columns.map((column) => {
+    const sortable = column.sortable && onSort
+    const active = sortable && sortKey === column.key
+    const ariaSort = active ? (sortDirection === "asc" ? "ascending" : "descending") : sortable ? "none" : undefined
+    return <th key={column.key} scope="col" style={column.width ? { width: column.width } : undefined} aria-sort={ariaSort}>{sortable
+      ? <button type="button" className={`admin-sort-button ${active ? "is-active" : ""}`} onClick={() => onSort(column.key)}>{column.label}{active && <span aria-hidden="true">{sortDirection === "asc" ? "▲" : "▼"}</span>}</button>
+      : column.label}</th>
+  })}</tr></thead><tbody>{rows.map((row, index) => <tr key={row[rowKey] || row._id || index}>{columns.map((column) => <td key={column.key}>{column.render ? column.render(row) : row[column.key] ?? "—"}</td>)}</tr>)}</tbody></table></div>
 }
 
 export function AdminModal({ open, title, description, onClose, children, footer, size = "default" }) {
