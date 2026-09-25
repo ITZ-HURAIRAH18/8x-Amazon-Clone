@@ -87,6 +87,70 @@ The project is intentionally a functional commerce demo rather than a claim of A
 - Visible keyboard focus, semantic landmarks, labels, alt text, and accessible controls
 - Dynamic page titles, descriptions, canonical links, and Open Graph defaults
 
+## Administration
+
+The application includes a separate Amazon-inspired operations workspace for authorized staff.
+
+### Admin access
+
+- Admin URL: `/admin/login`
+- Admin dashboard: `/admin/dashboard`
+- Admin sessions use a separate scoped JWT and require the `admin` role.
+- Customer accounts are redirected to a proper 403 page when they attempt to open admin routes.
+- Admin API routes are protected by authentication and role middleware.
+
+### Admin workspace
+
+- Live revenue, order, customer, product, review, and inventory metrics
+- Date presets and custom analytics ranges
+- Revenue, order, category, brand, and customer charts backed by MongoDB aggregations
+- Product CRUD, archival, status changes, bulk actions, and inventory thresholds
+- Category and brand CRUD with product-count deletion protection
+- Order search, filtering, sorting, detail view, and status timeline updates
+- Customer search, account status, order history, reviews, wishlist summary, and spending
+- Review moderation with customer-visible status integration
+- Coupon CRUD with percentage, fixed, and shipping discounts
+- Deal CRUD with product selection and active dates
+- Inventory and low-stock management
+- Admin notifications, global search, settings, responsive tables, accessible modals, and mobile navigation
+
+### Admin API groups
+
+All routes below require an authenticated admin token:
+
+- `/api/admin/dashboard`
+- `/api/admin/analytics/*`
+- `/api/admin/products/*`
+- `/api/admin/categories/*`
+- `/api/admin/brands/*`
+- `/api/admin/orders/*`
+- `/api/admin/users/*`
+- `/api/admin/reviews/*`
+- `/api/admin/coupons/*`
+- `/api/admin/deals/*`
+- `/api/admin/inventory/*`
+- `/api/admin/notifications/*`
+- `/api/admin/search`
+- `/api/admin/settings`
+
+### Create an admin safely
+
+Admin credentials are never stored in the frontend or README. Set these server environment variables and run the explicit seed command:
+
+```env
+ADMIN_NAME=Operations Administrator
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=use-a-long-random-password
+```
+
+```bash
+npm run seed:admin
+```
+
+The seed command hashes the password and upserts the admin role. Use a unique development credential and rotate it through the account/security flow after signing in.
+
+---
+
 ## Architecture
 
 ```text

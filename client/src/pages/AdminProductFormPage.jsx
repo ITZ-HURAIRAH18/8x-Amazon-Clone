@@ -19,6 +19,7 @@ export default function AdminProductFormPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
+  const [taxonomy, setTaxonomy] = useState({ categories: ["Electronics", "Computers", "Home", "Kitchen", "Fashion", "Beauty", "Books", "Toys", "Grocery", "Sports"], brands: [] })
 
   useEffect(() => {
     if (!editing) return
@@ -35,6 +36,13 @@ export default function AdminProductFormPage() {
       })
     }).catch((requestError) => setError(errorMessage(requestError, "Product could not be loaded."))).finally(() => setLoading(false))
   }, [id, editing])
+  useEffect(() => {
+    Promise.all([adminApi.categories.list({ limit: 100 }), adminApi.brands.list({ limit: 100 })]).then(([categoryResponse, brandResponse]) => {
+      const categoryValue = categoryResponse?.data?.data || categoryResponse?.data || categoryResponse || []
+      const brandValue = brandResponse?.data?.data || brandResponse?.data || brandResponse || []
+      setTaxonomy({ categories: (Array.isArray(categoryValue) ? categoryValue : categoryValue.data || []).map((item) => item.name).filter(Boolean), brands: (Array.isArray(brandValue) ? brandValue : brandValue.data || []).map((item) => item.name).filter(Boolean) })
+    }).catch(() => {})
+  }, [])
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const submit = async (event) => {
@@ -45,6 +53,7 @@ export default function AdminProductFormPage() {
     try { specifications = JSON.parse(form.specifications || "{}") } catch { setError("Specifications must be valid JSON."); return }
     const images = form.images.split("\n").map((value) => value.trim()).filter(Boolean)
     if (!images.length) { setError("Add at least one product image URL."); return }
+    if (images.some((image) => !/^https?:\/\//i.test(image))) { setError("Every product image must use an http or https URL."); return }
     if (Number(form.price) < 0 || Number(form.originalPrice) < Number(form.price) || Number(form.stock) < 0) { setError("Check price and stock values."); return }
     const details = { ...form, active: form.isActive, isActive: form.isActive, price: Number(form.price), originalPrice: Number(form.originalPrice), discount: Number(form.discount || 0), stock: Math.floor(Number(form.stock)), lowStockThreshold: Math.floor(Number(form.lowStockThreshold || 10)), rating: Number(form.rating || 0), images, features: form.features.split("\n").map((value) => value.trim()).filter(Boolean), specifications, dealEndsAt: form.dealEndsAt || null }
     setSaving(true)
@@ -67,8 +76,8 @@ export default function AdminProductFormPage() {
         <div className="admin-form-grid">
           <label className="admin-field admin-field--wide">Title<input value={form.title} onChange={(event) => update("title", event.target.value)} required /></label>
           <label className="admin-field admin-field--wide">Description<textarea rows={5} value={form.description} onChange={(event) => update("description", event.target.value)} required /></label>
-          <label className="admin-field">Category<input list="admin-category-options" value={form.category} onChange={(event) => update("category", event.target.value)} required /><datalist id="admin-category-options"><option>Electronics</option><option>Computers</option><option>Home</option><option>Kitchen</option><option>Fashion</option><option>Beauty</option><option>Books</option><option>Toys</option><option>Grocery</option><option>Sports</option></datalist></label>
-          <label className="admin-field">Brand<input value={form.brand} onChange={(event) => update("brand", event.target.value)} required /></label>
+          <label className="admin-field">Category<input list="admin-category-options" value={form.category} onChange={(event) => update("category", event.target.value)} required /><datalist id="admin-category-options">{taxonomy.categories.map((category) => <option key={category} value={category} />)}</datalist></label>
+          <label className="admin-field">Brand<input list="admin-brand-options" value={form.brand} onChange={(event) => update("brand", event.target.value)} required /><datalist id="admin-brand-options">{taxonomy.brands.map((brand) => <option key={brand} value={brand} />)}</datalist></label>
           <label className="admin-field">SKU<input value={form.sku} onChange={(event) => update("sku", event.target.value)} required={!editing} placeholder="e.g. AMZ-NEW-001" /></label>
           <label className="admin-field">Rating<input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={(event) => update("rating", event.target.value)} /></label>
         </div>
