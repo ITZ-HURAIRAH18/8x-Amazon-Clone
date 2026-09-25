@@ -45,8 +45,19 @@ The database is shared, so anything you change as an admin appears immediately f
 npm run verify:deploy -- --api=https://8x-amazon-clone-server.vercel.app --client=https://amazon-clone-client-five.vercel.app
 ```
 
-All lines must read `PASS`. If the backend line fails, redeploy the backend Vercel project first
-(see `README.md` → Deployment).
+All six lines must read `PASS`:
+
+```text
+PASS Backend /api/health
+PASS MongoDB connection
+PASS Admin API reachable
+PASS CORS allows the frontend
+PASS Frontend /login
+PASS Frontend API base URL
+6/6 checks passed.
+```
+
+If the backend line fails, redeploy the backend Vercel project first (see `README.md` → Deployment).
 
 ### 4. Recording setup
 
@@ -63,6 +74,19 @@ Before recording, put the site back to a tidy state so nothing looks broken:
 
 - Delete any test products, coupons, or deals you created while testing.
 - Use a fresh customer account, or log out and back in.
+
+### 6. Open tabs to prepare in advance
+
+Having these ready saves time and avoids typing on camera:
+
+| Tab | URL |
+| --- | --- |
+| 1 | `https://amazon-clone-client-five.vercel.app` (storefront) |
+| 2 | `https://amazon-clone-client-five.vercel.app/admin/login` (admin) |
+| 3 | A second browser window or private window signed in as the customer |
+
+Use the customer window for checkout and order tracking, and the admin window for the dashboard.
+Switching between the two during Scene 14 makes the shared-database integration obvious.
 
 ---
 
@@ -287,11 +311,14 @@ window.
 
 ### Scene 14 — Order management and customer/admin consistency (12:40 – 13:40)
 
+**This is the strongest scene in the video.** Use two windows: the admin window and a customer
+window signed in as the customer from Scene 7.
+
 **Do:**
 1. `/admin/orders` — search for the order placed in Scene 7.
 2. Open it and show the customer, shipping address, items, payment, and totals.
 3. Change the status to **Processing**, then **Shipped**.
-4. Switch to the customer tab and refresh **Your orders** to show the new status.
+4. Alt-tab to the customer window, refresh **Your orders**, and show the new status.
 5. Cancel a different order to show stock being restored in `/admin/inventory`.
 
 **Say:**
