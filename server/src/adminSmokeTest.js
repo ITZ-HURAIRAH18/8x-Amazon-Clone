@@ -267,6 +267,14 @@ async function run() {
   check(!dealsAfter.data.some((row) => row.id === created.product), "removing a deal restores product pricing")
 
   // 9. Customer management
+  // Every filter combination is exercised because an empty MongoDB $and clause
+  // (for example an unfiltered customer list) used to fail the whole query.
+  const unfilteredUsers = await admin("/admin/users?limit=5")
+  check(Array.isArray(unfilteredUsers.data) && typeof unfilteredUsers.meta.total === "number", "customer list works without filters")
+  for (const params of ["sort=spent", "sort=name", "role=customer", "status=active", `search=${customerEmail}`]) {
+    const filtered = await admin(`/admin/users?limit=5&${params}`)
+    check(Array.isArray(filtered.data), `customer list accepts ?${params}`)
+  }
   const users = await admin(`/admin/users?search=${customerEmail}`)
   const managedUser = users.data.find((row) => row.email === customerEmail)
   check(Boolean(managedUser) && !("passwordHash" in (managedUser || {})), "admin customer list hides credentials")

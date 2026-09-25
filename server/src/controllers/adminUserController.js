@@ -48,13 +48,16 @@ export const listUsers = asyncHandler(async (req, res) => {
   const sort = { newest: { createdAt: -1 }, oldest: { createdAt: 1 }, name: { name: 1 }, nameDesc: { name: -1 }, spent: { totalSpent: -1 }, spentDesc: { totalSpent: 1 }, orders: { orderCount: -1 }, ordersDesc: { orderCount: 1 } }[req.query.sort] || { createdAt: -1 }
 
   if (databaseReady()) {
+    // MongoDB rejects an empty `$and`, so conditions are only added when needed
+    // and the key is dropped again if nothing ends up in it.
     const match = {}
-    match.$and ||= []
-    if (role === "customer") match.$and.push({ $or: [{ role: "customer" }, { role: { $exists: false } }] })
+    const and = []
+    if (role === "customer") and.push({ $or: [{ role: "customer" }, { role: { $exists: false } }] })
     else if (role) match.role = role
-    if (status === "active") match.$and.push({ $or: [{ status: "active" }, { status: { $exists: false } }] })
+    if (status === "active") and.push({ $or: [{ status: "active" }, { status: { $exists: false } }] })
     else if (status) match.status = status
-    if (search) match.$and.push({ $or: [{ name: new RegExp(escapeRegex(search), "i") }, { email: new RegExp(escapeRegex(search), "i") }] })
+    if (search) and.push({ $or: [{ name: new RegExp(escapeRegex(search), "i") }, { email: new RegExp(escapeRegex(search), "i") }] })
+    if (and.length) match.$and = and
     const [result] = await User.aggregate([
       { $match: match },
       {
