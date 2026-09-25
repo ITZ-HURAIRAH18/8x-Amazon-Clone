@@ -6,6 +6,17 @@ Amazon Clone is a high-fidelity MERN e-commerce application inspired by Amazon's
 
 The project is intentionally a functional commerce demo rather than a claim of Amazon's real backend. Product data is seeded, payment is simulated, and recommendations are deterministic rather than machine-learned.
 
+**Live URLs and key files**
+
+| | |
+| --- | --- |
+| Frontend (Vercel) | `https://amazon-clone-client-five.vercel.app` |
+| Backend API (Vercel) | `https://8x-amazon-clone-server.vercel.app/api` |
+| Admin sign in | `https://amazon-clone-client-five.vercel.app/admin/login` |
+| Repository | `https://github.com/ITZ-HURAIRAH18/8x-Amazon-Clone` |
+| Assignment requirements | `agent.md` |
+| Video presentation guide | `VIDEO_PRESENTATION_GUIDE.md` |
+
 ## Stack
 
 - **Frontend:** React 18, Vite, React Router, Axios, Recharts, Lucide React, structured CSS
@@ -395,15 +406,32 @@ npm start
 
 ## Deployment
 
+### Live URLs for this project
+
+| | URL |
+| --- | --- |
+| Frontend (Vercel) | `https://amazon-clone-client-five.vercel.app` |
+| Backend API (Vercel) | `https://8x-amazon-clone-server.vercel.app/api` |
+| Admin sign in | `https://amazon-clone-client-five.vercel.app/admin/login` |
+| Health check | `https://8x-amazon-clone-server.vercel.app/api/health` |
+
+The frontend and the backend are two separate Vercel projects. The frontend is a static Vite build that reads `VITE_API_URL` at build time; the backend is an Express API exposed as a Vercel Function. `error.md` in the repository root records these two deployed domains.
+
+```bash
+npm run verify:deploy -- --api=https://8x-amazon-clone-server.vercel.app --client=https://amazon-clone-client-five.vercel.app
+```
+
+This prints a pass/fail line for the backend health endpoint, the MongoDB connection, the admin API, CORS for the frontend origin, the SPA route, and the API base URL baked into the deployed bundle. See [Diagnose a deployment](#diagnose-a-deployment-with-one-command) for interpreting the output.
+
 ### Frontend
 
 Deploy the `client/` directory as a Vite application. For Vercel, set **Root Directory** to `client`, keep the Vite framework preset, and set:
 
 ```dotenv
-VITE_API_URL=https://<backend-domain>/api
+VITE_API_URL=https://8x-amazon-clone-server.vercel.app/api
 ```
 
-`client/vercel.json` rewrites client-side routes to `index.html` while leaving API calls on the separately configured backend origin.
+`client/vercel.json` rewrites client-side routes to `index.html` while leaving API calls on the separately configured backend origin. `VITE_API_URL` is baked into the bundle at build time, so changing it requires a new deployment.
 
 ### Backend
 
@@ -430,7 +458,7 @@ Set these environment variables in the backend Vercel project:
 After changing the Vercel project settings or environment variables, create a new deployment. Existing deployments are not rebuilt automatically. The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML or 404 instead of JSON. Verify the deployed pair explicitly:
 
 ```text
-GET https://<backend-domain>/api/health
+GET https://8x-amazon-clone-server.vercel.app/api/health
 → { "data": { "status": "ok", "database": "connected" } }
 ```
 
@@ -460,7 +488,7 @@ That combination means the frontend is configured correctly but the backend doma
 1. Set `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` on the backend host (Render, Vercel, or a `.env` file) and run `npm run seed:admin` once with the same values.
 2. Confirm the deployment protection on the backend is disabled for API traffic, otherwise `/api/admin/*` returns a Vercel login page instead of JSON.
 3. Add the deployed frontend origin to `CLIENT_URL` so CORS allows the admin client.
-4. Sign in at `https://<frontend-domain>/admin/login`, confirm the dashboard loads, then sign out and confirm the token is revoked.
+4. Sign in at `https://amazon-clone-client-five.vercel.app/admin/login`, confirm the dashboard loads, then sign out and confirm the token is revoked.
 5. Rotate the administrator password by re-running the seed command; every issued admin token is invalidated.
 
 ### Vercel backend layout
@@ -546,3 +574,14 @@ It checks admin sign-in and logout, 401/403 enforcement, dashboard and analytics
 ## Quality and capture records
 
 The project includes responsive states, visible focus styles, keyboard-accessible drawer behavior, loading/empty/error states, and the automatic agent capture setup required by the assignment. Raw root-session prompts and final responses are stored in `.agent-logs/`; the directory is intentionally tracked and is not ignored.
+
+### Files in this repository
+
+| File | Purpose |
+| --- | --- |
+| `README.md` | This document: setup, features, API, deployment |
+| `agent.md` | The assignment requirements and QA checklist |
+| `VIDEO_PRESENTATION_GUIDE.md` | Scene-by-scene script for the demo video |
+| `error.md` | The deployed frontend and backend domains |
+| `CAPTURE-TEST.md` | Capture test evidence required by the assignment |
+| `.agent-logs/` | Recorded work sessions |
