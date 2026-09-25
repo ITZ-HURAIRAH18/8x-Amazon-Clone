@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: amazon-clone-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false
+      - key: MONGO_DNS_SERVERS
+        value: 8.8.8.8,1.1.1.1,8.8.4.4
+      - key: ORDER_STATUS_TOKEN
+        generateValue: true

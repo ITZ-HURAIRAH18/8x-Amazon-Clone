@@ -9,7 +9,7 @@ const objectId = (value) => (mongoose.isValidObjectId(value) ? value : null)
 const numberOrUndefined = (value) => {
   if (value === undefined || value === null || value === "") return undefined
   const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : undefined
+  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 1_000_000_000 ? parsed : undefined
 }
 
 function fallbackProduct(product) {
@@ -139,10 +139,10 @@ export const getProductFacets = asyncHandler(async (_req, res) => {
     const [categories, brands, range] = await Promise.all([
       Product.distinct("category"),
       Product.distinct("brand"),
-      Product.find({}, "price").sort({ price: 1 }).lean(),
+      Product.aggregate([{ $group: { _id: null, minPrice: { $min: "$price" }, maxPrice: { $max: "$price" } } }]),
     ])
-    const prices = range.map((item) => Number(item.price)).filter(Number.isFinite)
-    return res.json({ data: { categories: categories.sort(), brands: brands.sort(), minPrice: prices[0] || 0, maxPrice: prices[prices.length - 1] || 0 } })
+    const bounds = range[0] || {}
+    return res.json({ data: { categories: categories.sort(), brands: brands.sort(), minPrice: Number(bounds.minPrice || 0), maxPrice: Number(bounds.maxPrice || 0) } })
   }
   const prices = demoProducts.map((item) => item.price)
   return res.json({ data: { categories: [...new Set(demoProducts.map((item) => item.category))].sort(), brands: [...new Set(demoProducts.map((item) => item.brand))].sort(), minPrice: Math.min(...prices), maxPrice: Math.max(...prices) } })

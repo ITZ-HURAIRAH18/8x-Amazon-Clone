@@ -11,12 +11,15 @@ import couponRoutes from "./routes/couponRoutes.js"
 import notificationRoutes from "./routes/notificationRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
 import { errorHandler, notFound } from "./middleware/error.js"
+import { rateLimit, securityHeaders } from "./middleware/security.js"
 import { databaseReady } from "./config/db.js"
 import { env } from "./config/env.js"
 
 export function createApp() {
   const app = express()
   app.disable("x-powered-by")
+  app.set("trust proxy", 1)
+  app.use(securityHeaders)
   const rawClientOrigins = (env.clientUrl || "")
     .split(",")
     .map((o) => o.trim())
@@ -41,8 +44,8 @@ export function createApp() {
     if (!origin) return true
     const normalizedOrigin = origin.replace(/\/$/, "")
     if (allowedOrigins.has(origin) || allowedOrigins.has(normalizedOrigin)) return true
-    // Allow any local host/IP development origin on any port
-    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return true
+    // Allow any local host/IP development origin only outside production.
+    if (env.nodeEnv !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return true
     return false
   }
 

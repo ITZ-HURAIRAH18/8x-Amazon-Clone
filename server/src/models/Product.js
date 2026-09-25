@@ -28,6 +28,10 @@ const productSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 )
 
-productSchema.index({ title: "text", category: "text", brand: "text" })
+productSchema.index({ title: "text", category: "text", brand: "text", description: "text", features: "text" })
+productSchema.index({ category: 1, price: 1 })
+productSchema.index({ brand: 1, category: 1 })
+productSchema.index({ deal: 1, discount: -1 })
+productSchema.index({ rating: -1, reviewCount: -1 })
 
 export const Product = mongoose.models.Product || mongoose.model("Product", productSchema)
