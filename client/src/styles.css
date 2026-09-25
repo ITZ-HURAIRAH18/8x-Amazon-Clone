@@ -58,10 +58,10 @@ h1, h2, h3 { line-height: 1.25; }
 .delivery-location span, .header-account span, .header-orders span { display: flex; flex-direction: column; align-items: flex-start; line-height: 14px; }
 .delivery-location small, .header-account small, .header-orders small { font-size: 11px; color: #d6dbdb; }
 .delivery-location strong, .header-account strong, .header-orders strong { font-size: 13px; font-weight: 700; }
-.search-form { height: 40px; min-width: 180px; flex: 1 1 auto; display: flex; border-radius: 4px; overflow: hidden; }
-.search-form select { width: 92px; border: 0; background: #e6e6e6; color: #333; padding: 0 8px; font-size: 12px; }
+.search-form { height: 40px; min-width: 0; flex: 1 1 auto; display: flex; align-items: stretch; border-radius: 4px; overflow: hidden; }
+.search-form select { width: 96px; flex: 0 0 96px; min-width: 0; border: 0; background: #e6e6e6; color: #333; padding: 0 8px; font-size: 12px; }
 .search-form input { min-width: 0; flex: 1; border: 0; padding: 0 12px; outline: 0; }
-.search-submit { width: 48px; border: 0; background: var(--amz-search); color: #131921; display: grid; place-items: center; }
+.search-submit { width: 48px; flex: 0 0 48px; border: 0; background: var(--amz-search); color: #131921; display: grid; place-items: center; }
 .search-submit:hover { background: #f3ae52; }
 .language-button { display: flex; align-items: center; gap: 3px; color: #fff; background: transparent; border: 0; padding: 7px 3px; white-space: nowrap; }
 .language-button:hover { color: var(--amz-accent); }
@@ -655,7 +655,7 @@ h1, h2, h3 { line-height: 1.25; }
 .header-notifications { position: relative; display: grid; place-items: center; color: #fff; padding: 8px 5px; }
 .header-notifications b { position: absolute; top: 0; right: -1px; min-width: 15px; padding: 1px 3px; border-radius: 8px; background: #e4794b; color: #fff; font-size: 9px; }
 .cart-subtotal { align-self: flex-end; margin: 0 0 1px 2px; color: #d6dbdb; font-size: 10px; white-space: nowrap; }
-.search-input-wrap { position: relative; min-width: 0; flex: 1; display: flex; align-items: center; }
+.search-input-wrap { position: relative; min-width: 0; flex: 1 1 auto; display: flex; align-items: center; }
 .search-input-wrap input { width: 100%; }
 .search-clear { position: absolute; right: 7px; display: grid; place-items: center; border: 0; background: transparent; color: var(--amz-muted); padding: 5px; }
 .search-suggestions { position: absolute; z-index: 70; top: 40px; left: 0; right: 0; overflow: hidden; background: #fff; color: var(--amz-ink); border: 1px solid var(--amz-border); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
