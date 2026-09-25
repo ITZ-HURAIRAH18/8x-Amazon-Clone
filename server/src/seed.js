@@ -9,8 +9,9 @@ if (!connected) {
   process.exitCode = 1
 } else {
   await Product.deleteMany({})
-  await Product.insertMany(demoProducts)
-  console.log(`Seeded ${demoProducts.length} products`)
+  const products = demoProducts.map(({ _id, slug2, ...product }) => product)
+  await Product.insertMany(products)
+  console.log(`Seeded ${products.length} products`)
   await disconnectDatabase()
 }
 
