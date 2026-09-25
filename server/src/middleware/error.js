@@ -4,7 +4,7 @@ export function notFound(req, res, next) {
 }
 
 export function errorHandler(error, _req, res, _next) {
-  console.error(error)
+  console.error("API error", { name: error?.name || "Error", code: error?.code || "UNKNOWN" })
   if (error?.name === "ValidationError") {
     return res.status(400).json({ message: "Validation failed", code: "VALIDATION_ERROR", details: Object.values(error.errors || {}) })
   }
