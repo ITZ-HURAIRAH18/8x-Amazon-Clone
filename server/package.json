@@ -7,7 +7,8 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seed.js",
-    "seed:coupons": "node src/seedCoupons.js"
+    "seed:coupons": "node src/seedCoupons.js",
+    "smoke": "node src/smokeTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

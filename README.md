@@ -143,7 +143,7 @@ All routes are prefixed with `/api`.
 - `GET /products/facets`
 - `GET /products/:id`
 - `GET /products/:id/recommendations`
-- `POST /products` (authenticated catalog-management endpoint)
+- `POST /products` (authenticated operations endpoint; requires `PRODUCT_ADMIN_TOKEN`)
 
 ### Cart
 
@@ -282,6 +282,16 @@ Deploy `server/` as a Node service with:
 - `ORDER_STATUS_TOKEN` set if status updates will be operated manually
 
 The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML instead of JSON.
+
+## Local smoke test
+
+With the API running and MongoDB available, run the authenticated API smoke test:
+
+```bash
+npm run smoke
+```
+
+It creates a temporary user, exercises search, wishlist, saved-cart behavior, coupons, checkout order creation, reviews, and notifications, then removes the temporary MongoDB records and restores stock. Override the target with `SMOKE_API_URL` when needed.
 
 ## Recommended Demo Flow
 
