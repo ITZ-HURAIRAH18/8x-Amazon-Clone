@@ -18,6 +18,9 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || "amazon-clone-development-secret-change-me",
   orderStatusToken: process.env.ORDER_STATUS_TOKEN || "",
   productAdminToken: process.env.PRODUCT_ADMIN_TOKEN || "",
+  adminEmail: process.env.ADMIN_EMAIL || "",
+  adminPassword: process.env.ADMIN_PASSWORD || "",
+  adminName: process.env.ADMIN_NAME || "Administrator",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   nodeEnv: process.env.NODE_ENV || "development",
 }

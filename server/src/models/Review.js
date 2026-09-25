@@ -10,6 +10,9 @@ const reviewSchema = new mongoose.Schema(
     comment: { type: String, required: true, trim: true, maxlength: 2000 },
     verifiedPurchase: { type: Boolean, default: false },
     helpfulCount: { type: Number, default: 0, min: 0 },
+    status: { type: String, enum: ["Pending", "Approved", "Hidden", "Rejected"], default: "Approved", index: true },
+    moderatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    moderatedAt: { type: Date, default: null },
   },
   { timestamps: true },
 )

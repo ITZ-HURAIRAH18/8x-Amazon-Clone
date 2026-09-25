@@ -15,6 +15,8 @@ const productSchema = new mongoose.Schema(
     rating: { type: Number, default: 0, min: 0, max: 5, index: true },
     reviewCount: { type: Number, default: 0, min: 0 },
     stock: { type: Number, default: 0, min: 0, index: true },
+    lowStockThreshold: { type: Number, default: 10, min: 0 },
+    active: { type: Boolean, default: true, index: true },
     bestseller: { type: Boolean, default: false, index: true },
     featured: { type: Boolean, default: false, index: true },
     deal: { type: Boolean, default: false, index: true },

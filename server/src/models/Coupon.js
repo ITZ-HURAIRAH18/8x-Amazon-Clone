@@ -12,7 +12,13 @@ const couponSchema = new mongoose.Schema(
     expiresAt: { type: Date, required: true, index: true },
     active: { type: Boolean, default: true, index: true },
     usageLimit: { type: Number, default: null, min: 1 },
+    perUserLimit: { type: Number, default: null, min: 1 },
     usageCount: { type: Number, default: 0, min: 0 },
+    redemptions: {
+      type: [{ user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, count: { type: Number, default: 1, min: 1 } }],
+      default: [],
+      select: false,
+    },
   },
   { timestamps: true },
 )
