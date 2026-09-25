@@ -22,3 +22,9 @@ client/dist/
 *.log
 .DS_Store
 Thumbs.db
+
+# Local agent tooling and scratch worktrees (never part of the deliverable)
+.kilo/
+.opencode/sessions/
+*.tmp.mjs
+scratch/

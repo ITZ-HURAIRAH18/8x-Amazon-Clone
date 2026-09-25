@@ -423,7 +423,7 @@ npm start
 | Admin sign in | `https://amazon-clone-client-five.vercel.app/admin/login` |
 | Health check | `https://8x-amazon-clone-server.vercel.app/api/health` |
 
-The frontend and the backend are two separate Vercel projects. The frontend is a static Vite build that reads `VITE_API_URL` at build time; the backend is an Express API exposed as a Vercel Function. `error.md` in the repository root records these two deployed domains.
+The frontend and the backend are two separate Vercel projects. The frontend is a static Vite build that reads `VITE_API_URL` at build time; the backend is an Express API exposed as a Vercel Function.
 
 ```bash
 npm run verify:deploy -- --api=https://8x-amazon-clone-server.vercel.app --client=https://amazon-clone-client-five.vercel.app
@@ -590,6 +590,6 @@ The project includes responsive states, visible focus styles, keyboard-accessibl
 | `README.md` | This document: setup, features, API, deployment |
 | `agent.md` | The assignment requirements and QA checklist |
 | `VIDEO_PRESENTATION_GUIDE.md` | Scene-by-scene script for the demo video |
-| `error.md` | The deployed frontend and backend domains |
 | `CAPTURE-TEST.md` | Capture test evidence required by the assignment |
 | `.agent-logs/` | Recorded work sessions |
+| `scripts/` | Deployment and product-image verification tools |
