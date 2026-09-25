@@ -5,6 +5,7 @@ import ProductCard from "../components/ProductCard"
 import { productApi, errorMessage } from "../services/api"
 import demoProducts from "../data/demoProducts"
 import { normalizeProduct } from "../utils/format"
+import { usePageMeta } from "../utils/seo"
 
 const defaultCategories = ["All", "Electronics", "Computers", "Phones", "Home", "Kitchen", "Fashion", "Beauty", "Books", "Toys", "Grocery", "Sports", "Cameras", "Gaming"]
 const sortOptions = [["featured", "Featured"], ["newest", "Newest arrivals"], ["priceAsc", "Price: Low to High"], ["priceDesc", "Price: High to Low"], ["rating", "Avg. customer review"], ["best-sellers", "Best Sellers"], ["biggest-discount", "Biggest Discount"]]
@@ -25,6 +26,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [mobileFilters, setMobileFilters] = useState(false)
+  usePageMeta(search ? `Search results for ${search}` : `${category} products`, `Shop ${category.toLowerCase()} products with filters, sorting, reviews, and fast delivery.`)
 
   const filterValues = useMemo(() => ({
     minPrice: params.get("minPrice") || "",
@@ -88,6 +90,11 @@ export default function ProductsPage() {
     if (key !== "page") next.delete("page")
     setParams(next)
   }
+  const toggleBrand = (brand) => {
+    const selected = filterValues.brand ? filterValues.brand.split(",").filter(Boolean) : []
+    const next = selected.includes(brand) ? selected.filter((value) => value !== brand) : [...selected, brand]
+    updateParam("brand", next.join(","))
+  }
   const setCategory = (value) => {
     const next = new URLSearchParams(params)
     if (value === "All") next.delete("category")
@@ -125,7 +132,7 @@ export default function ProductsPage() {
         <div className="filter-sidebar__mobile-head"><strong>Filters</strong><button type="button" className="icon-button" onClick={() => setMobileFilters(false)} aria-label="Close filters"><X size={20} /></button></div>
         <div className="filter-title"><SlidersHorizontal size={17} /><strong>Filters</strong>{activeFilterCount > 0 && <button type="button" onClick={clearFilters}>Clear all</button>}</div>
         <FilterGroup title="Category"><label className="filter-radio"><input type="radio" name="category" checked={category === "All"} onChange={() => setCategory("All")} /> All</label>{[...new Set([...defaultCategories.slice(1), ...facets.categories])].map((option) => <label className="filter-radio" key={option}><input type="radio" name="category" checked={category === option} onChange={() => setCategory(option)} /> {option}</label>)}</FilterGroup>
-        <FilterGroup title="Brand"><select className="filter-select" aria-label="Filter by brand" value={filterValues.brand} onChange={(event) => updateParam("brand", event.target.value)}><option value="">All brands</option>{facets.brands.map((brand) => <option value={brand} key={brand}>{brand}</option>)}</select></FilterGroup>
+        <FilterGroup title="Brand"><label className="filter-check"><input type="radio" name="brand" checked={!filterValues.brand} onChange={() => updateParam("brand", "")} /> All brands</label>{facets.brands.map((brand) => <label className="filter-check" key={brand}><input type="checkbox" checked={filterValues.brand.split(",").includes(brand)} onChange={() => toggleBrand(brand)} /> {brand}</label>)}</FilterGroup>
         <FilterGroup title="Price"><div className="price-inputs"><input aria-label="Minimum price" type="number" min="0" placeholder="$ Min" value={filterValues.minPrice} onChange={(event) => updateParam("minPrice", event.target.value)} /><span>to</span><input aria-label="Maximum price" type="number" min="0" placeholder="$ Max" value={filterValues.maxPrice} onChange={(event) => updateParam("maxPrice", event.target.value)} /></div></FilterGroup>
         <FilterGroup title="Customer rating">{[4, 3, 2].map((value) => <label className="filter-radio" key={value}><input type="radio" name="rating" checked={filterValues.rating === String(value)} onChange={() => updateParam("rating", value)} /> {value} stars & up</label>)}</FilterGroup>
         <FilterGroup title="Availability"><label className="filter-check"><input type="radio" name="availability" checked={!filterValues.availability} onChange={() => updateParam("availability", "")} /> All</label><label className="filter-check"><input type="radio" name="availability" checked={filterValues.availability === "in-stock"} onChange={() => updateParam("availability", "in-stock")} /> In stock</label><label className="filter-check"><input type="radio" name="availability" checked={filterValues.availability === "out-of-stock"} onChange={() => updateParam("availability", "out-of-stock")} /> Out of stock</label></FilterGroup>

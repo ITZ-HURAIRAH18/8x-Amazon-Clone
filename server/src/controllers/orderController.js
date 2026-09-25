@@ -46,6 +46,7 @@ async function couponFor(code, subtotal, deliveryMethod) {
   const coupon = await findCoupon(code)
   if (!coupon) return { error: "This coupon is expired or unavailable", code: "COUPON_INVALID" }
   if (subtotal < Number(coupon.minimumOrder || 0)) return { error: `This coupon requires a minimum order of $${Number(coupon.minimumOrder).toFixed(2)}`, code: "COUPON_MINIMUM" }
+  if (coupon.usageLimit != null && Number(coupon.usageCount || 0) >= Number(coupon.usageLimit)) return { error: "This coupon has reached its usage limit", code: "COUPON_LIMIT" }
   return { coupon, totals: calculateTotals([{ unitPrice: subtotal, quantity: 1 }], { coupon, deliveryMethod }) }
 }
 

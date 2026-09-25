@@ -5,6 +5,7 @@ import AmazonLogo from "../components/AmazonLogo"
 import { AuthFrame } from "./LoginPage"
 import { useAuth } from "../context/StoreContext"
 import { errorMessage } from "../services/api"
+import { usePageMeta } from "../utils/seo"
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -13,6 +14,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" })
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  usePageMeta("Create Account", "Create an Amazon Clone account for saved carts, wishlists, addresses, and faster checkout.")
   const submit = async (event) => {
     event.preventDefault(); setError(""); setBusy(true)
     try { await register(form); navigate(location.state?.from || "/account", { replace: true }) } catch (requestError) { setError(errorMessage(requestError, "Unable to create your account.")) } finally { setBusy(false) }

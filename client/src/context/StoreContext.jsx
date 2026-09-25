@@ -137,6 +137,7 @@ export function CartProvider({ children }) {
   }, [user])
   const addToCart = async (product, quantity = 1) => {
     const safeQuantity = Math.max(1, Number(quantity) || 1)
+    if (product.stock != null && Number(product.stock) < 1) { setError("This item is currently unavailable."); return false }
     setError("")
     if (user) {
       try {

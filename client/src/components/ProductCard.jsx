@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Check, Heart, Scale, ShoppingCart } from "lucide-react"
 import RatingStars from "./RatingStars"
 import Price from "./Price"
+import ProductBadges from "./ProductBadges"
 import { useCart, useShoppingMemory, useWishlist } from "../context/StoreContext"
 
 const productId = (product) => String(product?.id || product?._id || product?.slug || "")
@@ -33,11 +34,10 @@ export default function ProductCard({ product }) {
     event.preventDefault()
     toggleCompareProduct(product)
   }
-  const badge = product.badge || (product.bestseller ? "Best Seller" : product.deal ? "Limited Time Deal" : product.discount >= 20 ? `${product.discount}% off` : "")
   return <article className="product-card">
     <div className="product-card__image-wrap">
       <Link to={`/product/${product.id}`} aria-label={product.title}>
-        {badge && <span className={`product-badge ${product.bestseller ? "product-badge--bestseller" : product.deal ? "product-badge--deal" : ""}`}>{badge}</span>}
+        <ProductBadges product={product} compact />
         {image && !imageFailed ? <img src={image} alt={product.title} loading="lazy" onError={() => setImageFailed(true)} /> : <div className="image-fallback">{product.brand || "Product image"}</div>}
       </Link>
       <button className={`wishlist-button ${saved ? "is-saved" : ""}`} type="button" aria-label={`${saved ? "Remove" : "Save"} ${product.title}`} aria-pressed={saved} onClick={toggleWishlist}><Heart size={17} fill={saved ? "currentColor" : "none"} /></button>

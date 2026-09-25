@@ -269,6 +269,7 @@ h1, h2, h3 { line-height: 1.25; }
 .detail-info { padding: 4px 10px; }
 .detail-brand { color: var(--amz-link); font-size: 13px; margin-bottom: 6px; }
 .detail-brand span { color: var(--amz-link); margin-left: 4px; }
+.detail-info .product-badges { position: static; max-width: none; margin: 0 0 8px; }
 .detail-info h1 { font-size: 23px; line-height: 1.25; font-weight: 400; margin-bottom: 8px; }
 .detail-rating { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .detail-separator { color: var(--amz-border-strong); }
@@ -674,8 +675,15 @@ h1, h2, h3 { line-height: 1.25; }
 .product-card__actions { display: flex; flex-direction: column; gap: 5px; margin-top: auto; }
 .card-compare-button { min-height: 28px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid transparent; background: transparent; color: var(--amz-link); font-size: 11px; }
 .card-compare-button:hover, .card-compare-button.is-active { color: var(--amz-link-hover); text-decoration: underline; }
+.product-badges { position: absolute; top: 8px; left: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 3px; max-width: 75%; }
+.product-badges .product-badge { position: static; padding: 3px 5px; font-size: 9px; }
 .product-badge--bestseller { background: #087990; }
 .product-badge--deal { background: #b12704; }
+.product-badge--discount { background: #b12704; }
+.product-badge--prime { background: #087990; }
+.product-badge--warning { background: #ff9900; color: #0f1111; }
+.product-badge--stock { background: #007600; }
+.product-badge--neutral { background: var(--amz-ink); }
 .active-filter-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: -3px 0 13px; }
 .filter-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border: 1px solid var(--amz-border-strong); background: #fff; color: var(--amz-link); font-size: 11px; }
 .filter-chip:hover { background: #f3f3f3; }

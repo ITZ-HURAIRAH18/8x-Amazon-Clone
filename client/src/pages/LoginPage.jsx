@@ -4,6 +4,7 @@ import { ArrowRight, LockKeyhole } from "lucide-react"
 import AmazonLogo from "../components/AmazonLogo"
 import { useAuth } from "../context/StoreContext"
 import { errorMessage } from "../services/api"
+import { usePageMeta } from "../utils/seo"
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" })
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  usePageMeta("Sign In", "Sign in to access your Amazon Clone orders and saved shopping preferences.")
   const submit = async (event) => {
     event.preventDefault(); setError(""); setBusy(true)
     try { await login(form); navigate(location.state?.from || "/account", { replace: true }) } catch (requestError) { setError(errorMessage(requestError, "Unable to sign in.")) } finally { setBusy(false) }
