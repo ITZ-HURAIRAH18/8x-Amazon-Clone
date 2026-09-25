@@ -5,6 +5,10 @@ import productRoutes from "./routes/productRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import cartRoutes from "./routes/cartRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js"
+import wishlistRoutes from "./routes/wishlistRoutes.js"
+import addressRoutes from "./routes/addressRoutes.js"
+import couponRoutes from "./routes/couponRoutes.js"
+import notificationRoutes from "./routes/notificationRoutes.js"
 import { errorHandler, notFound } from "./middleware/error.js"
 import { databaseReady } from "./config/db.js"
 import { env } from "./config/env.js"
@@ -12,19 +16,28 @@ import { env } from "./config/env.js"
 export function createApp() {
   const app = express()
   app.disable("x-powered-by")
+  const rawClientOrigins = (env.clientUrl || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean)
+
   const allowedOrigins = new Set([
-    env.clientUrl,
+    ...rawClientOrigins,
+    ...rawClientOrigins.map((o) => o.replace(/\/$/, "")),
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://amazon-clone-client-five.vercel.app",
+    "https://amazon-clone-client-five.vercel.app/",
   ])
 
   const isAllowedOrigin = (origin) => {
     if (!origin) return true
-    if (allowedOrigins.has(origin)) return true
+    const normalizedOrigin = origin.replace(/\/$/, "")
+    if (allowedOrigins.has(origin) || allowedOrigins.has(normalizedOrigin)) return true
     // Allow any local host/IP development origin on any port
     if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return true
     return false
@@ -51,6 +64,10 @@ export function createApp() {
   app.use("/api/auth", authRoutes)
   app.use("/api/cart", cartRoutes)
   app.use("/api/orders", orderRoutes)
+  app.use("/api/wishlist", wishlistRoutes)
+  app.use("/api/addresses", addressRoutes)
+  app.use("/api/coupons", couponRoutes)
+  app.use("/api/notifications", notificationRoutes)
   app.use(notFound)
   app.use(errorHandler)
   return app
