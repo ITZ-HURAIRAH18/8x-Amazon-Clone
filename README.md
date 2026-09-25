@@ -290,6 +290,16 @@ Copy-Item client/.env.example client/.env
 
 Set `MONGODB_URI` in `server/.env`. The server accepts both `MONGODB_URI` and the legacy `MONGO_URI` name. Set a long random `JWT_SECRET` before deploying. Never commit `.env` files or database credentials.
 
+Admin seed variables are optional until an administrator is needed:
+
+```dotenv
+ADMIN_NAME=Operations Administrator
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=use-a-long-random-password
+```
+
+Run `npm run seed:admin` explicitly; the password is hashed server-side and no admin credential belongs in the frontend or README. The optional `ORDER_STATUS_TOKEN` and `PRODUCT_ADMIN_TOKEN` variables are reserved for explicitly documented emergency operations paths; normal administration uses the admin role.
+
 For Atlas SRV records in restricted networks, configure:
 
 ```dotenv
@@ -345,7 +355,9 @@ Deploy `server/` as a Node service with:
 - `JWT_SECRET` set to a long random secret
 - `CLIENT_URL` set to the deployed frontend origin
 - `NODE_ENV=production`
-- `ORDER_STATUS_TOKEN` set if status updates will be operated manually
+- `ORDER_STATUS_TOKEN` set if the legacy operations-only status endpoint is used
+- `PRODUCT_ADMIN_TOKEN` set if the legacy operations-only product endpoint is used
+- `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` set only when running `npm run seed:admin`
 
 The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML or 404 instead of JSON. Verify the deployed pair explicitly:
 

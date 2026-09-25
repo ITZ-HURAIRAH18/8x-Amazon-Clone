@@ -75,7 +75,8 @@ export function AuthProvider({ children }) {
     refresh,
     async login(credentials) { return saveSession(await authApi.login(credentials)) },
     async register(details) { return saveSession(await authApi.register(details)) },
-    logout() {
+    async logout() {
+      try { await authApi.logout() } catch { /* local logout still succeeds */ }
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(USER_KEY)
       setUser(null)

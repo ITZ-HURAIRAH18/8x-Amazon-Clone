@@ -22,7 +22,8 @@ export function AdminAuthProvider({ children }) {
     return data.user
   }
   const refresh = async () => {
-    const user = await adminApi.auth.me()
+    const result = await adminApi.auth.me()
+    const user = result.user || result.admin || result
     localStorage.setItem(USER_KEY, JSON.stringify(user))
     setAdmin(user)
     return user
@@ -54,7 +55,7 @@ export function AdminAuthProvider({ children }) {
     error,
     isAuthenticated: Boolean(admin),
     isAdmin: admin?.role === "admin" && admin?.status !== "suspended",
-    login: async (credentials) => saveSession(await adminApi.auth.login(credentials)),
+    login: async (credentials) => { const session = await adminApi.auth.login(credentials); return saveSession({ token: session.token, user: session.user || session.admin }) },
     logout,
     refresh,
   }), [admin, ready, error])

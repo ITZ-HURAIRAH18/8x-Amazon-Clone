@@ -31,7 +31,8 @@ export default function AdminLayout() {
   const [counts, setCounts] = useState({ pendingOrders: 0, pendingReviews: 0, unreadNotifications: 0 })
   const sidebarRef = useRef(null)
   const menuButtonRef = useRef(null)
-  useEffect(() => { adminApi.dashboard({ range: "30d" }).then((result) => setCounts({ pendingOrders: result.data?.orders?.Pending || 0, pendingReviews: result.data?.reviews?.Pending || 0, unreadNotifications: result.meta?.unreadNotifications || 0 })).catch(() => {}) }, [location.pathname])
+  useEffect(() => { adminApi.dashboard({ range: "30d" }).then((result) => { const value = result?.data?.data || result?.data || result || {}; const orderCounts = value.orders || value.metrics?.orders || {}; const reviewCounts = value.reviews || value.metrics?.reviews || {}; setCounts({ pendingOrders: orderCounts.Pending || 0, pendingReviews: reviewCounts.Pending || 0, unreadNotifications: result?.meta?.unreadNotifications || value.notifications?.unread || 0 }) }).catch(() => {}) }, [location.pathname])
+  useEffect(() => { const label = links.find((link) => location.pathname.startsWith(link.to))?.label || "Admin"; document.title = `${label} | Amazon Admin`; return () => { document.title = "Amazon.com" } }, [location.pathname])
   useEffect(() => { setMobileOpen(false); setProfileOpen(false) }, [location.pathname])
   useEffect(() => {
     if (!mobileOpen) return undefined

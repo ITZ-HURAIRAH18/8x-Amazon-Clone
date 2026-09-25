@@ -62,6 +62,7 @@ export const authApi = {
   login: async (credentials) => unwrap(await api.post("/auth/login", credentials)),
   register: async (details) => unwrap(await api.post("/auth/register", details)),
   me: async () => unwrap(await api.get("/auth/me")),
+  logout: async () => unwrap(await api.post("/auth/logout")),
   updateProfile: async (details) => unwrap(await api.patch("/auth/profile", details)),
   changePassword: async (details) => unwrap(await api.patch("/auth/password", details)),
 }
