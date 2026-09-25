@@ -13,7 +13,7 @@ const number = (value, fallback) => {
 
 export const env = {
   port: number(process.env.PORT, 5000),
-  mongoUri: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/AmazonClone",
+  mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://127.0.0.1:27017/AmazonClone",
   jwtSecret: process.env.JWT_SECRET || "amazon-clone-development-secret-change-me",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   nodeEnv: process.env.NODE_ENV || "development",
