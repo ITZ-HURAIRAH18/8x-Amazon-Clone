@@ -12,8 +12,38 @@ import { env } from "./config/env.js"
 export function createApp() {
   const app = express()
   app.disable("x-powered-by")
-  const allowedOrigins = new Set([env.clientUrl, "http://localhost:5173", "http://127.0.0.1:5173"])
-  app.use(cors({ origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin)), credentials: true }))
+  const allowedOrigins = new Set([
+    env.clientUrl,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ])
+
+  const isAllowedOrigin = (origin) => {
+    if (!origin) return true
+    if (allowedOrigins.has(origin)) return true
+    // Allow any local host/IP development origin on any port
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return true
+    return false
+  }
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+          callback(null, true)
+        } else {
+          callback(null, false)
+        }
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  )
   app.use(express.json({ limit: "1mb" }))
   app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"))
   app.get("/api/health", (_req, res) => res.json({ data: { status: "ok", database: databaseReady() ? "connected" : "demo-fallback" } }))
