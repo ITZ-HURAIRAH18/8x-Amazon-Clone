@@ -14,6 +14,9 @@ export default function GlobalHeader() {
   const { count } = useCart()
   const [term, setTerm] = useState(params.get("q") || "")
   const [category, setCategory] = useState(params.get("category") || "All")
+  const [locationOpen, setLocationOpen] = useState(false)
+  const [languageOpen, setLanguageOpen] = useState(false)
+  const [postalCode, setPostalCode] = useState("10001")
 
   useEffect(() => {
     setTerm(location.pathname === "/search" ? params.get("q") || "" : "")
@@ -35,7 +38,7 @@ export default function GlobalHeader() {
           <span className="hamburger-lines" aria-hidden="true"><i /><i /><i /></span>
         </button>
         <AmazonLogo />
-        <button className="delivery-location" type="button" aria-label="Choose delivery location">
+        <button className="delivery-location" type="button" aria-label="Choose delivery location" aria-expanded={locationOpen} onClick={() => setLocationOpen((value) => !value)}>
           <MapPin size={17} strokeWidth={2.2} />
           <span><small>Deliver to</small><strong>New York 10001</strong></span>
         </button>
@@ -48,7 +51,7 @@ export default function GlobalHeader() {
           <input id="site-search" value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Search Amazon" autoComplete="off" />
           <button className="search-submit" type="submit" aria-label="Submit search"><Search size={22} /></button>
         </form>
-        <button className="language-button" type="button" aria-label="Choose language"><Globe size={19} /><span>EN</span><ChevronDown size={13} /></button>
+        <button className="language-button" type="button" aria-label="Choose language" aria-expanded={languageOpen} onClick={() => setLanguageOpen((value) => !value)}><Globe size={19} /><span>EN</span><ChevronDown size={13} /></button>
         <Link className="header-account" to={user ? "/account" : "/login"}>
           <span><small>Hello, {user?.name?.split(" ")[0] || "sign in"}</small><strong>{user ? "Account & Lists" : "Sign in"}</strong></span>
           <ChevronDown size={13} />
@@ -59,6 +62,8 @@ export default function GlobalHeader() {
           <span className="cart-label">Cart</span>
         </Link>
       </div>
+      {locationOpen && <div className="location-popover"><div className="location-popover__heading"><div><strong>Deliver to</strong><span>Choose a destination for delivery dates</span></div><button type="button" className="icon-button" onClick={() => setLocationOpen(false)} aria-label="Close location dialog">×</button></div><label>Postal code<input value={postalCode} onChange={(event) => setPostalCode(event.target.value)} inputMode="numeric" /></label><button className="primary-button" type="button" onClick={() => setLocationOpen(false)}>Apply</button></div>}
+      {languageOpen && <div className="language-popover"><strong>Language</strong>{["English", "Español", "Deutsch", "Français"].map((language) => <button type="button" key={language} onClick={() => setLanguageOpen(false)}>{language}</button>)}</div>}
     </header>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Check, ChevronRight, Heart, RotateCcw, ShieldCheck, ShoppingCart, Truck } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import QuantitySelector from "../components/QuantitySelector"
