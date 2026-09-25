@@ -67,6 +67,12 @@ export function createApp() {
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   )
+  app.use((req, res, next) => {
+    if (env.nodeEnv === "production" && req.databaseUnavailable && req.path.startsWith("/api")) {
+      return res.status(503).json({ message: "Database unavailable", code: "DATABASE_UNAVAILABLE" })
+    }
+    return next()
+  })
   const jsonParser = express.json({ limit: "1mb" })
   app.use((req, res, next) => {
     // Vercel may parse the request body before Express receives it. Mark it as

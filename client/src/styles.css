@@ -1271,6 +1271,9 @@ a.admin-notification-row { text-decoration: none; }
   .admin-search-field { width: 100%; }
   .admin-toolbar select, .admin-toolbar__note { width: 100%; }
   .admin-table { min-width: 760px; }
+  .admin-status-form { flex-direction: column; align-items: stretch; }
+  .admin-status-form .admin-field { min-width: 0; }
+  .admin-timeline { padding-bottom: 10px; }
   .admin-order-detail-grid { display: block; }
   .admin-order-detail-grid > aside { margin-top: 15px; }
   .admin-custom-range { align-items: stretch; flex-direction: column; }

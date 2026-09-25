@@ -374,28 +374,37 @@ npm start
 
 ### Frontend
 
-Deploy the `client/` directory as a Vite application. Set:
+Deploy the `client/` directory as a Vite application. For Vercel, set **Root Directory** to `client`, keep the Vite framework preset, and set:
 
 ```dotenv
 VITE_API_URL=https://<backend-domain>/api
 ```
 
-`client/vercel.json` rewrites client-side routes to `index.html` while leaving API calls on the separately configured backend origin. A root `vercel.json` is also included for deploying the Express API as a Vercel Node function through `server/api/index.js`.
+`client/vercel.json` rewrites client-side routes to `index.html` while leaving API calls on the separately configured backend origin.
 
 ### Backend
 
-Deploy `server/` as a Node service with:
+For a Vercel backend project, use a separate project from the frontend and set:
 
-- `PORT` set by the host or left at the provider default
+- **Root Directory:** `server` (recommended), or leave it empty to use the repository-root `vercel.json`
+- **Framework Preset:** Other
+- **Install Command:** `npm install`
+- **Build Command:** leave blank
+- **Output Directory:** leave blank
+
+Do not set the backend project's Root Directory to `client`. The checked-in `server/vercel.json` and root `vercel.json` expose the Express API as a Vercel Function and route `/api/*` requests to it.
+
+Set these environment variables in the backend Vercel project:
+
 - `MONGODB_URI` set to the Atlas connection string
 - `JWT_SECRET` set to a long random secret
-- `CLIENT_URL` set to the deployed frontend origin
+- `CLIENT_URL` set to the deployed frontend origin, for example `https://amazon-clone-client-five.vercel.app`
 - `NODE_ENV=production`
-- `ORDER_STATUS_TOKEN` set if the legacy operations-only status endpoint is used
-- `PRODUCT_ADMIN_TOKEN` set if the legacy operations-only product endpoint is used
-- `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` set only when running `npm run seed:admin`
+- `MONGO_DNS_SERVERS` optionally set to `8.8.8.8,1.1.1.1,8.8.4.4`
+- `ORDER_STATUS_TOKEN` and `PRODUCT_ADMIN_TOKEN` only if the legacy operations endpoints are used
+- `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` only when running `npm run seed:admin`
 
-The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML or 404 instead of JSON. Verify the deployed pair explicitly:
+After changing the Vercel project settings or environment variables, create a new deployment. Existing deployments are not rebuilt automatically. The backend must be reachable at a separate HTTPS `/api` origin. Do not point `VITE_API_URL` at the frontend's `/api` path; SPA rewrites will return HTML or 404 instead of JSON. Verify the deployed pair explicitly:
 
 ```text
 GET https://<backend-domain>/api/health
@@ -445,7 +454,14 @@ The repository keeps `api/index.js` at the root so Vercel detects a Node functio
 }
 ```
 
-If the backend domain answers `404` for `/api/health`, the deployment was built without that function. Redeploy the repository root (not `client/`) with the backend project, then re-run `npm run verify:deploy`.
+If the backend domain answers `404` for `/api/health`, the deployment was built without that function. Two supported layouts are included:
+
+| Vercel project root directory | Function | Configuration |
+| --- | --- | --- |
+| Repository root | `api/index.js` | `vercel.json` |
+| `server/` | `server/api/index.js` | `server/vercel.json` |
+
+Redeploy the backend project with the matching root directory and backend environment variables, then re-run `npm run verify:deploy`.
 
 ## Local smoke test
 

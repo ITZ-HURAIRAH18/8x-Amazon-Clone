@@ -5,11 +5,14 @@ import { env } from "../src/config/env.js"
 const app = createApp()
 
 export default async function handler(req, res) {
+  let databaseUnavailable = false
   try {
-    await connectDatabase()
+    const connected = await connectDatabase()
+    databaseUnavailable = env.nodeEnv === "production" && !connected
   } catch (error) {
-    if (env.nodeEnv === "production") return res.status(503).json({ message: "Database unavailable", code: "DATABASE_UNAVAILABLE" })
-    console.warn(`MongoDB connection unavailable (${error?.name || "Error"})`)
+    databaseUnavailable = env.nodeEnv === "production"
+    if (!databaseUnavailable) console.warn(`MongoDB connection unavailable (${error?.name || "Error"})`)
   }
+  req.databaseUnavailable = databaseUnavailable
   return app(req, res)
 }
